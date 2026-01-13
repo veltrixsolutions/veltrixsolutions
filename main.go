@@ -6,6 +6,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"strings"
 	"time"
 
 	"github.com/joho/godotenv"
@@ -74,12 +75,14 @@ func main() {
 
 	port := os.Getenv("PORT")
 	if port == "" {
-		port = ":8080"
+		port = "8080"
 	}
 
-	address := fmt.Sprintf(":%s", port)
+	if !strings.HasPrefix(port, ":") {
+		port = ":" + port
+	}
 
-	fmt.Println("🚀 Servidor iniciando en el puerto " + address)
+	fmt.Println("🚀 Servidor iniciando en " + port)
 	e.Logger.Fatal(e.Start(port))
 }
 
@@ -117,7 +120,8 @@ func validarCaptchaGoogle(token string) bool {
 	}
 
 	resp, err := http.PostForm("https://www.google.com/recaptcha/api/siteverify", map[string][]string{
-		"secret": {secret}, "response": {token},
+		"secret":   {secret},
+		"response": {token},
 	})
 	if err != nil {
 		return false
