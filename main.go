@@ -11,14 +11,13 @@ import (
 	"github.com/joho/godotenv"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
-	"gorm.io/driver/postgres" // <--- CAMBIO: Usamos Postgres
+	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 )
 
-// ... (Las estructuras ContactoWeb, ContactoRequest, etc. SE QUEDAN IGUAL) ...
 type ContactoWeb struct {
 	ID        uint      `gorm:"primaryKey" json:"id"`
-	Nombre    string    `gorm:"type:varchar(100);not null" json:"nombre"` // nvarchar -> varchar
+	Nombre    string    `gorm:"type:varchar(100);not null" json:"nombre"`
 	Email     string    `gorm:"type:varchar(150);not null" json:"email"`
 	Telefono  string    `gorm:"type:varchar(20)" json:"telefono"`
 	Servicio  string    `gorm:"type:varchar(50)" json:"servicio"`
@@ -27,7 +26,6 @@ type ContactoWeb struct {
 	CreatedAt time.Time `json:"fecha"`
 }
 
-// ... (Resto de structs iguales) ...
 type ContactoRequest struct {
 	Nombre         string `json:"nombre"`
 	Email          string `json:"email"`
@@ -48,24 +46,20 @@ func main() {
 		fmt.Println("ℹ️ Nota: Usando variables de entorno del sistema.")
 	}
 
-	// --- CONEXIÓN A RAILWAY (POSTGRES) ---
 	dsn := os.Getenv("DB_DSN")
 	if dsn == "" {
 		log.Fatal("❌ Error: DB_DSN está vacío.")
 	}
 
 	var err error
-	// CAMBIO AQUÍ: Usamos postgres.Open
 	db, err = gorm.Open(postgres.Open(dsn), &gorm.Config{})
 	if err != nil {
 		log.Fatal("❌ Falló la conexión a Railway: ", err)
 	}
 	fmt.Println("✅ Conectado exitosamente a PostgreSQL en Railway")
 
-	// Migración
 	db.AutoMigrate(&ContactoWeb{})
 
-	// --- SERVIDOR ---
 	e := echo.New()
 	e.Use(middleware.Logger())
 	e.Use(middleware.Recover())
@@ -86,7 +80,6 @@ func main() {
 	e.Logger.Fatal(e.Start(port))
 }
 
-// ... (Las funciones manejarContacto y validarCaptchaGoogle SE QUEDAN IGUAL) ...
 func manejarContacto(c echo.Context) error {
 	req := new(ContactoRequest)
 	if err := c.Bind(req); err != nil {
