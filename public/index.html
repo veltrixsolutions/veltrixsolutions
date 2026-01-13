@@ -907,7 +907,7 @@
         submitBtn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Enviando...';
 
         try {
-            // 4. Petición al Backend Go (Asegúrate que el puerto coincida)
+            // 4. Petición al Backend Go 
             const response = await fetch('/api/contacto', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
