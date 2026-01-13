@@ -1,0 +1,9 @@
+.env
+/vendor
+/bin
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+test.db
