@@ -77,6 +77,9 @@ func main() {
 		port = ":8080"
 	}
 
+	address := fmt.Sprintf(":%s", port)
+
+	fmt.Println("🚀 Servidor iniciando en el puerto " + address)
 	e.Logger.Fatal(e.Start(port))
 }
 
