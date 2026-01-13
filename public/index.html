@@ -729,7 +729,7 @@
 
                     <div class="flex justify-center md:justify-start">
                         <div class="g-recaptcha" 
-                             data-sitekey="6LcWAUksAAAAAFi5XKpnvsNlAxLIonmcYdn2V35O" 
+                             data-sitekey="6LfDBEksAAAAAKrApfpgtv5AUri6Dz23DCWxcEeV" 
                              data-theme="dark">
                         </div>
                     </div>
@@ -908,7 +908,7 @@
 
         try {
             // 4. Petición al Backend Go (Asegúrate que el puerto coincida)
-            const response = await fetch('http://localhost:8080/api/contacto', {
+            const response = await fetch('/api/contacto', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(formData)
