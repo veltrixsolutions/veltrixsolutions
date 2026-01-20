@@ -106,7 +106,6 @@ func main() {
 	// C. CORS Estricto (Crucial para producción)
 	allowOrigin := os.Getenv("FRONTEND_URL")
 	if allowOrigin == "" {
-		allowOrigin = "*" // Solo para desarrollo, advertir en logs
 		fmt.Println("⚠️ ADVERTENCIA: CORS permitido para todo (*). Configura FRONTEND_URL en producción.")
 	}
 
