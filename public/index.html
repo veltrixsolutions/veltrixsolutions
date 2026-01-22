@@ -21,6 +21,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;700;800&display=swap" rel="stylesheet">
     <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
 
     <script>
         tailwind.config = {
@@ -48,6 +49,9 @@
     </script>
 
     <style>
+        .swiper-pagination-bullet-active { background-color: #6366f1 !important; }
+        .swiper-button-next, .swiper-button-prev { color: #6366f1 !important; }
+
         .bg-grid {
             background-size: 40px 40px;
             background-image: linear-gradient(to right, rgba(255, 255, 255, 0.05) 1px, transparent 1px),
@@ -660,38 +664,80 @@
         </div>
     </section>
 
-    <section id="galeria-upload" class="py-20 bg-slate-50 relative border-t border-gray-200">
-    <div class="max-w-4xl mx-auto px-4">
-        <div class="text-center mb-10">
-            <h2 class="text-brand-primary font-bold uppercase text-sm mb-3">Zona de Usuarios</h2>
-            <h3 class="text-3xl font-bold text-brand-dark">Comparte tu Diseño</h3>
-            <p class="text-gray-500 mt-2">Sube una imagen de referencia para tu proyecto (Max 2MB).</p>
+<section id="galeria-upload" class="py-20 bg-slate-50 relative border-t border-gray-200 overflow-hidden">
+    <div class="absolute top-0 right-0 w-64 h-64 bg-brand-primary/5 rounded-full blur-3xl -z-10"></div>
+    <div class="absolute bottom-0 left-0 w-64 h-64 bg-brand-secondary/5 rounded-full blur-3xl -z-10"></div>
+
+    <div class="max-w-6xl mx-auto px-4">
+        
+        <div class="text-center mb-12">
+            <h2 class="text-brand-primary font-bold uppercase text-sm mb-3 tracking-wider">Zona Creativa</h2>
+            <h3 class="text-3xl md:text-4xl font-extrabold text-brand-dark">Comparte y Descubre</h3>
+            <p class="text-gray-500 mt-2 max-w-2xl mx-auto">Sube tu referencia para una cotización o inspírate con lo que estamos construyendo.</p>
         </div>
 
-        <div class="bg-white p-8 rounded-3xl shadow-xl border border-gray-100 max-w-xl mx-auto">
-            <form id="uploadForm" class="space-y-6">
-                
-                <div class="relative group">
-                    <label for="imagenInput" class="flex flex-col items-center justify-center w-full h-64 border-2 border-dashed border-gray-300 rounded-2xl cursor-pointer bg-gray-50 hover:bg-gray-100 hover:border-brand-primary transition-all duration-300">
-                        
-                        <img id="previewImg" class="hidden w-full h-full object-contain rounded-2xl p-2" />
-                        
-                        <div id="uploadPlaceholder" class="flex flex-col items-center justify-center pt-5 pb-6 text-center px-4">
-                            <div class="w-16 h-16 bg-brand-primary/10 text-brand-primary rounded-full flex items-center justify-center text-2xl mb-4 group-hover:scale-110 transition-transform">
-                                <i class="fa-solid fa-cloud-arrow-up"></i>
-                            </div>
-                            <p class="mb-2 text-sm text-gray-500"><span class="font-semibold text-brand-primary">Clic para subir</span> o arrastra aquí</p>
-                            <p class="text-xs text-gray-400">PNG, JPG o JPEG (MAX. 2MB)</p>
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-10 items-start">
+            
+            <div class="lg:col-span-4">
+                <div class="bg-white p-6 rounded-3xl shadow-xl border border-gray-100 sticky top-24">
+                    <h4 class="text-lg font-bold text-brand-dark mb-4 flex items-center gap-2">
+                        <i class="fa-solid fa-cloud-arrow-up text-brand-primary"></i> Subir Referencia
+                    </h4>
+                    
+                    <form id="uploadForm" class="space-y-4">
+                        <div class="relative group">
+                            <label for="imagenInput" class="flex flex-col items-center justify-center w-full h-48 border-2 border-dashed border-gray-300 rounded-2xl cursor-pointer bg-gray-50 hover:bg-brand-primary/5 hover:border-brand-primary transition-all duration-300 overflow-hidden relative">
+                                
+                                <img id="previewImg" class="hidden absolute inset-0 w-full h-full object-cover p-1 rounded-2xl z-10" />
+                                
+                                <div id="uploadPlaceholder" class="flex flex-col items-center justify-center pt-5 pb-6 text-center px-4 z-0">
+                                    <div class="w-10 h-10 bg-white shadow-sm text-brand-primary rounded-full flex items-center justify-center text-xl mb-3 group-hover:scale-110 transition-transform">
+                                        <i class="fa-solid fa-image"></i>
+                                    </div>
+                                    <p class="mb-1 text-xs text-gray-500"><span class="font-bold text-brand-primary">Clic</span> o arrastra</p>
+                                    <p class="text-[10px] text-gray-400">JPG, PNG (Max 2MB)</p>
+                                </div>
+                                <input id="imagenInput" type="file" class="hidden" accept="image/png, image/jpeg, image/jpg" />
+                            </label>
                         </div>
 
-                        <input id="imagenInput" type="file" class="hidden" accept="image/png, image/jpeg, image/jpg" />
-                    </label>
+                        <button type="submit" id="btnUpload" class="w-full py-3 rounded-xl bg-brand-dark text-white font-bold text-sm shadow-lg hover:shadow-xl hover:bg-brand-primary transition-all duration-300 disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center gap-2 group">
+                            <span>Guardar en Galería</span> 
+                            <i class="fa-solid fa-arrow-right group-hover:translate-x-1 transition-transform"></i>
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            <div class="lg:col-span-8 w-full overflow-hidden">
+                <div class="flex justify-between items-end mb-6 px-2">
+                    <div>
+                        <h4 class="text-xl font-bold text-brand-dark">Galería de Proyectos</h4>
+                        <p class="text-sm text-gray-500">Últimas subidas de la comunidad</p>
+                    </div>
+                    <div class="flex gap-2">
+                        <button class="swiper-prev-btn w-8 h-8 rounded-full border border-gray-300 flex items-center justify-center text-gray-500 hover:bg-brand-primary hover:text-white hover:border-brand-primary transition-all">
+                            <i class="fa-solid fa-chevron-left text-xs"></i>
+                        </button>
+                        <button class="swiper-next-btn w-8 h-8 rounded-full border border-gray-300 flex items-center justify-center text-gray-500 hover:bg-brand-primary hover:text-white hover:border-brand-primary transition-all">
+                            <i class="fa-solid fa-chevron-right text-xs"></i>
+                        </button>
+                    </div>
                 </div>
 
-                <button type="submit" id="btnUpload" class="w-full py-4 rounded-xl bg-brand-dark text-white font-bold text-lg shadow-lg hover:shadow-xl hover:bg-brand-primary transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2">
-                    <i class="fa-solid fa-save"></i> Guardar Imagen
-                </button>
-            </form>
+                <div class="swiper mySwiper w-full h-[400px] rounded-3xl">
+                    <div class="swiper-wrapper" id="galeria-container">
+                        <div class="swiper-slide flex items-center justify-center bg-white rounded-2xl border border-gray-100">
+                            <div class="text-center text-gray-400">
+                                <i class="fa-solid fa-circle-notch fa-spin text-2xl mb-2"></i>
+                                <p class="text-sm">Cargando galería...</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="swiper-pagination"></div>
+                </div>
+            </div>
+
         </div>
     </div>
 </section>
@@ -934,6 +980,8 @@
     </a>
 
     <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
+
    <script>
         // ------------------------------------------------------
         // 1. INICIALIZACIÓN DE ANIMACIONES Y UI
@@ -1221,51 +1269,97 @@
 
 
     //Imagnes subida 
-    // ELEMENTOS
-    const uploadForm = document.getElementById('uploadForm');
-    const imagenInput = document.getElementById('imagenInput');
-    const previewImg = document.getElementById('previewImg');
-    const uploadPlaceholder = document.getElementById('uploadPlaceholder');
-    const btnUpload = document.getElementById('btnUpload');
+document.addEventListener('DOMContentLoaded', () => {
+        
+        // 1. INICIALIZAR SWIPER
+        const swiper = new Swiper(".mySwiper", {
+            slidesPerView: 1,
+            spaceBetween: 20,
+            loop: true,
+            autoplay: { delay: 4000, disableOnInteraction: false },
+            pagination: { el: ".swiper-pagination", clickable: true },
+            navigation: {
+                nextEl: ".swiper-next-btn",
+                prevEl: ".swiper-prev-btn",
+            },
+            breakpoints: {
+                640: { slidesPerView: 2, spaceBetween: 20 }, // Tablet
+                1024: { slidesPerView: 2.5, spaceBetween: 20 }, // Desktop
+            },
+        });
 
-    // 1. LÓGICA DE VISTA PREVIA
-    if(imagenInput) {
-        imagenInput.addEventListener('change', function(e) {
-            const file = e.target.files[0];
+        // 2. FUNCIÓN PARA CARGAR IMÁGENES
+        async function cargarGaleria() {
+            const container = document.getElementById('galeria-container');
+            try {
+                const response = await fetch('/api/proyectos'); // Usa tu endpoint GET
+                const proyectos = await response.json();
+
+                if(proyectos.length > 0) {
+                    container.innerHTML = ''; // Limpiar loader
+                    proyectos.forEach(proy => {
+                        // Creamos el slide
+                        const slide = document.createElement('div');
+                        slide.className = 'swiper-slide relative group overflow-hidden rounded-2xl';
+                        slide.innerHTML = `
+                            <img src="${proy.imagenUrl}" alt="${proy.titulo}" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110">
+                            <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-end p-6">
+                                <span class="text-brand-accent text-xs font-bold uppercase mb-1">${proy.categoria}</span>
+                                <h5 class="text-white font-bold text-lg">${proy.titulo}</h5>
+                            </div>
+                        `;
+                        container.append(slide);
+                    });
+                    swiper.update(); // Actualizar Swiper con los nuevos slides
+                } else {
+                    container.innerHTML = '<div class="flex items-center justify-center h-full w-full text-gray-400">Sin imágenes aún</div>';
+                }
+            } catch (error) {
+                console.error("Error al cargar galería:", error);
+            }
+        }
+
+        // Cargar al inicio
+        cargarGaleria();
+
+        // 3. LÓGICA DE SUBIDA (PREVIEW Y UPLOAD)
+        const fileInput = document.getElementById('imagenInput');
+        const previewImg = document.getElementById('previewImg');
+        const uploadPlaceholder = document.getElementById('uploadPlaceholder');
+        const uploadForm = document.getElementById('uploadForm');
+        const btnUpload = document.getElementById('btnUpload');
+
+        // Preview de imagen
+        fileInput.addEventListener('change', function() {
+            const file = this.files[0];
             if (file) {
-                // Validar tipo
-                if(!file.type.startsWith('image/')) {
-                    Swal.fire({ icon: 'error', title: 'Error', text: 'Por favor selecciona solo imágenes.', background: '#0B0F19', color: '#fff' });
-                    this.value = ''; // Limpiar
+                if (file.size > 2 * 1024 * 1024) { // 2MB
+                    Swal.fire({ icon: 'error', title: 'Muy pesado', text: 'La imagen debe pesar menos de 2MB', confirmButtonColor: '#0B0F19' });
+                    this.value = '';
                     return;
                 }
-
-                // Mostrar Preview
                 const reader = new FileReader();
                 reader.onload = function(e) {
                     previewImg.src = e.target.result;
                     previewImg.classList.remove('hidden');
-                    uploadPlaceholder.classList.add('hidden');
+                    uploadPlaceholder.classList.add('opacity-0'); // Ocultar texto pero mantener espacio
                 }
                 reader.readAsDataURL(file);
             }
         });
-    }
 
-    // 2. ENVÍO AL BACKEND (Go)
-    if(uploadForm) {
-        uploadForm.addEventListener('submit', async function(e) {
+        // Subir imagen
+        uploadForm.addEventListener('submit', async (e) => {
             e.preventDefault();
-
-            const file = imagenInput.files[0];
+            const file = fileInput.files[0];
+            
             if (!file) {
-                Swal.fire({ icon: 'warning', title: 'Falta imagen', text: 'Selecciona una imagen primero.', background: '#0B0F19', color: '#fff' });
+                Swal.fire({ icon: 'warning', title: 'Falta imagen', text: 'Selecciona una imagen primero.', confirmButtonColor: '#0B0F19' });
                 return;
             }
 
-            // Crear FormData (Necesario para enviar archivos)
             const formData = new FormData();
-            formData.append('imagen', file); // 'imagen' debe coincidir con c.FormFile("imagen") en Go
+            formData.append('imagen', file); // 'imagen' debe coincidir con el backend
 
             // UI Loading
             const originalText = btnUpload.innerHTML;
@@ -1273,39 +1367,34 @@
             btnUpload.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Subiendo...';
 
             try {
-                const response = await fetch('/api/subir-imagen', {
+                const res = await fetch('/api/upload', {
                     method: 'POST',
-                    body: formData // No usamos JSON.stringify aquí
+                    body: formData
                 });
 
-                const result = await response.json();
+                if (!res.ok) throw new Error('Error al subir');
 
-                if (!response.ok) throw new Error(result.error || 'Error al subir');
-
-                // Éxito
-                Swal.fire({
-                    icon: 'success',
-                    title: '¡Guardado!',
-                    text: 'La imagen se guardó en la base de datos correctamente.',
-                    background: '#0B0F19', color: '#fff', confirmButtonColor: '#6366f1'
+                Swal.fire({ 
+                    icon: 'success', 
+                    title: '¡Subido!', 
+                    text: 'Tu diseño se ha agregado a la galería.',
+                    confirmButtonColor: '#6366f1' 
                 });
 
                 // Resetear form
                 uploadForm.reset();
                 previewImg.classList.add('hidden');
-                uploadPlaceholder.classList.remove('hidden');
+                uploadPlaceholder.classList.remove('opacity-0');
+                
+                // Recargar el carrusel para ver la nueva foto
+                cargarGaleria();
 
-            } catch (error) {
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Error',
-                    text: error.message,
-                    background: '#0B0F19', color: '#fff'
-                });
+            } catch (err) {
+                Swal.fire({ icon: 'error', title: 'Error', text: 'No se pudo subir la imagen.', confirmButtonColor: '#0B0F19' });
             } finally {
                 btnUpload.disabled = false;
                 btnUpload.innerHTML = originalText;
             }
         });
-    }
+    });
     </script>

@@ -7,6 +7,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"path/filepath"
 	"strings"
 	"time"
 
@@ -23,16 +24,17 @@ import (
 // 1. MODELOS DE DATOS (STRUCTS)
 // ---------------------------------------------------------
 
-// Modelo para la tabla de imagenes usuarios(GORM)
-type ImagenUsuario struct {
-	ID        uint      `gorm:"primaryKey" json:"id"`
-	Nombre    string    `gorm:"type:varchar(255)" json:"nombre"`
-	Datos     []byte    `gorm:"type:bytea" json:"-"`              // Aquí se guarda la imagen binaria
-	MimeType  string    `gorm:"type:varchar(50)" json:"mimeType"` // ej: image/jpeg
-	CreatedAt time.Time `json:"fecha"`
+// Proyecto representa las imágenes de la galería/carrusel
+type Proyecto struct {
+	ID          uint      `gorm:"primaryKey" json:"id"`
+	Titulo      string    `gorm:"type:varchar(100)" json:"titulo"`
+	Categoria   string    `gorm:"type:varchar(50)" json:"categoria"`
+	Descripcion string    `gorm:"type:text" json:"descripcion"`
+	ImagenURL   string    `gorm:"type:text" json:"imagenUrl"` // Ruta pública (ej: /uploads/foto.jpg)
+	CreatedAt   time.Time `json:"fecha"`
 }
 
-// Modelo para la Base de Datos (GORM)
+// ContactoWeb representa los mensajes del formulario
 type ContactoWeb struct {
 	ID        uint      `gorm:"primaryKey" json:"id"`
 	Nombre    string    `gorm:"type:varchar(100);not null" json:"nombre"`
@@ -40,21 +42,21 @@ type ContactoWeb struct {
 	Telefono  string    `gorm:"type:varchar(20)" json:"telefono"`
 	Servicio  string    `gorm:"type:varchar(50)" json:"servicio"`
 	Mensaje   string    `gorm:"type:text" json:"mensaje"`
-	IpUsuario string    `gorm:"type:varchar(50)" json:"-"` // No se envía al frontend
+	IpUsuario string    `gorm:"type:varchar(50)" json:"-"`
 	CreatedAt time.Time `json:"fecha"`
 }
 
-// Modelo para la Petición JSON (Con Validaciones)
+// ContactoRequest valida los datos que llegan del frontend
 type ContactoRequest struct {
 	Nombre         string `json:"nombre" validate:"required,min=2,max=100"`
 	Email          string `json:"email" validate:"required,email,max=150"`
-	Telefono       string `json:"telefono" validate:"omitempty,numeric,max=20"` // Solo números
+	Telefono       string `json:"telefono" validate:"omitempty,numeric,max=20"`
 	Servicio       string `json:"servicio" validate:"max=50"`
-	Mensaje        string `json:"mensaje" validate:"required,min=10,max=2000"` // Evita spam vacío
+	Mensaje        string `json:"mensaje" validate:"required,min=10,max=2000"`
 	RecaptchaToken string `json:"recaptchaToken" validate:"required"`
 }
 
-// Respuesta de Google ReCAPTCHA
+// RecaptchaResponse mapea la respuesta de Google
 type RecaptchaResponse struct {
 	Success bool `json:"success"`
 }
@@ -69,7 +71,6 @@ type CustomValidator struct {
 
 func (cv *CustomValidator) Validate(i interface{}) error {
 	if err := cv.validator.Struct(i); err != nil {
-		// Devuelve error 400 si la validación falla
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 	return nil
@@ -79,33 +80,7 @@ func (cv *CustomValidator) Validate(i interface{}) error {
 var db *gorm.DB
 
 // ---------------------------------------------------------
-// 3. MANEJO DE ERRORES PERSONALIZADO (404 HTML vs JSON)
-// ---------------------------------------------------------
-
-func customHTTPErrorHandler(err error, c echo.Context) {
-	code := http.StatusInternalServerError
-	if he, ok := err.(*echo.HTTPError); ok {
-		code = he.Code
-	}
-
-	// Lógica especial para error 404 (Not Found)
-	if code == http.StatusNotFound {
-		// IMPORTANTE: Si la ruta NO empieza con /api/, servimos el HTML visual
-		if !strings.HasPrefix(c.Path(), "/api/") {
-			if err := c.File("public/404.html"); err != nil {
-				c.Logger().Error(err)
-				c.String(code, "404 - Página no encontrada")
-			}
-			return
-		}
-	}
-
-	// Para errores de API (JSON) o errores 500, usamos el default de Echo
-	c.Echo().DefaultHTTPErrorHandler(err, c)
-}
-
-// ---------------------------------------------------------
-// 4. FUNCIÓN MAIN (Punto de Entrada)
+// 3. FUNCIÓN MAIN (Punto de Entrada)
 // ---------------------------------------------------------
 
 func main() {
@@ -127,31 +102,25 @@ func main() {
 	}
 	fmt.Println("✅ Conexión a PostgreSQL establecida.")
 
-	// Migración automática (Crea la tabla si no existe)
-	db.AutoMigrate(&ContactoWeb{}, &ImagenUsuario{})
+	// Migración automática
+	db.AutoMigrate(&ContactoWeb{}, &Proyecto{})
 
 	// C. Inicializar Echo
 	e := echo.New()
-
-	// Asignar Validador y Manejador de Errores
 	e.Validator = &CustomValidator{validator: validator.New()}
-	e.HTTPErrorHandler = customHTTPErrorHandler
 
 	// ---------------------------------------------------------
-	// 5. MIDDLEWARES (Capas de Seguridad)
+	// 4. MIDDLEWARES
 	// ---------------------------------------------------------
 
-	e.Use(middleware.Logger())  // Logs de peticiones
-	e.Use(middleware.Recover()) // Evita que el server se caiga por un panic
-	e.Use(middleware.Secure())  // Headers de seguridad (XSS, HSTS)
+	e.Use(middleware.Logger())
+	e.Use(middleware.Recover())
+	e.Use(middleware.Secure())
+	e.Use(middleware.BodyLimit("5M")) // Aumentado a 5MB para permitir imágenes
 
-	// Limita el cuerpo de la petición a 2KB (Suficiente para texto, evita ataques DoS)
-	e.Use(middleware.BodyLimit("2M"))
-
-	// Configuración CORS (Cross-Origin Resource Sharing)
+	// CORS
 	allowOrigin := os.Getenv("FRONTEND_URL")
 	if allowOrigin == "" {
-		fmt.Println("⚠️ ADVERTENCIA: CORS abierto (*). Configura FRONTEND_URL en producción.")
 		allowOrigin = "*"
 	}
 	e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
@@ -159,7 +128,7 @@ func main() {
 		AllowMethods: []string{http.MethodPost, http.MethodGet},
 	}))
 
-	// Rate Limiter: 5 peticiones/segundo por IP (Protección anti-spam/DoS)
+	// Rate Limiter
 	configRateLimit := middleware.RateLimiterConfig{
 		Skipper: middleware.DefaultSkipper,
 		Store: middleware.NewRateLimiterMemoryStoreWithConfig(
@@ -169,68 +138,58 @@ func main() {
 			return ctx.RealIP(), nil
 		},
 		ErrorHandler: func(context echo.Context, err error) error {
-			return context.JSON(http.StatusTooManyRequests, map[string]string{"error": "Demasiadas peticiones. Calma un poco."})
-		},
-		DenyHandler: func(context echo.Context, identifier string, err error) error {
 			return context.JSON(http.StatusTooManyRequests, map[string]string{"error": "Demasiadas peticiones."})
 		},
 	}
 	e.Use(middleware.RateLimiterWithConfig(configRateLimit))
 
 	// ---------------------------------------------------------
-	// 6. RUTAS
+	// 5. RUTAS Y ARCHIVOS ESTÁTICOS
 	// ---------------------------------------------------------
 
-	// Servir archivos estáticos (Frontend: HTML, CSS, JS, Imágenes)
-	// Esto servirá index.html en la raíz "/"
+	// Servir index.html y assets (css, js)
 	e.Static("/", "public")
+	// IMPORTANTE: Servir la carpeta de subidas para que las imágenes sean visibles
+	e.Static("/uploads", "public/uploads")
 
-	// Ruta API para el formulario
+	// API Endpoints
 	e.POST("/api/contacto", manejarContacto)
-
-	// Ruta API para las imagenes
-	e.POST("/api/subir-imagen", subirImagen)
+	e.POST("/api/upload", subirProyecto)      // Subir imagen para galería
+	e.GET("/api/proyectos", obtenerProyectos) // Leer imágenes para el carrusel
 
 	// ---------------------------------------------------------
-	// 7. ARRANQUE DEL SERVIDOR
+	// 6. ARRANQUE
 	// ---------------------------------------------------------
 
 	port := os.Getenv("PORT")
 	if port == "" {
 		port = "8080"
 	}
-	// Asegurar formato ":8080"
 	if !strings.HasPrefix(port, ":") {
 		port = ":" + port
 	}
 
-	fmt.Println("🚀 Servidor Veltrix corriendo en el puerto " + port)
+	fmt.Println("🚀 Servidor Veltrix corriendo en " + port)
 	e.Logger.Fatal(e.Start(port))
 }
 
 // ---------------------------------------------------------
-// 8. HANDLERS (Lógica de Negocio)
+// 7. HANDLERS (Lógica)
 // ---------------------------------------------------------
 
+// --- A. CONTACTO ---
 func manejarContacto(c echo.Context) error {
 	req := new(ContactoRequest)
-
-	// 1. Parsear JSON
 	if err := c.Bind(req); err != nil {
-		return c.JSON(http.StatusBadRequest, map[string]string{"error": "Formato JSON inválido"})
+		return c.JSON(http.StatusBadRequest, map[string]string{"error": "Formato inválido"})
 	}
-
-	// 2. Validar Datos (Reglas del struct)
 	if err := c.Validate(req); err != nil {
 		return c.JSON(http.StatusBadRequest, map[string]string{"error": "Datos inválidos: " + err.Error()})
 	}
-
-	// 3. Verificar ReCAPTCHA con Google
 	if !validarCaptchaGoogle(req.RecaptchaToken) {
-		return c.JSON(http.StatusUnauthorized, map[string]string{"error": "Verificación de seguridad fallida (Captcha)"})
+		return c.JSON(http.StatusUnauthorized, map[string]string{"error": "Captcha inválido"})
 	}
 
-	// 4. Crear objeto para guardar (Sanitización básica)
 	nuevoContacto := ContactoWeb{
 		Nombre:    strings.TrimSpace(req.Nombre),
 		Email:     strings.TrimSpace(req.Email),
@@ -240,25 +199,94 @@ func manejarContacto(c echo.Context) error {
 		IpUsuario: c.RealIP(),
 	}
 
-	// 5. Guardar en Base de Datos
 	if result := db.Create(&nuevoContacto); result.Error != nil {
-		fmt.Println("❌ Error guardando en DB:", result.Error)
-		return c.JSON(http.StatusInternalServerError, map[string]string{"error": "Error interno del servidor"})
+		fmt.Println("Error DB:", result.Error)
+		return c.JSON(http.StatusInternalServerError, map[string]string{"error": "Error interno"})
 	}
 
-	// 6. Responder éxito
-	return c.JSON(http.StatusCreated, map[string]string{"mensaje": "Solicitud recibida correctamente"})
+	return c.JSON(http.StatusCreated, map[string]string{"mensaje": "Enviado correctamente"})
+}
+
+// --- B. SUBIR IMAGEN (Para la Galería) ---
+func subirProyecto(c echo.Context) error {
+	// 1. Leer archivo del form-data
+	file, err := c.FormFile("imagen")
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, map[string]string{"error": "No se envió imagen"})
+	}
+
+	// 2. Validar extensión y tamaño
+	ext := strings.ToLower(filepath.Ext(file.Filename))
+	if ext != ".jpg" && ext != ".jpeg" && ext != ".png" {
+		return c.JSON(http.StatusBadRequest, map[string]string{"error": "Solo se permiten JPG o PNG"})
+	}
+	if file.Size > 2*1024*1024 { // 2MB
+		return c.JSON(http.StatusBadRequest, map[string]string{"error": "Imagen muy pesada (Max 2MB)"})
+	}
+
+	src, err := file.Open()
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, map[string]string{"error": "Error al abrir archivo"})
+	}
+	defer src.Close()
+
+	// 3. Crear carpeta si no existe
+	uploadDir := "public/uploads"
+	if _, err := os.Stat(uploadDir); os.IsNotExist(err) {
+		os.MkdirAll(uploadDir, 0755)
+	}
+
+	// 4. Guardar archivo en disco con nombre único
+	newFileName := fmt.Sprintf("%d%s", time.Now().Unix(), ext)
+	dstPath := filepath.Join(uploadDir, newFileName)
+
+	dst, err := os.Create(dstPath)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, map[string]string{"error": "Error al guardar en disco"})
+	}
+	defer dst.Close()
+
+	if _, err = io.Copy(dst, src); err != nil {
+		return c.JSON(http.StatusInternalServerError, map[string]string{"error": "Error al escribir archivo"})
+	}
+
+	// 5. Guardar referencia en Base de Datos
+	// Construimos la URL pública para el frontend
+	publicURL := fmt.Sprintf("/uploads/%s", newFileName)
+
+	nuevoProyecto := Proyecto{
+		Titulo:      "Diseño de Comunidad",
+		Categoria:   "Upload",
+		Descripcion: "Imagen subida por usuario",
+		ImagenURL:   publicURL, // Guardamos la ruta, no los bytes
+	}
+
+	if result := db.Create(&nuevoProyecto); result.Error != nil {
+		return c.JSON(http.StatusInternalServerError, map[string]string{"error": "Error DB"})
+	}
+
+	return c.JSON(http.StatusCreated, map[string]string{"mensaje": "Subido correctamente", "url": publicURL})
+}
+
+// --- C. OBTENER PROYECTOS (Para el Carrusel) ---
+func obtenerProyectos(c echo.Context) error {
+	var proyectos []Proyecto
+	// Traemos los últimos 10 proyectos
+	if result := db.Order("created_at desc").Limit(10).Find(&proyectos); result.Error != nil {
+		return c.JSON(http.StatusInternalServerError, map[string]string{"error": "Error al obtener datos"})
+	}
+	return c.JSON(http.StatusOK, proyectos)
 }
 
 // ---------------------------------------------------------
-// 9. HELPERS
+// 8. HELPERS
 // ---------------------------------------------------------
 
 func validarCaptchaGoogle(token string) bool {
 	secret := os.Getenv("RECAPTCHA_SECRET")
 	if secret == "" {
-		fmt.Println("❌ Error: RECAPTCHA_SECRET no está configurado en el .env")
-		return false // Falla segura si no hay configuración
+		fmt.Println("❌ Error: Falta RECAPTCHA_SECRET")
+		return false
 	}
 
 	client := &http.Client{Timeout: 10 * time.Second}
@@ -267,7 +295,6 @@ func validarCaptchaGoogle(token string) bool {
 		"response": {token},
 	})
 	if err != nil {
-		fmt.Println("Error conectando a Google:", err)
 		return false
 	}
 	defer resp.Body.Close()
@@ -277,46 +304,4 @@ func validarCaptchaGoogle(token string) bool {
 		return false
 	}
 	return googleResult.Success
-}
-
-// Pon esto al final, junto con tus otros handlers
-func subirImagen(c echo.Context) error {
-	// 1. Obtener el archivo del formulario (key: "imagen")
-	file, err := c.FormFile("imagen")
-	if err != nil {
-		return c.JSON(http.StatusBadRequest, map[string]string{"error": "No se ha enviado ninguna imagen"})
-	}
-
-	// 2. Validar tamaño (Ejemplo: Máximo 2MB para no saturar la BD)
-	if file.Size > 2*1024*1024 {
-		return c.JSON(http.StatusBadRequest, map[string]string{"error": "La imagen es muy pesada (Máximo 2MB)"})
-	}
-
-	// 3. Abrir el archivo
-	src, err := file.Open()
-	if err != nil {
-		return c.JSON(http.StatusInternalServerError, map[string]string{"error": "Error al procesar el archivo"})
-	}
-	defer src.Close()
-
-	// 4. Leer los bytes (Binario)
-	fileBytes, err := io.ReadAll(src)
-	if err != nil {
-		return c.JSON(http.StatusInternalServerError, map[string]string{"error": "Error al leer el archivo"})
-	}
-
-	// 5. Crear registro para la BD
-	nuevaImagen := ImagenUsuario{
-		Nombre:   file.Filename,
-		Datos:    fileBytes, // Guardamos el binario
-		MimeType: file.Header.Get("Content-Type"),
-	}
-
-	// 6. Guardar en Postgres
-	if result := db.Create(&nuevaImagen); result.Error != nil {
-		fmt.Println("Error DB:", result.Error)
-		return c.JSON(http.StatusInternalServerError, map[string]string{"error": "Error al guardar en la base de datos"})
-	}
-
-	return c.JSON(http.StatusCreated, map[string]string{"mensaje": "Imagen subida exitosamente"})
 }
