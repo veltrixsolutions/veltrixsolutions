@@ -85,41 +85,66 @@
     <nav class="fixed w-full z-50 transition-all duration-300 border-b border-white/5 bg-brand-dark/90 backdrop-blur-lg" id="navbar">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between items-center h-20">
-                <div class="flex items-center gap-2 z-50">
-                    <div class="w-10 h-10 bg-white rounded-lg flex items-center justify-center overflow-hidden shadow-glow shrink-0">
+                
+                <a href="#inicio" class="flex items-center gap-2 z-50 group">
+                    <div class="w-10 h-10 bg-white rounded-lg flex items-center justify-center overflow-hidden shadow-glow shrink-0 group-hover:scale-105 transition-transform">
                         <img src="LogoPerfil.jpeg" alt="Veltrix Logo" class="w-full h-full object-cover">
                     </div>
-                    <span class="font-bold text-lg sm:text-xl md:text-2xl text-white tracking-tight truncate max-w-[200px] sm:max-w-none">Veltrix Solutions</span>
-                </div>
+                    <span class="font-bold text-lg sm:text-xl md:text-2xl text-white tracking-tight truncate max-w-[200px] sm:max-w-none group-hover:text-brand-primary transition-colors">Veltrix Solutions</span>
+                </a>
 
-                <div class="hidden md:flex space-x-8 items-center">
-                    <a href="#proceso" class="text-sm font-medium hover:text-white transition">Metodología</a>
-                    <a href="#portafolio" class="text-sm font-medium hover:text-white transition">Portafolio</a>
-                    <a href="#precios" class="text-sm font-bold text-brand-accent hover:text-white transition">Ver Precios</a>
-                    <a href="https://wa.me/5563986246" class="bg-white text-brand-dark px-5 py-2.5 rounded-full font-bold text-sm hover:bg-gray-200 transition">
-                        ¡Hablemos!
+                <div class="hidden lg:flex space-x-6 xl:space-x-8 items-center">
+                    <a href="#inicio" class="text-sm font-medium text-slate-300 hover:text-white transition relative group">
+                        Inicio
+                        <span class="absolute -bottom-1 left-0 w-0 h-0.5 bg-brand-primary transition-all group-hover:w-full"></span>
+                    </a>
+                    <a href="#nosotros" class="text-sm font-medium text-slate-300 hover:text-white transition relative group">
+                        Nosotros
+                        <span class="absolute -bottom-1 left-0 w-0 h-0.5 bg-brand-primary transition-all group-hover:w-full"></span>
+                    </a>
+                    <a href="#proceso" class="text-sm font-medium text-slate-300 hover:text-white transition relative group">
+                        Metodología
+                        <span class="absolute -bottom-1 left-0 w-0 h-0.5 bg-brand-primary transition-all group-hover:w-full"></span>
+                    </a>
+                    <a href="#portafolio" class="text-sm font-medium text-slate-300 hover:text-white transition relative group">
+                        Portafolio
+                        <span class="absolute -bottom-1 left-0 w-0 h-0.5 bg-brand-primary transition-all group-hover:w-full"></span>
+                    </a>
+                    <a href="#precios" class="text-sm font-bold text-brand-accent hover:text-white transition">
+                       Ver Precios
+                    </a>
+                    
+                    <a href="#contacto" class="bg-white text-brand-dark px-6 py-2.5 rounded-full font-bold text-sm hover:bg-brand-primary hover:text-white transition shadow-[0_0_15px_rgba(255,255,255,0.3)] hover:shadow-[0_0_20px_rgba(99,102,241,0.6)]">
+                        ¡Cotizar Ahora!
                     </a>
                 </div>
 
-                <div class="md:hidden flex items-center z-50">
-                    <button id="mobile-menu-btn" class="text-white focus:outline-none p-2">
+                <div class="lg:hidden flex items-center z-50">
+                    <button id="mobile-menu-btn" class="text-white focus:outline-none p-2 active:scale-95 transition-transform">
                         <i class="fa-solid fa-bars text-2xl"></i>
                     </button>
                 </div>
             </div>
         </div>
 
-        <div id="mobile-menu" class="hidden absolute top-0 left-0 w-full h-screen bg-brand-dark flex-col items-center justify-center space-y-8 md:hidden transition-all duration-300 z-40 px-6">
-            <a href="#proceso" class="mobile-link text-2xl font-medium text-white hover:text-brand-primary">Metodología</a>
-            <a href="#portafolio" class="mobile-link text-2xl font-medium text-white hover:text-brand-primary">Portafolio</a>
-            <a href="#precios" class="mobile-link text-2xl font-bold text-brand-accent hover:text-white">Ver Precios</a>
-            <a href="https://wa.me/5563986246" class="bg-white text-brand-dark px-8 py-4 rounded-full font-bold text-lg hover:bg-gray-200 transition text-center w-full max-w-xs">
-                ¡Hablemos!
+        <div id="mobile-menu" class="hidden absolute top-0 left-0 w-full h-screen bg-brand-dark/95 backdrop-blur-xl flex-col items-center justify-center space-y-8 lg:hidden transition-all duration-300 z-40 px-6">
+            <button class="mobile-link absolute top-6 right-6 text-white/50 hover:text-white text-3xl">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+
+            <a href="#inicio" class="mobile-link text-2xl font-medium text-white hover:text-brand-primary transition-colors">Inicio</a>
+            <a href="#nosotros" class="mobile-link text-2xl font-medium text-white hover:text-brand-primary transition-colors">Nosotros</a>
+            <a href="#proceso" class="mobile-link text-2xl font-medium text-white hover:text-brand-primary transition-colors">Metodología</a>
+            <a href="#portafolio" class="mobile-link text-2xl font-medium text-white hover:text-brand-primary transition-colors">Portafolio</a>
+            <a href="#precios" class="mobile-link text-2xl font-bold text-brand-accent hover:text-white transition-colors">Ver Precios</a>
+            <a href="#ubicacion" class="mobile-link text-xl font-medium text-slate-400 hover:text-white transition-colors">Ubicación</a>
+            
+            <a href="#contacto" class="mobile-link bg-gradient-to-r from-brand-primary to-brand-secondary text-white px-10 py-4 rounded-full font-bold text-xl shadow-lg hover:scale-105 transition-transform w-full max-w-xs text-center">
+                ¡Cotizar Proyecto!
             </a>
         </div>
     </nav>
-
-    <section class="relative pt-32 pb-16 lg:pt-48 lg:pb-32 overflow-hidden bg-brand-dark border-b border-white/5">
+    <section id="inicio" class="relative pt-32 pb-16 lg:pt-48 lg:pb-32 overflow-hidden bg-brand-dark border-b border-white/5">
         <div class="absolute inset-0 bg-grid opacity-20"></div>
         <div class="absolute top-20 right-0 w-[200px] sm:w-[300px] md:w-[500px] h-[300px] md:h-[500px] bg-brand-primary/20 rounded-full blur-[100px] -z-10"></div>
         <div class="absolute bottom-0 left-0 w-[200px] sm:w-[300px] md:w-[400px] h-[300px] md:h-[400px] bg-brand-secondary/20 rounded-full blur-[100px] -z-10"></div>
@@ -647,9 +672,7 @@
             
             <div class="max-w-5xl mx-auto mb-20" data-aos="zoom-in">
                 <div class="bg-gradient-to-br from-brand-primary/90 to-brand-secondary/90 rounded-3xl p-10 md:p-14 text-center text-white shadow-[0_0_50px_rgba(99,102,241,0.3)] relative overflow-hidden">
-                    
                     <div class="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-10 mix-blend-overlay"></div>
-                    
                     <div class="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent translate-x-[-150%] animate-[shimmer_3s_infinite] pointer-events-none"></div>
 
                     <h2 class="text-3xl md:text-5xl font-extrabold mb-6 relative z-10 tracking-tight leading-tight">
@@ -658,10 +681,7 @@
                     <p class="text-lg md:text-xl text-blue-100 max-w-2xl mx-auto relative z-10 leading-relaxed">
                         Tu competencia ya está invirtiendo en tecnología. No te quedes atrás. La consulta inicial es <span class="font-bold text-white border-b-2 border-white/30">100% gratuita</span> y sin compromiso.
                     </p>
-                    
-                    <div class="mt-8 animate-bounce">
-                        <i class="fa-solid fa-chevron-down text-2xl text-white/50"></i>
-                    </div>
+                    <div class="mt-8 animate-bounce"><i class="fa-solid fa-chevron-down text-2xl text-white/50"></i></div>
                 </div>
             </div>
 
@@ -672,35 +692,20 @@
                         <span class="w-2 h-2 rounded-full bg-green-400 animate-pulse shadow-[0_0_10px_rgba(74,222,128,0.5)]"></span>
                         <span class="text-xs font-bold text-slate-300 uppercase tracking-wide">Respuesta en 24h</span>
                     </div>
-
                     <h2 class="text-4xl md:text-5xl font-extrabold text-white mb-6 leading-tight">
-                        Hablemos de tu <br>
-                        <span class="text-transparent bg-clip-text bg-gradient-to-r from-brand-primary to-brand-secondary">Próximo Proyecto</span>
+                        Hablemos de tu <br><span class="text-transparent bg-clip-text bg-gradient-to-r from-brand-primary to-brand-secondary">Próximo Proyecto</span>
                     </h2>
-
                     <p class="text-slate-400 text-lg mb-10 leading-relaxed max-w-md">
                         ¿Tienes una idea? Nosotros tenemos la tecnología. Déjanos tus datos y nuestro equipo de ingeniería analizará la viabilidad técnica de tu proyecto gratis.
                     </p>
-
                     <div class="grid gap-4">
                         <a href="https://wa.me/5563986246" class="group flex items-center gap-5 p-5 bg-white/5 hover:bg-white/10 rounded-2xl border border-white/5 hover:border-brand-primary/30 transition-all duration-300">
-                            <div class="w-12 h-12 rounded-full bg-green-500/20 flex items-center justify-center text-green-400 text-xl group-hover:scale-110 transition-transform">
-                                <i class="fa-brands fa-whatsapp"></i>
-                            </div>
-                            <div>
-                                <p class="text-xs text-slate-400 font-bold uppercase mb-1">WhatsApp Directo</p>
-                                <p class="text-white font-bold text-lg group-hover:text-green-400 transition-colors">+52 55 6398 6246</p>
-                            </div>
+                            <div class="w-12 h-12 rounded-full bg-green-500/20 flex items-center justify-center text-green-400 text-xl group-hover:scale-110 transition-transform"><i class="fa-brands fa-whatsapp"></i></div>
+                            <div><p class="text-xs text-slate-400 font-bold uppercase mb-1">WhatsApp Directo</p><p class="text-white font-bold text-lg group-hover:text-green-400 transition-colors">+52 55 6398 6246</p></div>
                         </a>
-
                         <div class="group flex items-center gap-5 p-5 bg-white/5 rounded-2xl border border-white/5 transition-all duration-300">
-                            <div class="w-12 h-12 rounded-full bg-brand-primary/20 flex items-center justify-center text-brand-primary text-xl">
-                                <i class="fa-solid fa-envelope"></i>
-                            </div>
-                            <div>
-                                <p class="text-xs text-slate-400 font-bold uppercase mb-1">Correo Electrónico</p>
-                                <p class="text-white font-bold text-lg break-all">veltrixsolutionsbusinness@gmail.com</p>
-                            </div>
+                            <div class="w-12 h-12 rounded-full bg-brand-primary/20 flex items-center justify-center text-brand-primary text-xl"><i class="fa-solid fa-envelope"></i></div>
+                            <div><p class="text-xs text-slate-400 font-bold uppercase mb-1">Correo Electrónico</p><p class="text-white font-bold text-lg break-all">veltrixsolutionsbusinness@gmail.com</p></div>
                         </div>
                     </div>
                 </div>
@@ -711,12 +716,14 @@
                     <form id="contactForm" class="space-y-6 relative z-10">
                         
                         <div class="group">
-                            <label class="block text-xs font-bold text-brand-primary uppercase tracking-wider mb-2 ml-1">Nombre Completo</label>
+                            <div class="flex justify-between">
+                                <label class="block text-xs font-bold text-brand-primary uppercase tracking-wider mb-2 ml-1">Nombre Completo</label>
+                                <span class="text-[10px] text-slate-500" id="count-nombre">0/50</span>
+                            </div>
                             <div class="relative">
-                                <span class="absolute inset-y-0 left-0 flex items-center pl-4 text-slate-500">
-                                    <i class="fa-regular fa-user"></i>
-                                </span>
+                                <span class="absolute inset-y-0 left-0 flex items-center pl-4 text-slate-500"><i class="fa-regular fa-user"></i></span>
                                 <input type="text" id="nombre" required 
+                                    maxlength="50"
                                     class="w-full bg-brand-dark/50 border border-white/10 rounded-xl py-4 pl-11 pr-4 text-white placeholder-slate-600 focus:border-brand-primary focus:ring-2 focus:ring-brand-primary/20 focus:bg-brand-dark/80 transition-all duration-300 outline-none"
                                     placeholder="Ej. Juan Pérez">
                             </div>
@@ -726,23 +733,19 @@
                             <div class="group">
                                 <label class="block text-xs font-bold text-brand-primary uppercase tracking-wider mb-2 ml-1">Correo</label>
                                 <div class="relative">
-                                    <span class="absolute inset-y-0 left-0 flex items-center pl-4 text-slate-500">
-                                        <i class="fa-regular fa-envelope"></i>
-                                    </span>
-                                    <input type="email" id="email" required 
-                                        class="w-full bg-brand-dark/50 border border-white/10 rounded-xl py-4 pl-11 pr-4 text-white placeholder-slate-600 focus:border-brand-primary focus:ring-2 focus:ring-brand-primary/20 focus:bg-brand-dark/80 transition-all duration-300 outline-none"
-                                        placeholder="hola@empresa.com">
+                                    <span class="absolute inset-y-0 left-0 flex items-center pl-4 text-slate-500"><i class="fa-regular fa-envelope"></i></span>
+                                    <input type="email" id="email" required maxlength="100" class="w-full bg-brand-dark/50 border border-white/10 rounded-xl py-4 pl-11 pr-4 text-white placeholder-slate-600 focus:border-brand-primary focus:ring-2 focus:ring-brand-primary/20 focus:bg-brand-dark/80 transition-all duration-300 outline-none" placeholder="hola@empresa.com">
                                 </div>
                             </div>
+                            
                             <div class="group">
-                                <label class="block text-xs font-bold text-brand-primary uppercase tracking-wider mb-2 ml-1">Teléfono</label>
+                                <label class="block text-xs font-bold text-brand-primary uppercase tracking-wider mb-2 ml-1">Teléfono (10 Dígitos)</label>
                                 <div class="relative">
-                                    <span class="absolute inset-y-0 left-0 flex items-center pl-4 text-slate-500">
-                                        <i class="fa-solid fa-mobile-screen"></i>
-                                    </span>
+                                    <span class="absolute inset-y-0 left-0 flex items-center pl-4 text-slate-500"><i class="fa-solid fa-mobile-screen"></i></span>
                                     <input type="tel" id="telefono" required 
+                                        maxlength="10"
                                         class="w-full bg-brand-dark/50 border border-white/10 rounded-xl py-4 pl-11 pr-4 text-white placeholder-slate-600 focus:border-brand-primary focus:ring-2 focus:ring-brand-primary/20 focus:bg-brand-dark/80 transition-all duration-300 outline-none"
-                                        placeholder="10 dígitos">
+                                        placeholder="Ej. 5512345678">
                                 </div>
                             </div>
                         </div>
@@ -750,47 +753,41 @@
                         <div class="group">
                             <label class="block text-xs font-bold text-brand-primary uppercase tracking-wider mb-2 ml-1">Interés Principal</label>
                             <div class="relative">
-                                <span class="absolute inset-y-0 left-0 flex items-center pl-4 text-slate-500">
-                                    <i class="fa-solid fa-layer-group"></i>
-                                </span>
+                                <span class="absolute inset-y-0 left-0 flex items-center pl-4 text-slate-500"><i class="fa-solid fa-layer-group"></i></span>
                                 <select id="servicio" class="w-full bg-brand-dark/50 border border-white/10 rounded-xl py-4 pl-11 pr-10 text-white focus:border-brand-primary focus:ring-2 focus:ring-brand-primary/20 focus:bg-brand-dark/80 transition-all duration-300 outline-none appearance-none cursor-pointer">
                                     <option value="Desarrollo Web">Desarrollo Web / Landing Page</option>
-                                    <option value="E-Commerce">Tienda en Línea (E-Commerce)</option>
-                                    <option value="App Movil">Aplicación Móvil (iOS/Android)</option>
+                                    <option value="E-Commerce">Tienda en Línea</option>
+                                    <option value="App Movil">Aplicación Móvil</option>
                                     <option value="Software a Medida">Software a Medida</option>
                                     <option value="Otro">Otro / Consultoría</option>
                                 </select>
-                                <span class="absolute inset-y-0 right-0 flex items-center pr-4 text-slate-500 pointer-events-none">
-                                    <i class="fa-solid fa-chevron-down text-xs"></i>
-                                </span>
+                                <span class="absolute inset-y-0 right-0 flex items-center pr-4 text-slate-500 pointer-events-none"><i class="fa-solid fa-chevron-down text-xs"></i></span>
                             </div>
                         </div>
 
                         <div class="group">
-                            <label class="block text-xs font-bold text-brand-primary uppercase tracking-wider mb-2 ml-1">Detalles del Proyecto</label>
+                            <div class="flex justify-between items-center mb-2 ml-1">
+                                <label class="block text-xs font-bold text-brand-primary uppercase tracking-wider">Detalles del Proyecto</label>
+                                <span id="contador-mensaje" class="text-[10px] font-mono text-brand-secondary bg-brand-primary/10 px-2 py-0.5 rounded border border-brand-primary/20 transition-all">
+                                    0 / 100 (Quedan: 100)
+                                </span>
+                            </div>
                             <textarea id="mensaje" rows="4" required 
+                                maxlength="100"
                                 class="w-full bg-brand-dark/50 border border-white/10 rounded-xl p-4 text-white placeholder-slate-600 focus:border-brand-primary focus:ring-2 focus:ring-brand-primary/20 focus:bg-brand-dark/80 transition-all duration-300 outline-none resize-none"
-                                placeholder="Cuéntanos brevemente qué necesitas..."></textarea>
+                                placeholder="Describe tu idea brevemente (Máx. 100 letras)..."></textarea>
                         </div>
 
                         <div class="bg-brand-dark/30 p-3 rounded-xl border border-white/5 flex justify-center">
-                            <div class="g-recaptcha" 
-                                 data-sitekey="6LfDBEksAAAAAKrApfpgtv5AUri6Dz23DCWxcEeV" 
-                                 data-theme="dark">
-                            </div>
+                            <div class="g-recaptcha" data-sitekey="6LfDBEksAAAAAKrApfpgtv5AUri6Dz23DCWxcEeV" data-theme="dark"></div>
                         </div>
 
                         <button type="submit" id="submitBtn" class="w-full py-4 rounded-xl bg-gradient-to-r from-brand-primary to-brand-secondary text-white font-bold text-lg shadow-[0_0_20px_rgba(99,102,241,0.3)] hover:shadow-[0_0_30px_rgba(99,102,241,0.5)] hover:scale-[1.01] active:scale-[0.98] transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed group relative overflow-hidden">
-                            <span class="relative z-10 flex items-center justify-center gap-2">
-                                Enviar Solicitud <i class="fa-solid fa-paper-plane group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform"></i>
-                            </span>
+                            <span class="relative z-10 flex items-center justify-center gap-2">Enviar Solicitud <i class="fa-solid fa-paper-plane group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform"></i></span>
                             <div class="absolute inset-0 bg-white/20 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700 ease-in-out"></div>
                         </button>
 
-                        <p class="text-center text-xs text-slate-500 mt-4">
-                            Tus datos están seguros. No compartimos información con terceros.
-                        </p>
-
+                        <p class="text-center text-xs text-slate-500 mt-4">Tus datos están seguros. No compartimos información con terceros.</p>
                     </form>
                 </div>
             </div>
@@ -886,27 +883,27 @@
     </a>
 
     <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
-    <script>
-        // Inicializar animaciones
-        AOS.init({
-            duration: 800,
-            once: true,
-            offset: 100
-        });
+   <script>
+        // ------------------------------------------------------
+        // 1. INICIALIZACIÓN DE ANIMACIONES Y UI
+        // ------------------------------------------------------
+        
+        // Iniciar AOS (Animaciones al hacer scroll)
+        AOS.init({ duration: 800, once: true, offset: 100 });
 
-        // Navbar Scroll Effect
+        // Lógica del Navbar (Cambio de color al bajar)
         window.addEventListener('scroll', () => {
             const nav = document.getElementById('navbar');
             if (window.scrollY > 50) {
                 nav.classList.add('shadow-lg');
-                nav.classList.replace('bg-brand-dark/80', 'bg-brand-dark/95');
+                nav.classList.replace('bg-brand-dark/90', 'bg-brand-dark/95');
             } else {
                 nav.classList.remove('shadow-lg');
-                nav.classList.replace('bg-brand-dark/95', 'bg-brand-dark/80');
+                nav.classList.replace('bg-brand-dark/95', 'bg-brand-dark/90');
             }
         });
 
-        // Mobile Menu Logic
+        // Lógica del Menú Móvil (Abrir/Cerrar)
         const btn = document.getElementById('mobile-menu-btn');
         const menu = document.getElementById('mobile-menu');
         const links = document.querySelectorAll('.mobile-link');
@@ -923,81 +920,162 @@
             });
         });
 
+        // ------------------------------------------------------
+        // 2. VALIDACIÓN EN TIEMPO REAL (Visualización Dinámica)
+        // ------------------------------------------------------
+
+        // Elementos del DOM
+        const inputNombre = document.getElementById('nombre');
+        const countNombre = document.getElementById('count-nombre'); // ID del contador de nombre
+        
+        const inputTel = document.getElementById('telefono');
+        
+        const inputMensaje = document.getElementById('mensaje');
+        const countMensaje = document.getElementById('contador-mensaje'); // ID del contador de mensaje
+
+        // A. NOMBRE: Contador simple (0/50)
+        // Se actualiza cada vez que el usuario escribe
+        if (inputNombre && countNombre) {
+            inputNombre.addEventListener('input', function() {
+                const actual = this.value.length;
+                countNombre.textContent = `${actual}/50`;
+                
+                // Color rojo si llega al límite
+                if(actual === 50) { 
+                    countNombre.classList.add('text-red-400'); 
+                } else { 
+                    countNombre.classList.remove('text-red-400'); 
+                }
+            });
+        }
+
+        // B. TELÉFONO: Filtro estricto (Solo números)
+        // Si el usuario intenta escribir letras, se borran instantáneamente
+        if (inputTel) {
+            inputTel.addEventListener('input', function() {
+                this.value = this.value.replace(/[^0-9]/g, '');
+            });
+        }
+
+        // C. MENSAJE: Contador avanzado (Escritos vs Restantes)
+        if (inputMensaje && countMensaje) {
+            inputMensaje.addEventListener('input', function() {
+                const max = 100; // Límite estricto solicitado
+                const actual = this.value.length;
+                const restantes = max - actual;
+                
+                // Actualizar texto del contador
+                countMensaje.textContent = `${actual} / ${max} (Quedan: ${restantes})`;
+
+                // Cambiar estilo visual cuando quedan pocos caracteres (Alerta visual)
+                if (restantes < 10) {
+                    countMensaje.classList.replace('text-brand-secondary', 'text-red-400');
+                    countMensaje.classList.replace('bg-brand-primary/10', 'bg-red-500/10');
+                    countMensaje.classList.replace('border-brand-primary/20', 'border-red-500/20');
+                } else {
+                    countMensaje.classList.replace('text-red-400', 'text-brand-secondary');
+                    countMensaje.classList.replace('bg-red-500/10', 'bg-brand-primary/10');
+                    countMensaje.classList.replace('border-red-500/20', 'border-brand-primary/20');
+                }
+            });
+        }
+
+        // ------------------------------------------------------
+        // 3. LÓGICA DE ENVÍO DEL FORMULARIO (Fetch API)
+        // ------------------------------------------------------
+
         const contactForm = document.getElementById('contactForm');
-    const submitBtn = document.getElementById('submitBtn');
+        const submitBtn = document.getElementById('submitBtn');
 
-    contactForm.addEventListener('submit', async function(e) {
-        e.preventDefault();
+        if (contactForm) {
+            contactForm.addEventListener('submit', async function(e) {
+                e.preventDefault(); // Evitar recarga de página
 
-        // 1. Obtener token de Google
-        const recaptchaToken = grecaptcha.getResponse();
+                // VALIDACIÓN 1: Longitud exacta del teléfono
+                // Aunque HTML tiene maxlength, esto asegura que no envíen números incompletos (ej: "55")
+                if (inputTel.value.length !== 10) {
+                    Swal.fire({
+                        icon: 'warning',
+                        title: 'Teléfono incompleto',
+                        text: 'El número debe tener exactamente 10 dígitos.',
+                        background: '#0B0F19', color: '#fff', confirmButtonColor: '#6366f1'
+                    });
+                    return; // Detener envío
+                }
 
-        if (recaptchaToken.length === 0) {
-            Swal.fire({
-                icon: 'warning',
-                title: 'Verificación requerida',
-                text: 'Por favor, marca la casilla "No soy un robot".',
-                background: '#0B0F19',
-                color: '#fff'
+                // VALIDACIÓN 2: ReCAPTCHA
+                const recaptchaToken = grecaptcha.getResponse();
+                if (recaptchaToken.length === 0) {
+                    Swal.fire({
+                        icon: 'warning',
+                        title: 'Verificación requerida',
+                        text: 'Por favor, marca la casilla "No soy un robot".',
+                        background: '#0B0F19', color: '#fff', confirmButtonColor: '#6366f1'
+                    });
+                    return; // Detener envío
+                }
+
+                // PREPARACIÓN DE DATOS
+                const formData = {
+                    nombre: inputNombre.value.trim(),
+                    email: document.getElementById('email').value.trim(),
+                    telefono: inputTel.value, // Ya va limpio gracias al evento input
+                    servicio: document.getElementById('servicio').value,
+                    mensaje: inputMensaje.value.trim(),
+                    recaptchaToken: recaptchaToken
+                };
+
+                // UI LOADING (Feedback visual)
+                const originalBtnText = submitBtn.innerHTML;
+                submitBtn.disabled = true;
+                submitBtn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Enviando...';
+
+                try {
+                    // PETICIÓN AL BACKEND
+                    const response = await fetch('/api/contacto', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(formData)
+                    });
+
+                    const result = await response.json();
+
+                    if (!response.ok) {
+                        throw new Error(result.error || 'Error desconocido en el servidor');
+                    }
+
+                    // ÉXITO
+                    Swal.fire({
+                        icon: 'success',
+                        title: '¡Mensaje Enviado!',
+                        text: 'Hemos recibido tu solicitud correctamente. Te contactaremos pronto.',
+                        background: '#0B0F19', color: '#fff', confirmButtonColor: '#6366f1'
+                    });
+                    
+                    // LIMPIEZA
+                    contactForm.reset();
+                    grecaptcha.reset();
+                    
+                    // Resetear visualmente los contadores
+                    if(countNombre) countNombre.textContent = "0/50";
+                    if(countMensaje) {
+                        countMensaje.textContent = "0 / 100 (Quedan: 100)";
+                        countMensaje.className = "text-[10px] font-mono text-brand-secondary bg-brand-primary/10 px-2 py-0.5 rounded border border-brand-primary/20 transition-all";
+                    }
+
+                } catch (error) {
+                    // ERROR
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Hubo un problema',
+                        text: error.message,
+                        background: '#0B0F19', color: '#fff', confirmButtonColor: '#ef4444'
+                    });
+                } finally {
+                    // RESTAURAR BOTÓN
+                    submitBtn.disabled = false;
+                    submitBtn.innerHTML = originalBtnText;
+                }
             });
-            return;
         }
-
-        // 2. Preparar datos
-        const formData = {
-            nombre: document.getElementById('nombre').value,
-            email: document.getElementById('email').value,
-            telefono: document.getElementById('telefono').value,
-            servicio: document.getElementById('servicio').value,
-            mensaje: document.getElementById('mensaje').value,
-            recaptchaToken: recaptchaToken // Token vital para el backend
-        };
-
-        // 3. UI Loading
-        const originalBtnText = submitBtn.innerHTML;
-        submitBtn.disabled = true;
-        submitBtn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Enviando...';
-
-        try {
-            // 4. Petición al Backend Go 
-            const response = await fetch('/api/contacto', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(formData)
-            });
-
-            const result = await response.json();
-
-            if (!response.ok) throw new Error(result.error || 'Error desconocido');
-
-            // Éxito
-            Swal.fire({
-                icon: 'success',
-                title: '¡Mensaje Enviado!',
-                text: 'Hemos recibido tu solicitud correctamente.',
-                background: '#0B0F19',
-                color: '#fff',
-                confirmButtonColor: '#6366f1'
-            });
-            
-            contactForm.reset();
-            grecaptcha.reset(); // Resetear captcha
-
-        } catch (error) {
-            Swal.fire({
-                icon: 'error',
-                title: 'Error',
-                text: 'No pudimos enviar el mensaje. Inténtalo de nuevo o contáctanos por WhatsApp.',
-                background: '#0B0F19',
-                color: '#fff'
-            });
-            console.error(error);
-        } finally {
-            submitBtn.disabled = false;
-            submitBtn.innerHTML = originalBtnText;
-        }
-    });
     </script>
-</body>
-
-</html>
