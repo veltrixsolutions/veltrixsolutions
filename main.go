@@ -18,8 +18,11 @@ import (
 	"gorm.io/gorm"
 )
 
-// ---------------- MODELOS DE DATOS ----------------
+// ---------------------------------------------------------
+// 1. MODELOS DE DATOS (STRUCTS)
+// ---------------------------------------------------------
 
+// Modelo para la Base de Datos (GORM)
 type ContactoWeb struct {
 	ID        uint      `gorm:"primaryKey" json:"id"`
 	Nombre    string    `gorm:"type:varchar(100);not null" json:"nombre"`
@@ -27,25 +30,28 @@ type ContactoWeb struct {
 	Telefono  string    `gorm:"type:varchar(20)" json:"telefono"`
 	Servicio  string    `gorm:"type:varchar(50)" json:"servicio"`
 	Mensaje   string    `gorm:"type:text" json:"mensaje"`
-	IpUsuario string    `gorm:"type:varchar(50)" json:"-"`
+	IpUsuario string    `gorm:"type:varchar(50)" json:"-"` // No se envía al frontend
 	CreatedAt time.Time `json:"fecha"`
 }
 
-// ContactoRequest incluye etiquetas 'validate' para reglas estrictas
+// Modelo para la Petición JSON (Con Validaciones)
 type ContactoRequest struct {
 	Nombre         string `json:"nombre" validate:"required,min=2,max=100"`
 	Email          string `json:"email" validate:"required,email,max=150"`
-	Telefono       string `json:"telefono" validate:"omitempty,max=20,numeric"` // Opcional, solo números
+	Telefono       string `json:"telefono" validate:"omitempty,numeric,max=20"` // Solo números
 	Servicio       string `json:"servicio" validate:"max=50"`
-	Mensaje        string `json:"mensaje" validate:"required,min=10,max=2000"` // Mínimo 10 caracteres para evitar spam vacío
+	Mensaje        string `json:"mensaje" validate:"required,min=10,max=2000"` // Evita spam vacío
 	RecaptchaToken string `json:"recaptchaToken" validate:"required"`
 }
 
+// Respuesta de Google ReCAPTCHA
 type RecaptchaResponse struct {
 	Success bool `json:"success"`
 }
 
-// ---------------- CONFIGURACIÓN DE VALIDACIÓN ----------------
+// ---------------------------------------------------------
+// 2. CONFIGURACIÓN DEL VALIDADOR
+// ---------------------------------------------------------
 
 type CustomValidator struct {
 	validator *validator.Validate
@@ -53,70 +59,97 @@ type CustomValidator struct {
 
 func (cv *CustomValidator) Validate(i interface{}) error {
 	if err := cv.validator.Struct(i); err != nil {
+		// Devuelve error 400 si la validación falla
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 	return nil
 }
 
-// ---------------- VARIABLES GLOBALES ----------------
-
+// Variable global para la DB
 var db *gorm.DB
 
-// ---------------- FUNCIÓN PRINCIPAL ----------------
+// ---------------------------------------------------------
+// 3. MANEJO DE ERRORES PERSONALIZADO (404 HTML vs JSON)
+// ---------------------------------------------------------
 
-func main() {
-	if err := godotenv.Load(); err != nil {
-		fmt.Println("ℹ️ Nota: Usando variables de entorno del sistema.")
+func customHTTPErrorHandler(err error, c echo.Context) {
+	code := http.StatusInternalServerError
+	if he, ok := err.(*echo.HTTPError); ok {
+		code = he.Code
 	}
 
-	// 1. Conexión a Base de Datos
+	// Lógica especial para error 404 (Not Found)
+	if code == http.StatusNotFound {
+		// IMPORTANTE: Si la ruta NO empieza con /api/, servimos el HTML visual
+		if !strings.HasPrefix(c.Path(), "/api/") {
+			if err := c.File("public/404.html"); err != nil {
+				c.Logger().Error(err)
+				c.String(code, "404 - Página no encontrada")
+			}
+			return
+		}
+	}
+
+	// Para errores de API (JSON) o errores 500, usamos el default de Echo
+	c.Echo().DefaultHTTPErrorHandler(err, c)
+}
+
+// ---------------------------------------------------------
+// 4. FUNCIÓN MAIN (Punto de Entrada)
+// ---------------------------------------------------------
+
+func main() {
+	// A. Cargar variables de entorno
+	if err := godotenv.Load(); err != nil {
+		fmt.Println("ℹ️ Nota: No se encontró .env, usando variables del sistema.")
+	}
+
+	// B. Conexión a Base de Datos
 	dsn := os.Getenv("DB_DSN")
 	if dsn == "" {
-		log.Fatal("❌ Error: DB_DSN está vacío.")
+		log.Fatal("❌ Error crítico: La variable DB_DSN está vacía.")
 	}
 
 	var err error
 	db, err = gorm.Open(postgres.Open(dsn), &gorm.Config{})
 	if err != nil {
-		log.Fatal("❌ Falló la conexión a Railway: ", err)
+		log.Fatal("❌ Falló la conexión a la base de datos: ", err)
 	}
-	fmt.Println("✅ Conectado exitosamente a PostgreSQL en Railway")
+	fmt.Println("✅ Conexión a PostgreSQL establecida.")
 
-	// Migración automática
+	// Migración automática (Crea la tabla si no existe)
 	db.AutoMigrate(&ContactoWeb{})
 
-	// 2. Configuración de Echo
+	// C. Inicializar Echo
 	e := echo.New()
 
-	// Registrar el validador personalizado
+	// Asignar Validador y Manejador de Errores
 	e.Validator = &CustomValidator{validator: validator.New()}
+	e.HTTPErrorHandler = customHTTPErrorHandler
 
-	// ---------------- MIDDLEWARES DE SEGURIDAD ----------------
+	// ---------------------------------------------------------
+	// 5. MIDDLEWARES (Capas de Seguridad)
+	// ---------------------------------------------------------
 
-	e.Use(middleware.Logger())
-	e.Use(middleware.Recover())
+	e.Use(middleware.Logger())  // Logs de peticiones
+	e.Use(middleware.Recover()) // Evita que el server se caiga por un panic
+	e.Use(middleware.Secure())  // Headers de seguridad (XSS, HSTS)
 
-	// A. Protección de Cabeceras (XSS, HSTS, Sniffing)
-	e.Use(middleware.Secure())
-
-	// B. Limite de tamaño del cuerpo (Evita ataques de carga masiva)
-	// Limita a 2KB para un formulario de texto simple
+	// Limita el cuerpo de la petición a 2KB (Suficiente para texto, evita ataques DoS)
 	e.Use(middleware.BodyLimit("2K"))
 
-	// C. CORS Estricto (Crucial para producción)
+	// Configuración CORS (Cross-Origin Resource Sharing)
 	allowOrigin := os.Getenv("FRONTEND_URL")
 	if allowOrigin == "" {
-		fmt.Println("⚠️ ADVERTENCIA: CORS permitido para todo (*). Configura FRONTEND_URL en producción.")
+		fmt.Println("⚠️ ADVERTENCIA: CORS abierto (*). Configura FRONTEND_URL en producción.")
+		allowOrigin = "*"
 	}
-
 	e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
 		AllowOrigins: []string{allowOrigin},
-		AllowMethods: []string{http.MethodPost}, // Solo permitimos POST para esta API
+		AllowMethods: []string{http.MethodPost, http.MethodGet},
 	}))
 
-	// D. Rate Limiter (Limita peticiones por IP)
-	// Permite 5 peticiones por segundo con una ráfaga de 10 (ajustar según necesidad)
-	// Para formularios de contacto, idealmente sería más lento (ej. 2 por minuto), pero este es un config general.
+	// Rate Limiter: 5 peticiones/segundo por IP (Protección anti-spam/DoS)
 	configRateLimit := middleware.RateLimiterConfig{
 		Skipper: middleware.DefaultSkipper,
 		Store: middleware.NewRateLimiterMemoryStoreWithConfig(
@@ -126,56 +159,65 @@ func main() {
 			return ctx.RealIP(), nil
 		},
 		ErrorHandler: func(context echo.Context, err error) error {
-			return context.JSON(http.StatusTooManyRequests, map[string]string{"error": "Demasiadas peticiones. Intenta más tarde."})
+			return context.JSON(http.StatusTooManyRequests, map[string]string{"error": "Demasiadas peticiones. Calma un poco."})
 		},
 		DenyHandler: func(context echo.Context, identifier string, err error) error {
-			return context.JSON(http.StatusTooManyRequests, map[string]string{"error": "Demasiadas peticiones. Intenta más tarde."})
+			return context.JSON(http.StatusTooManyRequests, map[string]string{"error": "Demasiadas peticiones."})
 		},
 	}
 	e.Use(middleware.RateLimiterWithConfig(configRateLimit))
 
-	// ---------------- RUTAS ----------------
+	// ---------------------------------------------------------
+	// 6. RUTAS
+	// ---------------------------------------------------------
 
+	// Servir archivos estáticos (Frontend: HTML, CSS, JS, Imágenes)
+	// Esto servirá index.html en la raíz "/"
 	e.Static("/", "public")
+
+	// Ruta API para el formulario
 	e.POST("/api/contacto", manejarContacto)
 
-	// ---------------- INICIO DEL SERVIDOR ----------------
+	// ---------------------------------------------------------
+	// 7. ARRANQUE DEL SERVIDOR
+	// ---------------------------------------------------------
 
 	port := os.Getenv("PORT")
 	if port == "" {
 		port = "8080"
 	}
+	// Asegurar formato ":8080"
 	if !strings.HasPrefix(port, ":") {
 		port = ":" + port
 	}
 
-	fmt.Println("🚀 Servidor iniciando en " + port)
+	fmt.Println("🚀 Servidor Veltrix corriendo en el puerto " + port)
 	e.Logger.Fatal(e.Start(port))
 }
 
-// ---------------- HANDLERS ----------------
+// ---------------------------------------------------------
+// 8. HANDLERS (Lógica de Negocio)
+// ---------------------------------------------------------
 
 func manejarContacto(c echo.Context) error {
 	req := new(ContactoRequest)
 
-	// 1. Binding (Parsear JSON)
+	// 1. Parsear JSON
 	if err := c.Bind(req); err != nil {
-		return c.JSON(http.StatusBadRequest, map[string]string{"error": "Formato de datos inválido"})
+		return c.JSON(http.StatusBadRequest, map[string]string{"error": "Formato JSON inválido"})
 	}
 
-	// 2. Validación Estricta (Estructura y reglas de negocio)
+	// 2. Validar Datos (Reglas del struct)
 	if err := c.Validate(req); err != nil {
-		// Retornamos el error de validación específico
 		return c.JSON(http.StatusBadRequest, map[string]string{"error": "Datos inválidos: " + err.Error()})
 	}
 
-	// 3. Validación ReCAPTCHA (Seguridad externa)
+	// 3. Verificar ReCAPTCHA con Google
 	if !validarCaptchaGoogle(req.RecaptchaToken) {
-		return c.JSON(http.StatusUnauthorized, map[string]string{"error": "Captcha inválido o expirado"})
+		return c.JSON(http.StatusUnauthorized, map[string]string{"error": "Verificación de seguridad fallida (Captcha)"})
 	}
 
-	// 4. Sanitización básica y creación del modelo
-	// (PostgreSQL/GORM manejan SQL Injection, pero limpiamos espacios extra)
+	// 4. Crear objeto para guardar (Sanitización básica)
 	nuevoContacto := ContactoWeb{
 		Nombre:    strings.TrimSpace(req.Nombre),
 		Email:     strings.TrimSpace(req.Email),
@@ -185,34 +227,34 @@ func manejarContacto(c echo.Context) error {
 		IpUsuario: c.RealIP(),
 	}
 
-	// 5. Guardado en BD
+	// 5. Guardar en Base de Datos
 	if result := db.Create(&nuevoContacto); result.Error != nil {
-		fmt.Println("Error DB:", result.Error)
-		return c.JSON(http.StatusInternalServerError, map[string]string{"error": "Error interno al procesar la solicitud"})
+		fmt.Println("❌ Error guardando en DB:", result.Error)
+		return c.JSON(http.StatusInternalServerError, map[string]string{"error": "Error interno del servidor"})
 	}
 
-	return c.JSON(http.StatusCreated, map[string]string{"mensaje": "Enviado correctamente"})
+	// 6. Responder éxito
+	return c.JSON(http.StatusCreated, map[string]string{"mensaje": "Solicitud recibida correctamente"})
 }
 
-// ---------------- HELPERS ----------------
+// ---------------------------------------------------------
+// 9. HELPERS
+// ---------------------------------------------------------
 
 func validarCaptchaGoogle(token string) bool {
 	secret := os.Getenv("RECAPTCHA_SECRET")
-	if token == "" || secret == "" {
-		// Loguear error de configuración si falta el secreto
-		if secret == "" {
-			fmt.Println("❌ Error: RECAPTCHA_SECRET no configurado")
-		}
-		return false
+	if secret == "" {
+		fmt.Println("❌ Error: RECAPTCHA_SECRET no está configurado en el .env")
+		return false // Falla segura si no hay configuración
 	}
 
-	client := &http.Client{Timeout: 10 * time.Second} // Timeout para evitar colgar la goroutine
+	client := &http.Client{Timeout: 10 * time.Second}
 	resp, err := client.PostForm("https://www.google.com/recaptcha/api/siteverify", map[string][]string{
 		"secret":   {secret},
 		"response": {token},
 	})
 	if err != nil {
-		fmt.Println("Error conectando a Google ReCAPTCHA:", err)
+		fmt.Println("Error conectando a Google:", err)
 		return false
 	}
 	defer resp.Body.Close()
