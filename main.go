@@ -3,6 +3,7 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"io"
 	"log"
 	"net/http"
 	"os"
@@ -21,6 +22,15 @@ import (
 // ---------------------------------------------------------
 // 1. MODELOS DE DATOS (STRUCTS)
 // ---------------------------------------------------------
+
+// Modelo para la tabla de imagenes usuarios(GORM)
+type ImagenUsuario struct {
+	ID        uint      `gorm:"primaryKey" json:"id"`
+	Nombre    string    `gorm:"type:varchar(255)" json:"nombre"`
+	Datos     []byte    `gorm:"type:bytea" json:"-"`              // Aquí se guarda la imagen binaria
+	MimeType  string    `gorm:"type:varchar(50)" json:"mimeType"` // ej: image/jpeg
+	CreatedAt time.Time `json:"fecha"`
+}
 
 // Modelo para la Base de Datos (GORM)
 type ContactoWeb struct {
@@ -118,7 +128,7 @@ func main() {
 	fmt.Println("✅ Conexión a PostgreSQL establecida.")
 
 	// Migración automática (Crea la tabla si no existe)
-	db.AutoMigrate(&ContactoWeb{})
+	db.AutoMigrate(&ContactoWeb{}, &ImagenUsuario{})
 
 	// C. Inicializar Echo
 	e := echo.New()
@@ -136,7 +146,7 @@ func main() {
 	e.Use(middleware.Secure())  // Headers de seguridad (XSS, HSTS)
 
 	// Limita el cuerpo de la petición a 2KB (Suficiente para texto, evita ataques DoS)
-	e.Use(middleware.BodyLimit("2K"))
+	e.Use(middleware.BodyLimit("2M"))
 
 	// Configuración CORS (Cross-Origin Resource Sharing)
 	allowOrigin := os.Getenv("FRONTEND_URL")
@@ -177,6 +187,9 @@ func main() {
 
 	// Ruta API para el formulario
 	e.POST("/api/contacto", manejarContacto)
+
+	// Ruta API para las imagenes
+	e.POST("/api/subir-imagen", subirImagen)
 
 	// ---------------------------------------------------------
 	// 7. ARRANQUE DEL SERVIDOR
@@ -264,4 +277,46 @@ func validarCaptchaGoogle(token string) bool {
 		return false
 	}
 	return googleResult.Success
+}
+
+// Pon esto al final, junto con tus otros handlers
+func subirImagen(c echo.Context) error {
+	// 1. Obtener el archivo del formulario (key: "imagen")
+	file, err := c.FormFile("imagen")
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, map[string]string{"error": "No se ha enviado ninguna imagen"})
+	}
+
+	// 2. Validar tamaño (Ejemplo: Máximo 2MB para no saturar la BD)
+	if file.Size > 2*1024*1024 {
+		return c.JSON(http.StatusBadRequest, map[string]string{"error": "La imagen es muy pesada (Máximo 2MB)"})
+	}
+
+	// 3. Abrir el archivo
+	src, err := file.Open()
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, map[string]string{"error": "Error al procesar el archivo"})
+	}
+	defer src.Close()
+
+	// 4. Leer los bytes (Binario)
+	fileBytes, err := io.ReadAll(src)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, map[string]string{"error": "Error al leer el archivo"})
+	}
+
+	// 5. Crear registro para la BD
+	nuevaImagen := ImagenUsuario{
+		Nombre:   file.Filename,
+		Datos:    fileBytes, // Guardamos el binario
+		MimeType: file.Header.Get("Content-Type"),
+	}
+
+	// 6. Guardar en Postgres
+	if result := db.Create(&nuevaImagen); result.Error != nil {
+		fmt.Println("Error DB:", result.Error)
+		return c.JSON(http.StatusInternalServerError, map[string]string{"error": "Error al guardar en la base de datos"})
+	}
+
+	return c.JSON(http.StatusCreated, map[string]string{"mensaje": "Imagen subida exitosamente"})
 }

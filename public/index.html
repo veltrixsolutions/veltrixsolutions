@@ -659,6 +659,42 @@
             </div>
         </div>
     </section>
+
+    <section id="galeria-upload" class="py-20 bg-slate-50 relative border-t border-gray-200">
+    <div class="max-w-4xl mx-auto px-4">
+        <div class="text-center mb-10">
+            <h2 class="text-brand-primary font-bold uppercase text-sm mb-3">Zona de Usuarios</h2>
+            <h3 class="text-3xl font-bold text-brand-dark">Comparte tu Diseño</h3>
+            <p class="text-gray-500 mt-2">Sube una imagen de referencia para tu proyecto (Max 2MB).</p>
+        </div>
+
+        <div class="bg-white p-8 rounded-3xl shadow-xl border border-gray-100 max-w-xl mx-auto">
+            <form id="uploadForm" class="space-y-6">
+                
+                <div class="relative group">
+                    <label for="imagenInput" class="flex flex-col items-center justify-center w-full h-64 border-2 border-dashed border-gray-300 rounded-2xl cursor-pointer bg-gray-50 hover:bg-gray-100 hover:border-brand-primary transition-all duration-300">
+                        
+                        <img id="previewImg" class="hidden w-full h-full object-contain rounded-2xl p-2" />
+                        
+                        <div id="uploadPlaceholder" class="flex flex-col items-center justify-center pt-5 pb-6 text-center px-4">
+                            <div class="w-16 h-16 bg-brand-primary/10 text-brand-primary rounded-full flex items-center justify-center text-2xl mb-4 group-hover:scale-110 transition-transform">
+                                <i class="fa-solid fa-cloud-arrow-up"></i>
+                            </div>
+                            <p class="mb-2 text-sm text-gray-500"><span class="font-semibold text-brand-primary">Clic para subir</span> o arrastra aquí</p>
+                            <p class="text-xs text-gray-400">PNG, JPG o JPEG (MAX. 2MB)</p>
+                        </div>
+
+                        <input id="imagenInput" type="file" class="hidden" accept="image/png, image/jpeg, image/jpg" />
+                    </label>
+                </div>
+
+                <button type="submit" id="btnUpload" class="w-full py-4 rounded-xl bg-brand-dark text-white font-bold text-lg shadow-lg hover:shadow-xl hover:bg-brand-primary transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2">
+                    <i class="fa-solid fa-save"></i> Guardar Imagen
+                </button>
+            </form>
+        </div>
+    </div>
+</section>
     
 
 <section id="contacto" class="relative py-24 bg-brand-dark border-t border-white/5 overflow-hidden">
@@ -1179,6 +1215,96 @@
                 numRestante.className = "text-white";
                 barMsg.classList.remove('bg-red-500', 'bg-yellow-400');
                 barMsg.classList.add('bg-brand-primary');
+            }
+        });
+    }
+
+
+    //Imagnes subida 
+    // ELEMENTOS
+    const uploadForm = document.getElementById('uploadForm');
+    const imagenInput = document.getElementById('imagenInput');
+    const previewImg = document.getElementById('previewImg');
+    const uploadPlaceholder = document.getElementById('uploadPlaceholder');
+    const btnUpload = document.getElementById('btnUpload');
+
+    // 1. LÓGICA DE VISTA PREVIA
+    if(imagenInput) {
+        imagenInput.addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                // Validar tipo
+                if(!file.type.startsWith('image/')) {
+                    Swal.fire({ icon: 'error', title: 'Error', text: 'Por favor selecciona solo imágenes.', background: '#0B0F19', color: '#fff' });
+                    this.value = ''; // Limpiar
+                    return;
+                }
+
+                // Mostrar Preview
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    previewImg.src = e.target.result;
+                    previewImg.classList.remove('hidden');
+                    uploadPlaceholder.classList.add('hidden');
+                }
+                reader.readAsDataURL(file);
+            }
+        });
+    }
+
+    // 2. ENVÍO AL BACKEND (Go)
+    if(uploadForm) {
+        uploadForm.addEventListener('submit', async function(e) {
+            e.preventDefault();
+
+            const file = imagenInput.files[0];
+            if (!file) {
+                Swal.fire({ icon: 'warning', title: 'Falta imagen', text: 'Selecciona una imagen primero.', background: '#0B0F19', color: '#fff' });
+                return;
+            }
+
+            // Crear FormData (Necesario para enviar archivos)
+            const formData = new FormData();
+            formData.append('imagen', file); // 'imagen' debe coincidir con c.FormFile("imagen") en Go
+
+            // UI Loading
+            const originalText = btnUpload.innerHTML;
+            btnUpload.disabled = true;
+            btnUpload.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Subiendo...';
+
+            try {
+                const response = await fetch('/api/subir-imagen', {
+                    method: 'POST',
+                    body: formData // No usamos JSON.stringify aquí
+                });
+
+                const result = await response.json();
+
+                if (!response.ok) throw new Error(result.error || 'Error al subir');
+
+                // Éxito
+                Swal.fire({
+                    icon: 'success',
+                    title: '¡Guardado!',
+                    text: 'La imagen se guardó en la base de datos correctamente.',
+                    background: '#0B0F19', color: '#fff', confirmButtonColor: '#6366f1'
+                });
+
+                // Resetear form
+                uploadForm.reset();
+                previewImg.classList.add('hidden');
+                uploadPlaceholder.classList.remove('hidden');
+
+            } catch (error) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: error.message,
+                    background: '#0B0F19', color: '#fff'
+                });
+            } finally {
+                btnUpload.disabled = false;
+                btnUpload.innerHTML = originalText;
             }
         });
     }
