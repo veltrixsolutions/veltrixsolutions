@@ -1000,15 +1000,16 @@
 
     <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
-<script>
+
+   <script>
     // ------------------------------------------------------
-    // 1. INICIALIZACIÓN DE ANIMACIONES Y UI
+    // 1. INICIALIZACIÓN GLOBAL Y UI
     // ------------------------------------------------------
     
-    // Iniciar AOS
+    // Iniciar AOS (Animaciones)
     AOS.init({ duration: 800, once: true, offset: 100 });
 
-    // Navbar Logic
+    // Lógica del Navbar (Sombra al hacer scroll)
     window.addEventListener('scroll', () => {
         const nav = document.getElementById('navbar');
         if (window.scrollY > 50) {
@@ -1020,159 +1021,172 @@
         }
     });
 
-    // Mobile Menu Logic
+    // Menú Móvil
     const btn = document.getElementById('mobile-menu-btn');
     const menu = document.getElementById('mobile-menu');
     const links = document.querySelectorAll('.mobile-link');
 
-    btn.addEventListener('click', () => {
-        menu.classList.toggle('hidden');
-        menu.classList.toggle('flex');
-    });
-
-    links.forEach(link => {
-        link.addEventListener('click', () => {
-            menu.classList.add('hidden');
-            menu.classList.remove('flex');
+    if(btn && menu) {
+        btn.addEventListener('click', () => {
+            menu.classList.toggle('hidden');
+            menu.classList.toggle('flex');
         });
-    });
 
-    // ------------------------------------------------------
-    // 2. LÓGICA DE BREADCRUMBS (MIGAS DE PAN)
-    // ------------------------------------------------------
-    const sections = document.querySelectorAll('section');
-    const breadcrumbContainer = document.getElementById('breadcrumbs-container');
-    const breadcrumbCurrent = document.getElementById('breadcrumb-current');
-
-    const observerOptions = {
-        root: null,
-        rootMargin: '-50% 0px -50% 0px', // Detecta cuando la sección está en el centro
-        threshold: 0
-    };
-
-    const observer = new IntersectionObserver((entries) => {
-        entries.forEach(entry => {
-            if (entry.isIntersecting) {
-                const sectionId = entry.target.id;
-                
-                // Si estamos en Inicio, ocultamos breadcrumbs. Si no, mostramos.
-                if(sectionId === 'inicio') {
-                    breadcrumbContainer.classList.add('-translate-y-full', 'opacity-0');
-                } else {
-                    breadcrumbContainer.classList.remove('-translate-y-full', 'opacity-0');
-                    // Actualizar texto
-                    breadcrumbCurrent.textContent = sectionId.charAt(0).toUpperCase() + sectionId.slice(1);
-                    breadcrumbCurrent.classList.add('animate-pulse');
-                    setTimeout(() => breadcrumbCurrent.classList.remove('animate-pulse'), 500);
-                }
-            }
-        });
-    }, observerOptions);
-
-    sections.forEach(section => {
-        observer.observe(section);
-    });
-
-
-    // ------------------------------------------------------
-    // 3. VALIDACIÓN DE FORMULARIO VISUAL (CORREGIDO)
-    // ------------------------------------------------------
-
-    const inputNombre = document.getElementById('nombre');
-    const barNombre = document.getElementById('bar-nombre'); // Barra visual
-    const countNombre = document.getElementById('count-nombre'); // Texto contador
-
-    const inputTel = document.getElementById('telefono');
-    const countTel = document.getElementById('count-telefono');
-
-    const inputMensaje = document.getElementById('mensaje');
-    const barMensaje = document.getElementById('bar-mensaje'); // Barra visual
-    const txtMensaje = document.getElementById('txt-mensaje'); // Contenedor texto
-    const numRestante = document.getElementById('num-restante'); // Número restante
-
-    // A. Nombre: Barra de progreso + Contador (Max 50)
-    if (inputNombre && countNombre && barNombre) {
-        inputNombre.addEventListener('input', function() {
-            const max = 50;
-            const current = this.value.length;
-            const percentage = (current / max) * 100;
-
-            // Actualizar texto
-            countNombre.textContent = `${current}/${max}`;
-            
-            // Actualizar ancho de la barra visual
-            barNombre.style.width = `${percentage}%`;
-
-            // Cambiar color si se acerca al límite
-            if(percentage > 90) {
-                barNombre.classList.remove('bg-brand-secondary');
-                barNombre.classList.add('bg-red-500');
-                countNombre.classList.add('text-red-400');
-            } else {
-                barNombre.classList.add('bg-brand-secondary');
-                barNombre.classList.remove('bg-red-500');
-                countNombre.classList.remove('text-red-400');
-            }
-        });
-    }
-
-    // B. Teléfono: Solo números + Max 10 dígitos
-    if (inputTel && countTel) {
-        inputTel.addEventListener('input', function() {
-            // Eliminar cualquier caracter que no sea número
-            this.value = this.value.replace(/[^0-9]/g, '');
-            
-            const current = this.value.length;
-            countTel.textContent = `${current}/10`;
-
-            // Validación visual simple
-            if(current === 10) {
-                countTel.classList.replace('text-slate-500', 'text-green-400');
-                countTel.classList.replace('bg-white/5', 'bg-green-500/20');
-            } else {
-                countTel.classList.replace('text-green-400', 'text-slate-500');
-                countTel.classList.replace('bg-green-500/20', 'bg-white/5');
-            }
-        });
-    }
-
-    // C. Mensaje: Barra de progreso + Restantes (Max 100)
-    if (inputMensaje && numRestante && barMensaje) {
-        inputMensaje.addEventListener('input', function() {
-            const max = 100;
-            const current = this.value.length;
-            const remaining = max - current;
-            const percentage = (current / max) * 100;
-
-            // Actualizar número restante
-            numRestante.textContent = remaining;
-
-            // Actualizar ancho de la barra visual
-            barMensaje.style.width = `${percentage}%`;
-
-            // Lógica de colores (Amarillo al 80%, Rojo al 100%)
-            if (remaining < 10) {
-                numRestante.classList.add('text-red-500', 'font-bold');
-                barMensaje.classList.remove('bg-brand-primary');
-                barMensaje.classList.add('bg-red-500');
-            } else if (remaining < 30) {
-                numRestante.classList.remove('text-red-500');
-                numRestante.classList.add('text-yellow-400');
-                barMensaje.classList.remove('bg-brand-primary', 'bg-red-500');
-                barMensaje.classList.add('bg-yellow-400');
-            } else {
-                numRestante.classList.remove('text-red-500', 'text-yellow-400');
-                barMensaje.classList.remove('bg-red-500', 'bg-yellow-400');
-                barMensaje.classList.add('bg-brand-primary');
-            }
+        links.forEach(link => {
+            link.addEventListener('click', () => {
+                menu.classList.add('hidden');
+                menu.classList.remove('flex');
+            });
         });
     }
 
     // ------------------------------------------------------
-    // 4. GALERÍA SWIPER (MANTENIDA DEL ORIGINAL)
+    // 2. LÓGICA DE BREADCRUMBS (INTEGRACIÓN NUEVA)
     // ------------------------------------------------------
     document.addEventListener('DOMContentLoaded', () => {
-        // Inicializar Swiper
+        const breadcrumbContainer = document.getElementById('breadcrumbs-container');
+        const breadcrumbCurrent = document.getElementById('breadcrumb-current');
+        const sections = document.querySelectorAll('section');
+
+        // Configuración del observador
+        const observerOptions = {
+            root: null,
+            threshold: 0.2, // Se activa cuando el 20% de la sección es visible
+            rootMargin: "-10% 0px -50% 0px" // Ajuste para detectar mejor el centro de pantalla
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    const id = entry.target.id;
+                    
+                    // Si estamos en el inicio, ocultar breadcrumbs
+                    if (id === 'inicio') {
+                        breadcrumbContainer.classList.add('-translate-y-full', 'opacity-0');
+                    } else {
+                        // Mostrar breadcrumbs y actualizar texto
+                        breadcrumbContainer.classList.remove('-translate-y-full', 'opacity-0');
+                        // Capitalizar primera letra
+                        const nombreSeccion = id.charAt(0).toUpperCase() + id.slice(1);
+                        breadcrumbCurrent.textContent = nombreSeccion;
+                        
+                        // Pequeña animación de texto
+                        breadcrumbCurrent.classList.remove('animate-pulse');
+                        void breadcrumbCurrent.offsetWidth; // Trigger reflow
+                        breadcrumbCurrent.classList.add('animate-pulse');
+                    }
+                }
+            });
+        }, observerOptions);
+
+        sections.forEach(section => observer.observe(section));
+    });
+
+    // ------------------------------------------------------
+    // 3. VALIDACIÓN VISUAL DE FORMULARIO (CORREGIDO)
+    // ------------------------------------------------------
+    document.addEventListener('DOMContentLoaded', () => {
+        
+        // Elementos: Nombre
+        const inputNombre = document.getElementById('nombre');
+        const barNombre = document.getElementById('bar-nombre');
+        const countNombre = document.getElementById('count-nombre');
+
+        // Elementos: Teléfono
+        const inputTel = document.getElementById('telefono');
+        const countTel = document.getElementById('count-telefono');
+
+        // Elementos: Mensaje
+        const inputMensaje = document.getElementById('mensaje');
+        const barMensaje = document.getElementById('bar-mensaje');
+        const numRestante = document.getElementById('num-restante');
+        const txtMensaje = document.getElementById('txt-mensaje');
+
+        // A. Lógica Nombre (Progreso y Límite)
+        if (inputNombre && barNombre && countNombre) {
+            inputNombre.addEventListener('input', function() {
+                const max = 50;
+                const actual = this.value.length;
+                const porcentaje = (actual / max) * 100;
+
+                countNombre.textContent = `${actual}/${max}`;
+                barNombre.style.width = `${porcentaje}%`;
+
+                if (actual >= max) {
+                    countNombre.classList.add('text-red-400', 'font-bold');
+                    barNombre.classList.remove('bg-brand-secondary');
+                    barNombre.classList.add('bg-red-500');
+                } else {
+                    countNombre.classList.remove('text-red-400', 'font-bold');
+                    barNombre.classList.add('bg-brand-secondary');
+                    barNombre.classList.remove('bg-red-500');
+                }
+            });
+        }
+
+        // B. Lógica Teléfono (Solo números y longitud exacta)
+        if (inputTel && countTel) {
+            inputTel.addEventListener('input', function() {
+                // Eliminar no numéricos
+                this.value = this.value.replace(/[^0-9]/g, '');
+                
+                const actual = this.value.length;
+                countTel.textContent = `${actual}/10`;
+
+                if (actual === 10) {
+                    countTel.classList.remove('text-slate-500');
+                    countTel.classList.add('text-green-400', 'font-bold');
+                    countTel.classList.replace('bg-white/5', 'bg-green-500/20');
+                } else {
+                    countTel.classList.add('text-slate-500');
+                    countTel.classList.remove('text-green-400', 'font-bold');
+                    countTel.classList.replace('bg-green-500/20', 'bg-white/5');
+                }
+            });
+        }
+
+        // C. Lógica Mensaje (Cuenta regresiva y barra dinámica)
+        if (inputMensaje && barMensaje && numRestante) {
+            inputMensaje.addEventListener('input', function() {
+                const max = 100;
+                const actual = this.value.length;
+                const restantes = max - actual;
+                const porcentaje = (actual / max) * 100;
+
+                numRestante.textContent = restantes;
+                barMensaje.style.width = `${porcentaje}%`;
+
+                // Colores según estado
+                barMensaje.className = "h-full w-0 transition-all duration-300"; // Reset base classes
+                
+                if (restantes < 10) {
+                    // Crítico (Rojo)
+                    barMensaje.classList.add('bg-red-500');
+                    numRestante.classList.add('text-red-500', 'font-bold');
+                    txtMensaje.classList.remove('text-slate-400');
+                } else if (restantes < 30) {
+                    // Advertencia (Amarillo)
+                    barMensaje.classList.add('bg-yellow-400');
+                    numRestante.classList.remove('text-red-500', 'font-bold');
+                    numRestante.classList.add('text-yellow-400');
+                    txtMensaje.classList.remove('text-slate-400');
+                } else {
+                    // Normal (Primary)
+                    barMensaje.classList.add('bg-brand-primary');
+                    numRestante.classList.remove('text-red-500', 'text-yellow-400', 'font-bold');
+                    numRestante.classList.add('text-white');
+                    txtMensaje.classList.add('text-slate-400');
+                }
+            });
+        }
+    });
+
+    // ------------------------------------------------------
+    // 4. GALERÍA Y SUBIDA DE IMÁGENES (LÓGICA ORIGINAL)
+    // ------------------------------------------------------
+    document.addEventListener('DOMContentLoaded', () => {
+        
+        // 4.1 Inicializar Swiper
         const swiper = new Swiper(".mySwiper", {
             slidesPerView: 1,
             spaceBetween: 20,
@@ -1189,15 +1203,188 @@
             },
         });
 
-        // (Aquí iría tu lógica original de fetch de galería y upload)
-        // He omitido el código largo de fetch/upload para simplificar, 
-        // pero asegúrate de mantenerlo si ya lo tenías funcional.
+        // 4.2 Cargar Galería (Fetch)
+        async function cargarGaleria() {
+            const container = document.getElementById('galeria-container');
+            if(!container) return;
+
+            try {
+                const response = await fetch('/api/proyectos');
+                const proyectos = await response.json();
+
+                if(proyectos && proyectos.length > 0) {
+                    container.innerHTML = ''; 
+                    proyectos.forEach(proy => {
+                        const slide = document.createElement('div');
+                        slide.className = 'swiper-slide relative group overflow-hidden rounded-2xl';
+                        slide.innerHTML = `
+                            <img src="${proy.imagenUrl}" alt="${proy.titulo}" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110">
+                            <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-end p-6">
+                                <span class="text-brand-accent text-xs font-bold uppercase mb-1">${proy.categoria || 'Proyecto'}</span>
+                                <h5 class="text-white font-bold text-lg">${proy.titulo || 'Sin Título'}</h5>
+                            </div>
+                        `;
+                        container.append(slide);
+                    });
+                    swiper.update();
+                } else {
+                    container.innerHTML = '<div class="flex items-center justify-center h-full w-full text-gray-400 p-10">Sin imágenes disponibles</div>';
+                }
+            } catch (error) {
+                console.error("Error al cargar galería (API no disponible en demo):", error);
+                // Fallback visual para demo
+                container.innerHTML = '<div class="swiper-slide bg-gray-800 rounded-2xl flex items-center justify-center text-gray-500">API Demo Mode</div>';
+            }
+        }
+        cargarGaleria();
+
+        // 4.3 Subida de Imágenes
+        const fileInput = document.getElementById('imagenInput');
+        const previewImg = document.getElementById('previewImg');
+        const uploadPlaceholder = document.getElementById('uploadPlaceholder');
+        const uploadForm = document.getElementById('uploadForm');
+        const btnUpload = document.getElementById('btnUpload');
+
+        if (fileInput) {
+            fileInput.addEventListener('change', function() {
+                const file = this.files[0];
+                if (file) {
+                    if (file.size > 2 * 1024 * 1024) { // 2MB
+                        Swal.fire({ icon: 'error', title: 'Muy pesado', text: 'Máximo 2MB', confirmButtonColor: '#0B0F19' });
+                        this.value = '';
+                        return;
+                    }
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        previewImg.src = e.target.result;
+                        previewImg.classList.remove('hidden');
+                        uploadPlaceholder.classList.add('opacity-0');
+                    }
+                    reader.readAsDataURL(file);
+                }
+            });
+        }
+
+        if (uploadForm) {
+            uploadForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const file = fileInput.files[0];
+                if (!file) {
+                    Swal.fire({ icon: 'warning', title: 'Falta imagen', text: 'Selecciona una imagen primero.', confirmButtonColor: '#0B0F19' });
+                    return;
+                }
+
+                const formData = new FormData();
+                formData.append('imagen', file);
+                const originalText = btnUpload.innerHTML;
+                btnUpload.disabled = true;
+                btnUpload.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Subiendo...';
+
+                try {
+                    const res = await fetch('/api/upload', { method: 'POST', body: formData });
+                    if (!res.ok) throw new Error('Error al subir');
+                    
+                    Swal.fire({ icon: 'success', title: '¡Subido!', text: 'Agregado a la galería.', confirmButtonColor: '#6366f1' });
+                    uploadForm.reset();
+                    previewImg.classList.add('hidden');
+                    uploadPlaceholder.classList.remove('opacity-0');
+                    cargarGaleria();
+                } catch (err) {
+                    Swal.fire({ icon: 'error', title: 'Error', text: 'Fallo al conectar con servidor.', confirmButtonColor: '#0B0F19' });
+                } finally {
+                    btnUpload.disabled = false;
+                    btnUpload.innerHTML = originalText;
+                }
+            });
+        }
     });
 
     // ------------------------------------------------------
-    // 5. ENVÍO DE FORMULARIO
+    // 5. ENVÍO DE CONTACTO (VALIDACIÓN FINAL Y FETCH)
     // ------------------------------------------------------
-    // Mismo código de envío que tenías, no requiere cambios de lógica,
-    // ya que la validación HTML (maxlength) y JS previene datos erróneos.
+    const contactForm = document.getElementById('contactForm');
+    const submitBtn = document.getElementById('submitBtn');
+    const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
 
+    if (contactForm) {
+        contactForm.addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            // Referencias a inputs
+            const inNombre = document.getElementById('nombre');
+            const inEmail = document.getElementById('email');
+            const inTel = document.getElementById('telefono');
+            const inServicio = document.getElementById('servicio');
+            const inMensaje = document.getElementById('mensaje');
+
+            // 1. Validar Email
+            if (!emailRegex.test(inEmail.value)) {
+                Swal.fire({ icon: 'warning', title: 'Correo inválido', text: 'Verifica el formato del correo.', background: '#0B0F19', color: '#fff', confirmButtonColor: '#6366f1' });
+                return;
+            }
+
+            // 2. Validar Teléfono (Longitud)
+            if (inTel.value.length !== 10) {
+                Swal.fire({ icon: 'warning', title: 'Teléfono incompleto', text: 'El número debe tener 10 dígitos exactos.', background: '#0B0F19', color: '#fff', confirmButtonColor: '#6366f1' });
+                return;
+            }
+
+            // 3. Validar Captcha
+            const recaptchaToken = grecaptcha.getResponse();
+            if (recaptchaToken.length === 0) {
+                Swal.fire({ icon: 'warning', title: 'Verificación requerida', text: 'Confirma que no eres un robot.', background: '#0B0F19', color: '#fff', confirmButtonColor: '#6366f1' });
+                return;
+            }
+
+            // Preparar envío
+            const formData = {
+                nombre: inNombre.value.trim(),
+                email: inEmail.value.trim(),
+                telefono: inTel.value,
+                servicio: inServicio.value,
+                mensaje: inMensaje.value.trim(),
+                recaptchaToken: recaptchaToken
+            };
+
+            // UI Loading
+            const originalBtnText = submitBtn.innerHTML;
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Enviando...';
+
+            try {
+                const response = await fetch('/api/contacto', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(formData)
+                });
+                
+                const result = await response.json();
+                if (!response.ok) throw new Error(result.error || 'Error del servidor');
+
+                // Éxito
+                Swal.fire({ icon: 'success', title: '¡Enviado!', text: 'Te contactaremos pronto.', background: '#0B0F19', color: '#fff', confirmButtonColor: '#6366f1' });
+                
+                // Reset Total
+                contactForm.reset();
+                grecaptcha.reset();
+                
+                // Reset Barras Visuales
+                document.getElementById('bar-nombre').style.width = '0%';
+                document.getElementById('count-nombre').textContent = '0/50';
+                
+                document.getElementById('count-telefono').textContent = '0/10';
+                document.getElementById('count-telefono').classList.remove('text-green-400', 'font-bold');
+                
+                document.getElementById('bar-mensaje').style.width = '0%';
+                document.getElementById('num-restante').textContent = '100';
+                document.getElementById('bar-mensaje').className = 'h-full bg-brand-primary w-0 transition-all duration-300';
+
+            } catch (error) {
+                Swal.fire({ icon: 'error', title: 'Error', text: error.message, background: '#0B0F19', color: '#fff', confirmButtonColor: '#ef4444' });
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = originalBtnText;
+            }
+        });
+    }
 </script>
