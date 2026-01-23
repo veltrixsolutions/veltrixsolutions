@@ -49,15 +49,8 @@
     </script>
 
     <style>
-        html { scroll-padding-top: 120px; }
         .swiper-pagination-bullet-active { background-color: #6366f1 !important; }
         .swiper-button-next, .swiper-button-prev { color: #6366f1 !important; }
-
-        .breadcrumb-enter { animation: fadeInRight 0.5s ease-out; }
-        @keyframes fadeInRight {
-            from { opacity: 0; transform: translateX(-10px); }
-            to { opacity: 1; transform: translateX(0); }
-        }
 
         .bg-grid {
             background-size: 40px 40px;
@@ -155,18 +148,6 @@
             </a>
         </div>
     </nav>
-
-<div id="breadcrumbs-container" class="fixed top-20 left-0 w-full z-40 bg-brand-dark/95 border-b border-white/5 py-2 px-4 backdrop-blur-md transition-all duration-300 transform -translate-y-full opacity-0 shadow-lg">
-    <div class="max-w-7xl mx-auto text-xs font-mono flex items-center gap-2">
-        <a href="#inicio" class="text-slate-500 hover:text-brand-primary transition-colors">
-            <i class="fa-solid fa-house"></i> Inicio
-        </a>
-        <span class="text-slate-600">/</span>
-        <span id="breadcrumb-current" class="text-brand-primary font-bold uppercase tracking-wider">
-            </span>
-    </div>
-</div>
-
     <section id="inicio" class="relative pt-32 pb-16 lg:pt-48 lg:pb-32 overflow-hidden bg-brand-dark border-b border-white/5">
         <div class="absolute inset-0 bg-grid opacity-20"></div>
         <div class="absolute top-20 right-0 w-[200px] sm:w-[300px] md:w-[500px] h-[300px] md:h-[500px] bg-brand-primary/20 rounded-full blur-[100px] -z-10"></div>
@@ -1002,7 +983,7 @@
     <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
 
    <script>
-  // ------------------------------------------------------
+        // ------------------------------------------------------
         // 1. INICIALIZACIÓN DE ANIMACIONES Y UI
         // ------------------------------------------------------
         
@@ -1039,172 +1020,53 @@
         });
 
         // ------------------------------------------------------
-        // 2. GALERÍA SWIPER Y CARGA DE IMÁGENES
+        // 2. VALIDACIÓN EN TIEMPO REAL (Visualización Dinámica)
         // ------------------------------------------------------
 
-        document.addEventListener('DOMContentLoaded', () => {
-            
-            // A. Inicializar Swiper
-            const swiper = new Swiper(".mySwiper", {
-                slidesPerView: 1,
-                spaceBetween: 20,
-                loop: true,
-                autoplay: { delay: 4000, disableOnInteraction: false },
-                pagination: { el: ".swiper-pagination", clickable: true },
-                navigation: {
-                    nextEl: ".swiper-next-btn",
-                    prevEl: ".swiper-prev-btn",
-                },
-                breakpoints: {
-                    640: { slidesPerView: 2, spaceBetween: 20 }, // Tablet
-                    1024: { slidesPerView: 2.5, spaceBetween: 20 }, // Desktop
-                },
-            });
-
-            // B. Función para cargar imágenes desde el backend
-            async function cargarGaleria() {
-                const container = document.getElementById('galeria-container');
-                try {
-                    const response = await fetch('/api/proyectos');
-                    const proyectos = await response.json();
-
-                    if(proyectos && proyectos.length > 0) {
-                        container.innerHTML = ''; // Limpiar loader
-                        proyectos.forEach(proy => {
-                            const slide = document.createElement('div');
-                            slide.className = 'swiper-slide relative group overflow-hidden rounded-2xl';
-                            slide.innerHTML = `
-                                <img src="${proy.imagenUrl}" alt="${proy.titulo}" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110">
-                                <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-end p-6">
-                                    <span class="text-brand-accent text-xs font-bold uppercase mb-1">${proy.categoria}</span>
-                                    <h5 class="text-white font-bold text-lg">${proy.titulo}</h5>
-                                </div>
-                            `;
-                            container.append(slide);
-                        });
-                        swiper.update(); // Actualizar Swiper
-                    } else {
-                        container.innerHTML = '<div class="flex items-center justify-center h-full w-full text-gray-400">Sin imágenes aún</div>';
-                    }
-                } catch (error) {
-                    console.error("Error al cargar galería:", error);
-                }
-            }
-
-            // Cargar galería al inicio
-            cargarGaleria();
-
-            // C. Lógica de subida de imagen
-            const fileInput = document.getElementById('imagenInput');
-            const previewImg = document.getElementById('previewImg');
-            const uploadPlaceholder = document.getElementById('uploadPlaceholder');
-            const uploadForm = document.getElementById('uploadForm');
-            const btnUpload = document.getElementById('btnUpload');
-
-            // Preview
-            if (fileInput) {
-                fileInput.addEventListener('change', function() {
-                    const file = this.files[0];
-                    if (file) {
-                        if (file.size > 2 * 1024 * 1024) { // 2MB
-                            Swal.fire({ icon: 'error', title: 'Muy pesado', text: 'La imagen debe pesar menos de 2MB', confirmButtonColor: '#0B0F19' });
-                            this.value = '';
-                            return;
-                        }
-                        const reader = new FileReader();
-                        reader.onload = function(e) {
-                            previewImg.src = e.target.result;
-                            previewImg.classList.remove('hidden');
-                            uploadPlaceholder.classList.add('opacity-0');
-                        }
-                        reader.readAsDataURL(file);
-                    }
-                });
-            }
-
-            // Subir imagen
-            if (uploadForm) {
-                uploadForm.addEventListener('submit', async (e) => {
-                    e.preventDefault();
-                    const file = fileInput.files[0];
-                    
-                    if (!file) {
-                        Swal.fire({ icon: 'warning', title: 'Falta imagen', text: 'Selecciona una imagen primero.', confirmButtonColor: '#0B0F19' });
-                        return;
-                    }
-
-                    const formData = new FormData();
-                    formData.append('imagen', file);
-
-                    const originalText = btnUpload.innerHTML;
-                    btnUpload.disabled = true;
-                    btnUpload.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Subiendo...';
-
-                    try {
-                        const res = await fetch('/api/upload', {
-                            method: 'POST',
-                            body: formData
-                        });
-
-                        if (!res.ok) throw new Error('Error al subir');
-
-                        Swal.fire({ 
-                            icon: 'success', 
-                            title: '¡Subido!', 
-                            text: 'Tu diseño se ha agregado a la galería.',
-                            confirmButtonColor: '#6366f1' 
-                        });
-
-                        uploadForm.reset();
-                        previewImg.classList.add('hidden');
-                        uploadPlaceholder.classList.remove('opacity-0');
-                        cargarGaleria(); // Recargar carrusel
-
-                    } catch (err) {
-                        Swal.fire({ icon: 'error', title: 'Error', text: 'No se pudo subir la imagen.', confirmButtonColor: '#0B0F19' });
-                    } finally {
-                        btnUpload.disabled = false;
-                        btnUpload.innerHTML = originalText;
-                    }
-                });
-            }
-        });
-
-        // ------------------------------------------------------
-        // 3. VALIDACIÓN DE FORMULARIO DE CONTACTO EN TIEMPO REAL
-        // ------------------------------------------------------
-
+        // Elementos del DOM
         const inputNombre = document.getElementById('nombre');
-        const countNombre = document.getElementById('count-nombre');
+        const countNombre = document.getElementById('count-nombre'); // ID del contador de nombre
+        
         const inputTel = document.getElementById('telefono');
+        
         const inputMensaje = document.getElementById('mensaje');
-        const countMensaje = document.getElementById('contador-mensaje');
-        const inputEmail = document.getElementById('email'); // Nuevo para email
+        const countMensaje = document.getElementById('contador-mensaje'); // ID del contador de mensaje
 
-        // A. Nombre: Contador
+        // A. NOMBRE: Contador simple (0/50)
+        // Se actualiza cada vez que el usuario escribe
         if (inputNombre && countNombre) {
             inputNombre.addEventListener('input', function() {
                 const actual = this.value.length;
                 countNombre.textContent = `${actual}/50`;
-                if(actual === 50) countNombre.classList.add('text-red-400'); 
-                else countNombre.classList.remove('text-red-400'); 
+                
+                // Color rojo si llega al límite
+                if(actual === 50) { 
+                    countNombre.classList.add('text-red-400'); 
+                } else { 
+                    countNombre.classList.remove('text-red-400'); 
+                }
             });
         }
 
-        // B. Teléfono: Solo números
+        // B. TELÉFONO: Filtro estricto (Solo números)
+        // Si el usuario intenta escribir letras, se borran instantáneamente
         if (inputTel) {
             inputTel.addEventListener('input', function() {
                 this.value = this.value.replace(/[^0-9]/g, '');
             });
         }
 
-        // C. Mensaje: Contador
+        // C. MENSAJE: Contador avanzado (Escritos vs Restantes)
         if (inputMensaje && countMensaje) {
             inputMensaje.addEventListener('input', function() {
-                const max = 100;
+                const max = 100; // Límite estricto solicitado
                 const actual = this.value.length;
                 const restantes = max - actual;
+                
+                // Actualizar texto del contador
                 countMensaje.textContent = `${actual} / ${max} (Quedan: ${restantes})`;
+
+                // Cambiar estilo visual cuando quedan pocos caracteres (Alerta visual)
                 if (restantes < 10) {
                     countMensaje.classList.replace('text-brand-secondary', 'text-red-400');
                     countMensaje.classList.replace('bg-brand-primary/10', 'bg-red-500/10');
@@ -1218,32 +1080,18 @@
         }
 
         // ------------------------------------------------------
-        // 4. LÓGICA DE ENVÍO DE CONTACTO
+        // 3. LÓGICA DE ENVÍO DEL FORMULARIO (Fetch API)
         // ------------------------------------------------------
 
         const contactForm = document.getElementById('contactForm');
         const submitBtn = document.getElementById('submitBtn');
 
-        // Regex robusto para validar email
-        // Debe tener texto + @ + texto + . + extensión de 2 o más letras
-        const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
-
         if (contactForm) {
             contactForm.addEventListener('submit', async function(e) {
-                e.preventDefault();
+                e.preventDefault(); // Evitar recarga de página
 
-                // 1. Validar Email
-                if (!emailRegex.test(inputEmail.value)) {
-                    Swal.fire({
-                        icon: 'warning',
-                        title: 'Correo inválido',
-                        text: 'Por favor, ingresa un correo electrónico válido (ej: nombre@dominio.com).',
-                        background: '#0B0F19', color: '#fff', confirmButtonColor: '#6366f1'
-                    });
-                    return;
-                }
-
-                // 2. Validar Teléfono (Longitud exacta)
+                // VALIDACIÓN 1: Longitud exacta del teléfono
+                // Aunque HTML tiene maxlength, esto asegura que no envíen números incompletos (ej: "55")
                 if (inputTel.value.length !== 10) {
                     Swal.fire({
                         icon: 'warning',
@@ -1251,10 +1099,10 @@
                         text: 'El número debe tener exactamente 10 dígitos.',
                         background: '#0B0F19', color: '#fff', confirmButtonColor: '#6366f1'
                     });
-                    return;
+                    return; // Detener envío
                 }
 
-                // 3. Validar Captcha
+                // VALIDACIÓN 2: ReCAPTCHA
                 const recaptchaToken = grecaptcha.getResponse();
                 if (recaptchaToken.length === 0) {
                     Swal.fire({
@@ -1263,25 +1111,26 @@
                         text: 'Por favor, marca la casilla "No soy un robot".',
                         background: '#0B0F19', color: '#fff', confirmButtonColor: '#6366f1'
                     });
-                    return;
+                    return; // Detener envío
                 }
 
-                // Preparar datos
+                // PREPARACIÓN DE DATOS
                 const formData = {
                     nombre: inputNombre.value.trim(),
-                    email: inputEmail.value.trim(),
-                    telefono: inputTel.value,
+                    email: document.getElementById('email').value.trim(),
+                    telefono: inputTel.value, // Ya va limpio gracias al evento input
                     servicio: document.getElementById('servicio').value,
                     mensaje: inputMensaje.value.trim(),
                     recaptchaToken: recaptchaToken
                 };
 
-                // UI Loading
+                // UI LOADING (Feedback visual)
                 const originalBtnText = submitBtn.innerHTML;
                 submitBtn.disabled = true;
                 submitBtn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Enviando...';
 
                 try {
+                    // PETICIÓN AL BACKEND
                     const response = await fetch('/api/contacto', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
@@ -1294,7 +1143,7 @@
                         throw new Error(result.error || 'Error desconocido en el servidor');
                     }
 
-                    // Éxito
+                    // ÉXITO
                     Swal.fire({
                         icon: 'success',
                         title: '¡Mensaje Enviado!',
@@ -1302,11 +1151,11 @@
                         background: '#0B0F19', color: '#fff', confirmButtonColor: '#6366f1'
                     });
                     
-                    // Limpieza
+                    // LIMPIEZA
                     contactForm.reset();
                     grecaptcha.reset();
                     
-                    // Reset contadores visuales
+                    // Resetear visualmente los contadores
                     if(countNombre) countNombre.textContent = "0/50";
                     if(countMensaje) {
                         countMensaje.textContent = "0 / 100 (Quedan: 100)";
@@ -1314,6 +1163,7 @@
                     }
 
                 } catch (error) {
+                    // ERROR
                     Swal.fire({
                         icon: 'error',
                         title: 'Hubo un problema',
@@ -1321,9 +1171,230 @@
                         background: '#0B0F19', color: '#fff', confirmButtonColor: '#ef4444'
                     });
                 } finally {
+                    // RESTAURAR BOTÓN
                     submitBtn.disabled = false;
                     submitBtn.innerHTML = originalBtnText;
                 }
             });
         }
+        // ------------------------------------------------------
+    // INDICADORES VISUALES DINÁMICOS
+    // ------------------------------------------------------
+
+    // 1. NOMBRE (Barra de progreso simple)
+    const inNombre = document.getElementById('nombre');
+    const txtNombre = document.getElementById('count-nombre');
+    const barNombre = document.getElementById('bar-nombre');
+
+    if (inNombre && txtNombre && barNombre) {
+        inNombre.addEventListener('input', function() {
+            const len = this.value.length;
+            const max = 50;
+            const percentage = (len / max) * 100;
+            
+            txtNombre.innerText = `${len}/${max}`;
+            barNombre.style.width = `${percentage}%`;
+
+            // Cambio de color al llegar al límite
+            if(len === max) {
+                txtNombre.classList.add('text-red-400');
+                barNombre.classList.replace('bg-brand-secondary', 'bg-red-500');
+            } else {
+                txtNombre.classList.remove('text-red-400');
+                barNombre.classList.replace('bg-red-500', 'bg-brand-secondary');
+            }
+        });
+    }
+
+    // 2. TELÉFONO (Validación visual estricta)
+    const inTel = document.getElementById('telefono');
+    const txtTel = document.getElementById('count-telefono');
+
+    if (inTel && txtTel) {
+        inTel.addEventListener('input', function() {
+            // Limpiar no numéricos
+            this.value = this.value.replace(/[^0-9]/g, '');
+            const len = this.value.length;
+            txtTel.innerText = `${len}/10`;
+
+            // Lógica de colores (Semáforo)
+            if (len === 10) {
+                // Correcto (Verde)
+                txtTel.className = "text-[10px] font-mono font-bold px-2 py-0.5 rounded bg-green-500/20 text-green-400 border border-green-500/30 transition-all";
+                txtTel.innerHTML = '<i class="fa-solid fa-check mr-1"></i> 10/10';
+            } else if (len > 0) {
+                // Incompleto (Amarillo)
+                txtTel.className = "text-[10px] font-mono px-2 py-0.5 rounded bg-yellow-500/10 text-yellow-500 border border-yellow-500/20 transition-all";
+            } else {
+                // Vacío (Gris)
+                txtTel.className = "text-[10px] font-mono px-2 py-0.5 rounded bg-white/5 text-slate-500 border border-transparent transition-all";
+            }
+        });
+    }
+
+    // 3. MENSAJE (Barra de progreso + Contador inverso)
+    const inMsg = document.getElementById('mensaje');
+    const numRestante = document.getElementById('num-restante');
+    const barMsg = document.getElementById('bar-mensaje');
+
+    if (inMsg && numRestante && barMsg) {
+        inMsg.addEventListener('input', function() {
+            const len = this.value.length;
+            const max = 100;
+            const left = max - len;
+            const percentage = (len / max) * 100;
+
+            numRestante.innerText = left;
+            barMsg.style.width = `${percentage}%`;
+
+            // Colores dinámicos según el espacio restante
+            if (left < 10) {
+                // Peligro (Rojo)
+                numRestante.className = "text-red-500 font-bold animate-pulse";
+                barMsg.classList.remove('bg-brand-primary', 'bg-yellow-400');
+                barMsg.classList.add('bg-red-500');
+            } else if (left < 30) {
+                // Precaución (Amarillo)
+                numRestante.className = "text-yellow-400 font-bold";
+                barMsg.classList.remove('bg-brand-primary', 'bg-red-500');
+                barMsg.classList.add('bg-yellow-400');
+            } else {
+                // Seguro (Azul/Original)
+                numRestante.className = "text-white";
+                barMsg.classList.remove('bg-red-500', 'bg-yellow-400');
+                barMsg.classList.add('bg-brand-primary');
+            }
+        });
+    }
+
+
+    //Imagnes subida 
+document.addEventListener('DOMContentLoaded', () => {
+        
+        // 1. INICIALIZAR SWIPER
+        const swiper = new Swiper(".mySwiper", {
+            slidesPerView: 1,
+            spaceBetween: 20,
+            loop: true,
+            autoplay: { delay: 4000, disableOnInteraction: false },
+            pagination: { el: ".swiper-pagination", clickable: true },
+            navigation: {
+                nextEl: ".swiper-next-btn",
+                prevEl: ".swiper-prev-btn",
+            },
+            breakpoints: {
+                640: { slidesPerView: 2, spaceBetween: 20 }, // Tablet
+                1024: { slidesPerView: 2.5, spaceBetween: 20 }, // Desktop
+            },
+        });
+
+        // 2. FUNCIÓN PARA CARGAR IMÁGENES
+        async function cargarGaleria() {
+            const container = document.getElementById('galeria-container');
+            try {
+                const response = await fetch('/api/proyectos'); // Usa tu endpoint GET
+                const proyectos = await response.json();
+
+                if(proyectos.length > 0) {
+                    container.innerHTML = ''; // Limpiar loader
+                    proyectos.forEach(proy => {
+                        // Creamos el slide
+                        const slide = document.createElement('div');
+                        slide.className = 'swiper-slide relative group overflow-hidden rounded-2xl';
+                        slide.innerHTML = `
+                            <img src="${proy.imagenUrl}" alt="${proy.titulo}" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110">
+                            <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-end p-6">
+                                <span class="text-brand-accent text-xs font-bold uppercase mb-1">${proy.categoria}</span>
+                                <h5 class="text-white font-bold text-lg">${proy.titulo}</h5>
+                            </div>
+                        `;
+                        container.append(slide);
+                    });
+                    swiper.update(); // Actualizar Swiper con los nuevos slides
+                } else {
+                    container.innerHTML = '<div class="flex items-center justify-center h-full w-full text-gray-400">Sin imágenes aún</div>';
+                }
+            } catch (error) {
+                console.error("Error al cargar galería:", error);
+            }
+        }
+
+        // Cargar al inicio
+        cargarGaleria();
+
+        // 3. LÓGICA DE SUBIDA (PREVIEW Y UPLOAD)
+        const fileInput = document.getElementById('imagenInput');
+        const previewImg = document.getElementById('previewImg');
+        const uploadPlaceholder = document.getElementById('uploadPlaceholder');
+        const uploadForm = document.getElementById('uploadForm');
+        const btnUpload = document.getElementById('btnUpload');
+
+        // Preview de imagen
+        fileInput.addEventListener('change', function() {
+            const file = this.files[0];
+            if (file) {
+                if (file.size > 2 * 1024 * 1024) { // 2MB
+                    Swal.fire({ icon: 'error', title: 'Muy pesado', text: 'La imagen debe pesar menos de 2MB', confirmButtonColor: '#0B0F19' });
+                    this.value = '';
+                    return;
+                }
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    previewImg.src = e.target.result;
+                    previewImg.classList.remove('hidden');
+                    uploadPlaceholder.classList.add('opacity-0'); // Ocultar texto pero mantener espacio
+                }
+                reader.readAsDataURL(file);
+            }
+        });
+
+        // Subir imagen
+        uploadForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const file = fileInput.files[0];
+            
+            if (!file) {
+                Swal.fire({ icon: 'warning', title: 'Falta imagen', text: 'Selecciona una imagen primero.', confirmButtonColor: '#0B0F19' });
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append('imagen', file); // 'imagen' debe coincidir con el backend
+
+            // UI Loading
+            const originalText = btnUpload.innerHTML;
+            btnUpload.disabled = true;
+            btnUpload.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Subiendo...';
+
+            try {
+                const res = await fetch('/api/upload', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                if (!res.ok) throw new Error('Error al subir');
+
+                Swal.fire({ 
+                    icon: 'success', 
+                    title: '¡Subido!', 
+                    text: 'Tu diseño se ha agregado a la galería.',
+                    confirmButtonColor: '#6366f1' 
+                });
+
+                // Resetear form
+                uploadForm.reset();
+                previewImg.classList.add('hidden');
+                uploadPlaceholder.classList.remove('opacity-0');
+                
+                // Recargar el carrusel para ver la nueva foto
+                cargarGaleria();
+
+            } catch (err) {
+                Swal.fire({ icon: 'error', title: 'Error', text: 'No se pudo subir la imagen.', confirmButtonColor: '#0B0F19' });
+            } finally {
+                btnUpload.disabled = false;
+                btnUpload.innerHTML = originalText;
+            }
+        });
+    });
     </script>
