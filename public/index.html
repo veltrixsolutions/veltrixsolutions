@@ -1186,39 +1186,54 @@
     // ------------------------------------------------------
     document.addEventListener('DOMContentLoaded', () => {
         
-        // 4.1 Inicializar Swiper
-        const swiper = new Swiper(".mySwiper", {
-            slidesPerView: 1,
-            spaceBetween: 20,
-            loop: true,
-            autoplay: { delay: 4000, disableOnInteraction: false },
-            pagination: { el: ".swiper-pagination", clickable: true },
-            navigation: {
-                nextEl: ".swiper-next-btn",
-                prevEl: ".swiper-prev-btn",
-            },
-            breakpoints: {
-                640: { slidesPerView: 2, spaceBetween: 20 },
-                1024: { slidesPerView: 2.5, spaceBetween: 20 },
-            },
-        });
+        // Función para inicializar Swiper (Destruye y Recrea)
+        function initSwiper() {
+            if (gallerySwiper) {
+                gallerySwiper.destroy(true, true); // Destrucción total para evitar conflictos
+            }
+            
+            gallerySwiper = new Swiper(".mySwiper", {
+                slidesPerView: 1,
+                spaceBetween: 20,
+                loop: true, // El loop funciona mejor si se reinicia
+                observer: true,
+                observeParents: true,
+                autoplay: { delay: 4000, disableOnInteraction: false },
+                pagination: { el: ".swiper-pagination", clickable: true },
+                navigation: {
+                    nextEl: ".swiper-next-btn",
+                    prevEl: ".swiper-prev-btn",
+                },
+                breakpoints: {
+                    640: { slidesPerView: 2, spaceBetween: 20 },
+                    1024: { slidesPerView: 2.5, spaceBetween: 20 },
+                },
+            });
+        }
 
-        // 4.2 Cargar Galería (Fetch)
+        // Cargar Galería
         async function cargarGaleria() {
             const container = document.getElementById('galeria-container');
             if(!container) return;
 
             try {
-                const response = await fetch('/api/proyectos');
+                // Agregamos timestamp para evitar que el navegador guarde cache viejo
+                const response = await fetch(`/api/proyectos?t=${Date.now()}`);
                 const proyectos = await response.json();
 
+                console.log("Proyectos recibidos:", proyectos); // Para depuración
+
                 if(proyectos && proyectos.length > 0) {
-                    container.innerHTML = ''; 
+                    container.innerHTML = ''; // Limpiamos el DOM
+                    
                     proyectos.forEach(proy => {
                         const slide = document.createElement('div');
                         slide.className = 'swiper-slide relative group overflow-hidden rounded-2xl';
+                        // Usamos fallback por si imagenUrl viene vacío
+                        const imgUrl = proy.imagenUrl || 'https://via.placeholder.com/400x300?text=Proyecto';
+                        
                         slide.innerHTML = `
-                            <img src="${proy.imagenUrl}" alt="${proy.titulo}" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110">
+                            <img src="${imgUrl}" alt="${proy.titulo}" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110">
                             <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-end p-6">
                                 <span class="text-brand-accent text-xs font-bold uppercase mb-1">${proy.categoria || 'Proyecto'}</span>
                                 <h5 class="text-white font-bold text-lg">${proy.titulo || 'Sin Título'}</h5>
@@ -1226,30 +1241,36 @@
                         `;
                         container.append(slide);
                     });
-                    swiper.update();
+
+                    // Reiniciamos Swiper con los nuevos elementos
+                    initSwiper();
+
                 } else {
                     container.innerHTML = '<div class="flex items-center justify-center h-full w-full text-gray-400 p-10">Sin imágenes disponibles</div>';
                 }
             } catch (error) {
-                console.error("Error al cargar galería (API no disponible en demo):", error);
-                // Fallback visual para demo
-                container.innerHTML = '<div class="swiper-slide bg-gray-800 rounded-2xl flex items-center justify-center text-gray-500">API Demo Mode</div>';
+                console.error("Error al cargar galería:", error);
+                // Fallback visual para cuando no hay API real
+                container.innerHTML = '<div class="swiper-slide bg-gray-800 rounded-2xl flex items-center justify-center text-gray-500">Demo: Conecta tu API</div>';
+                initSwiper();
             }
         }
+
+        // Cargar al inicio
         cargarGaleria();
 
-        // 4.3 Subida de Imágenes
+        // Lógica de Subida
+        const uploadForm = document.getElementById('uploadForm');
         const fileInput = document.getElementById('imagenInput');
         const previewImg = document.getElementById('previewImg');
         const uploadPlaceholder = document.getElementById('uploadPlaceholder');
-        const uploadForm = document.getElementById('uploadForm');
         const btnUpload = document.getElementById('btnUpload');
 
         if (fileInput) {
             fileInput.addEventListener('change', function() {
                 const file = this.files[0];
                 if (file) {
-                    if (file.size > 2 * 1024 * 1024) { // 2MB
+                    if (file.size > 2 * 1024 * 1024) { 
                         Swal.fire({ icon: 'error', title: 'Muy pesado', text: 'Máximo 2MB', confirmButtonColor: '#0B0F19' });
                         this.value = '';
                         return;
@@ -1276,20 +1297,28 @@
 
                 const formData = new FormData();
                 formData.append('imagen', file);
+                
                 const originalText = btnUpload.innerHTML;
                 btnUpload.disabled = true;
                 btnUpload.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Subiendo...';
 
                 try {
                     const res = await fetch('/api/upload', { method: 'POST', body: formData });
+                    
                     if (!res.ok) throw new Error('Error al subir');
                     
                     Swal.fire({ icon: 'success', title: '¡Subido!', text: 'Agregado a la galería.', confirmButtonColor: '#6366f1' });
+                    
+                    // Limpieza
                     uploadForm.reset();
                     previewImg.classList.add('hidden');
                     uploadPlaceholder.classList.remove('opacity-0');
-                    cargarGaleria();
+                    
+                    // RECARGAR GALERÍA
+                    await cargarGaleria(); 
+
                 } catch (err) {
+                    console.error(err);
                     Swal.fire({ icon: 'error', title: 'Error', text: 'Fallo al conectar con servidor.', confirmButtonColor: '#0B0F19' });
                 } finally {
                     btnUpload.disabled = false;
@@ -1298,7 +1327,6 @@
             });
         }
     });
-
     // ------------------------------------------------------
     // 5. ENVÍO DE CONTACTO (VALIDACIÓN FINAL Y FETCH)
     // ------------------------------------------------------
