@@ -1002,31 +1002,30 @@
     <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
 
    <script>
-    // ------------------------------------------------------
-    // 1. INICIALIZACIÓN GLOBAL Y UI
-    // ------------------------------------------------------
-    
-    // Iniciar AOS (Animaciones)
-    AOS.init({ duration: 800, once: true, offset: 100 });
+  // ------------------------------------------------------
+        // 1. INICIALIZACIÓN DE ANIMACIONES Y UI
+        // ------------------------------------------------------
+        
+        // Iniciar AOS (Animaciones al hacer scroll)
+        AOS.init({ duration: 800, once: true, offset: 100 });
 
-    // Lógica del Navbar (Sombra al hacer scroll)
-    window.addEventListener('scroll', () => {
-        const nav = document.getElementById('navbar');
-        if (window.scrollY > 50) {
-            nav.classList.add('shadow-lg');
-            nav.classList.replace('bg-brand-dark/90', 'bg-brand-dark/95');
-        } else {
-            nav.classList.remove('shadow-lg');
-            nav.classList.replace('bg-brand-dark/95', 'bg-brand-dark/90');
-        }
-    });
+        // Lógica del Navbar (Cambio de color al bajar)
+        window.addEventListener('scroll', () => {
+            const nav = document.getElementById('navbar');
+            if (window.scrollY > 50) {
+                nav.classList.add('shadow-lg');
+                nav.classList.replace('bg-brand-dark/90', 'bg-brand-dark/95');
+            } else {
+                nav.classList.remove('shadow-lg');
+                nav.classList.replace('bg-brand-dark/95', 'bg-brand-dark/90');
+            }
+        });
 
-    // Menú Móvil
-    const btn = document.getElementById('mobile-menu-btn');
-    const menu = document.getElementById('mobile-menu');
-    const links = document.querySelectorAll('.mobile-link');
+        // Lógica del Menú Móvil (Abrir/Cerrar)
+        const btn = document.getElementById('mobile-menu-btn');
+        const menu = document.getElementById('mobile-menu');
+        const links = document.querySelectorAll('.mobile-link');
 
-    if(btn && menu) {
         btn.addEventListener('click', () => {
             menu.classList.toggle('hidden');
             menu.classList.toggle('flex');
@@ -1038,166 +1037,18 @@
                 menu.classList.remove('flex');
             });
         });
-    }
 
-    // ------------------------------------------------------
-    // 2. LÓGICA DE BREADCRUMBS (INTEGRACIÓN NUEVA)
-    // ------------------------------------------------------
-    document.addEventListener('DOMContentLoaded', () => {
-        const breadcrumbContainer = document.getElementById('breadcrumbs-container');
-        const breadcrumbCurrent = document.getElementById('breadcrumb-current');
-        const sections = document.querySelectorAll('section');
+        // ------------------------------------------------------
+        // 2. GALERÍA SWIPER Y CARGA DE IMÁGENES
+        // ------------------------------------------------------
 
-        // Configuración del observador
-        const observerOptions = {
-            root: null,
-            threshold: 0.2, // Se activa cuando el 20% de la sección es visible
-            rootMargin: "-10% 0px -50% 0px" // Ajuste para detectar mejor el centro de pantalla
-        };
-
-        const observer = new IntersectionObserver((entries) => {
-            entries.forEach(entry => {
-                if (entry.isIntersecting) {
-                    const id = entry.target.id;
-                    
-                    // Si estamos en el inicio, ocultar breadcrumbs
-                    if (id === 'inicio') {
-                        breadcrumbContainer.classList.add('-translate-y-full', 'opacity-0');
-                    } else {
-                        // Mostrar breadcrumbs y actualizar texto
-                        breadcrumbContainer.classList.remove('-translate-y-full', 'opacity-0');
-                        // Capitalizar primera letra
-                        const nombreSeccion = id.charAt(0).toUpperCase() + id.slice(1);
-                        breadcrumbCurrent.textContent = nombreSeccion;
-                        
-                        // Pequeña animación de texto
-                        breadcrumbCurrent.classList.remove('animate-pulse');
-                        void breadcrumbCurrent.offsetWidth; // Trigger reflow
-                        breadcrumbCurrent.classList.add('animate-pulse');
-                    }
-                }
-            });
-        }, observerOptions);
-
-        sections.forEach(section => observer.observe(section));
-    });
-
-    // ------------------------------------------------------
-    // 3. VALIDACIÓN VISUAL DE FORMULARIO (CORREGIDO)
-    // ------------------------------------------------------
-    document.addEventListener('DOMContentLoaded', () => {
-        
-        // Elementos: Nombre
-        const inputNombre = document.getElementById('nombre');
-        const barNombre = document.getElementById('bar-nombre');
-        const countNombre = document.getElementById('count-nombre');
-
-        // Elementos: Teléfono
-        const inputTel = document.getElementById('telefono');
-        const countTel = document.getElementById('count-telefono');
-
-        // Elementos: Mensaje
-        const inputMensaje = document.getElementById('mensaje');
-        const barMensaje = document.getElementById('bar-mensaje');
-        const numRestante = document.getElementById('num-restante');
-        const txtMensaje = document.getElementById('txt-mensaje');
-
-        // A. Lógica Nombre (Progreso y Límite)
-        if (inputNombre && barNombre && countNombre) {
-            inputNombre.addEventListener('input', function() {
-                const max = 50;
-                const actual = this.value.length;
-                const porcentaje = (actual / max) * 100;
-
-                countNombre.textContent = `${actual}/${max}`;
-                barNombre.style.width = `${porcentaje}%`;
-
-                if (actual >= max) {
-                    countNombre.classList.add('text-red-400', 'font-bold');
-                    barNombre.classList.remove('bg-brand-secondary');
-                    barNombre.classList.add('bg-red-500');
-                } else {
-                    countNombre.classList.remove('text-red-400', 'font-bold');
-                    barNombre.classList.add('bg-brand-secondary');
-                    barNombre.classList.remove('bg-red-500');
-                }
-            });
-        }
-
-        // B. Lógica Teléfono (Solo números y longitud exacta)
-        if (inputTel && countTel) {
-            inputTel.addEventListener('input', function() {
-                // Eliminar no numéricos
-                this.value = this.value.replace(/[^0-9]/g, '');
-                
-                const actual = this.value.length;
-                countTel.textContent = `${actual}/10`;
-
-                if (actual === 10) {
-                    countTel.classList.remove('text-slate-500');
-                    countTel.classList.add('text-green-400', 'font-bold');
-                    countTel.classList.replace('bg-white/5', 'bg-green-500/20');
-                } else {
-                    countTel.classList.add('text-slate-500');
-                    countTel.classList.remove('text-green-400', 'font-bold');
-                    countTel.classList.replace('bg-green-500/20', 'bg-white/5');
-                }
-            });
-        }
-
-        // C. Lógica Mensaje (Cuenta regresiva y barra dinámica)
-        if (inputMensaje && barMensaje && numRestante) {
-            inputMensaje.addEventListener('input', function() {
-                const max = 100;
-                const actual = this.value.length;
-                const restantes = max - actual;
-                const porcentaje = (actual / max) * 100;
-
-                numRestante.textContent = restantes;
-                barMensaje.style.width = `${porcentaje}%`;
-
-                // Colores según estado
-                barMensaje.className = "h-full w-0 transition-all duration-300"; // Reset base classes
-                
-                if (restantes < 10) {
-                    // Crítico (Rojo)
-                    barMensaje.classList.add('bg-red-500');
-                    numRestante.classList.add('text-red-500', 'font-bold');
-                    txtMensaje.classList.remove('text-slate-400');
-                } else if (restantes < 30) {
-                    // Advertencia (Amarillo)
-                    barMensaje.classList.add('bg-yellow-400');
-                    numRestante.classList.remove('text-red-500', 'font-bold');
-                    numRestante.classList.add('text-yellow-400');
-                    txtMensaje.classList.remove('text-slate-400');
-                } else {
-                    // Normal (Primary)
-                    barMensaje.classList.add('bg-brand-primary');
-                    numRestante.classList.remove('text-red-500', 'text-yellow-400', 'font-bold');
-                    numRestante.classList.add('text-white');
-                    txtMensaje.classList.add('text-slate-400');
-                }
-            });
-        }
-    });
-
-    // ------------------------------------------------------
-    // 4. GALERÍA Y SUBIDA DE IMÁGENES (LÓGICA ORIGINAL)
-    // ------------------------------------------------------
-    document.addEventListener('DOMContentLoaded', () => {
-        
-        // Función para inicializar Swiper (Destruye y Recrea)
-        function initSwiper() {
-            if (gallerySwiper) {
-                gallerySwiper.destroy(true, true); // Destrucción total para evitar conflictos
-            }
+        document.addEventListener('DOMContentLoaded', () => {
             
-            gallerySwiper = new Swiper(".mySwiper", {
+            // A. Inicializar Swiper
+            const swiper = new Swiper(".mySwiper", {
                 slidesPerView: 1,
                 spaceBetween: 20,
-                loop: true, // El loop funciona mejor si se reinicia
-                observer: true,
-                observeParents: true,
+                loop: true,
                 autoplay: { delay: 4000, disableOnInteraction: false },
                 pagination: { el: ".swiper-pagination", clickable: true },
                 navigation: {
@@ -1205,222 +1056,274 @@
                     prevEl: ".swiper-prev-btn",
                 },
                 breakpoints: {
-                    640: { slidesPerView: 2, spaceBetween: 20 },
-                    1024: { slidesPerView: 2.5, spaceBetween: 20 },
+                    640: { slidesPerView: 2, spaceBetween: 20 }, // Tablet
+                    1024: { slidesPerView: 2.5, spaceBetween: 20 }, // Desktop
                 },
             });
-        }
 
-        // Cargar Galería
-        async function cargarGaleria() {
-            const container = document.getElementById('galeria-container');
-            if(!container) return;
+            // B. Función para cargar imágenes desde el backend
+            async function cargarGaleria() {
+                const container = document.getElementById('galeria-container');
+                try {
+                    const response = await fetch('/api/proyectos');
+                    const proyectos = await response.json();
 
-            try {
-                // Agregamos timestamp para evitar que el navegador guarde cache viejo
-                const response = await fetch(`/api/proyectos?t=${Date.now()}`);
-                const proyectos = await response.json();
-
-                console.log("Proyectos recibidos:", proyectos); // Para depuración
-
-                if(proyectos && proyectos.length > 0) {
-                    container.innerHTML = ''; // Limpiamos el DOM
-                    
-                    proyectos.forEach(proy => {
-                        const slide = document.createElement('div');
-                        slide.className = 'swiper-slide relative group overflow-hidden rounded-2xl';
-                        // Usamos fallback por si imagenUrl viene vacío
-                        const imgUrl = proy.imagenUrl || 'https://via.placeholder.com/400x300?text=Proyecto';
-                        
-                        slide.innerHTML = `
-                            <img src="${imgUrl}" alt="${proy.titulo}" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110">
-                            <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-end p-6">
-                                <span class="text-brand-accent text-xs font-bold uppercase mb-1">${proy.categoria || 'Proyecto'}</span>
-                                <h5 class="text-white font-bold text-lg">${proy.titulo || 'Sin Título'}</h5>
-                            </div>
-                        `;
-                        container.append(slide);
-                    });
-
-                    // Reiniciamos Swiper con los nuevos elementos
-                    initSwiper();
-
-                } else {
-                    container.innerHTML = '<div class="flex items-center justify-center h-full w-full text-gray-400 p-10">Sin imágenes disponibles</div>';
+                    if(proyectos && proyectos.length > 0) {
+                        container.innerHTML = ''; // Limpiar loader
+                        proyectos.forEach(proy => {
+                            const slide = document.createElement('div');
+                            slide.className = 'swiper-slide relative group overflow-hidden rounded-2xl';
+                            slide.innerHTML = `
+                                <img src="${proy.imagenUrl}" alt="${proy.titulo}" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110">
+                                <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-end p-6">
+                                    <span class="text-brand-accent text-xs font-bold uppercase mb-1">${proy.categoria}</span>
+                                    <h5 class="text-white font-bold text-lg">${proy.titulo}</h5>
+                                </div>
+                            `;
+                            container.append(slide);
+                        });
+                        swiper.update(); // Actualizar Swiper
+                    } else {
+                        container.innerHTML = '<div class="flex items-center justify-center h-full w-full text-gray-400">Sin imágenes aún</div>';
+                    }
+                } catch (error) {
+                    console.error("Error al cargar galería:", error);
                 }
-            } catch (error) {
-                console.error("Error al cargar galería:", error);
-                // Fallback visual para cuando no hay API real
-                container.innerHTML = '<div class="swiper-slide bg-gray-800 rounded-2xl flex items-center justify-center text-gray-500">Demo: Conecta tu API</div>';
-                initSwiper();
             }
-        }
 
-        // Cargar al inicio
-        cargarGaleria();
+            // Cargar galería al inicio
+            cargarGaleria();
 
-        // Lógica de Subida
-        const uploadForm = document.getElementById('uploadForm');
-        const fileInput = document.getElementById('imagenInput');
-        const previewImg = document.getElementById('previewImg');
-        const uploadPlaceholder = document.getElementById('uploadPlaceholder');
-        const btnUpload = document.getElementById('btnUpload');
+            // C. Lógica de subida de imagen
+            const fileInput = document.getElementById('imagenInput');
+            const previewImg = document.getElementById('previewImg');
+            const uploadPlaceholder = document.getElementById('uploadPlaceholder');
+            const uploadForm = document.getElementById('uploadForm');
+            const btnUpload = document.getElementById('btnUpload');
 
-        if (fileInput) {
-            fileInput.addEventListener('change', function() {
-                const file = this.files[0];
-                if (file) {
-                    if (file.size > 2 * 1024 * 1024) { 
-                        Swal.fire({ icon: 'error', title: 'Muy pesado', text: 'Máximo 2MB', confirmButtonColor: '#0B0F19' });
-                        this.value = '';
+            // Preview
+            if (fileInput) {
+                fileInput.addEventListener('change', function() {
+                    const file = this.files[0];
+                    if (file) {
+                        if (file.size > 2 * 1024 * 1024) { // 2MB
+                            Swal.fire({ icon: 'error', title: 'Muy pesado', text: 'La imagen debe pesar menos de 2MB', confirmButtonColor: '#0B0F19' });
+                            this.value = '';
+                            return;
+                        }
+                        const reader = new FileReader();
+                        reader.onload = function(e) {
+                            previewImg.src = e.target.result;
+                            previewImg.classList.remove('hidden');
+                            uploadPlaceholder.classList.add('opacity-0');
+                        }
+                        reader.readAsDataURL(file);
+                    }
+                });
+            }
+
+            // Subir imagen
+            if (uploadForm) {
+                uploadForm.addEventListener('submit', async (e) => {
+                    e.preventDefault();
+                    const file = fileInput.files[0];
+                    
+                    if (!file) {
+                        Swal.fire({ icon: 'warning', title: 'Falta imagen', text: 'Selecciona una imagen primero.', confirmButtonColor: '#0B0F19' });
                         return;
                     }
-                    const reader = new FileReader();
-                    reader.onload = function(e) {
-                        previewImg.src = e.target.result;
-                        previewImg.classList.remove('hidden');
-                        uploadPlaceholder.classList.add('opacity-0');
+
+                    const formData = new FormData();
+                    formData.append('imagen', file);
+
+                    const originalText = btnUpload.innerHTML;
+                    btnUpload.disabled = true;
+                    btnUpload.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Subiendo...';
+
+                    try {
+                        const res = await fetch('/api/upload', {
+                            method: 'POST',
+                            body: formData
+                        });
+
+                        if (!res.ok) throw new Error('Error al subir');
+
+                        Swal.fire({ 
+                            icon: 'success', 
+                            title: '¡Subido!', 
+                            text: 'Tu diseño se ha agregado a la galería.',
+                            confirmButtonColor: '#6366f1' 
+                        });
+
+                        uploadForm.reset();
+                        previewImg.classList.add('hidden');
+                        uploadPlaceholder.classList.remove('opacity-0');
+                        cargarGaleria(); // Recargar carrusel
+
+                    } catch (err) {
+                        Swal.fire({ icon: 'error', title: 'Error', text: 'No se pudo subir la imagen.', confirmButtonColor: '#0B0F19' });
+                    } finally {
+                        btnUpload.disabled = false;
+                        btnUpload.innerHTML = originalText;
                     }
-                    reader.readAsDataURL(file);
+                });
+            }
+        });
+
+        // ------------------------------------------------------
+        // 3. VALIDACIÓN DE FORMULARIO DE CONTACTO EN TIEMPO REAL
+        // ------------------------------------------------------
+
+        const inputNombre = document.getElementById('nombre');
+        const countNombre = document.getElementById('count-nombre');
+        const inputTel = document.getElementById('telefono');
+        const inputMensaje = document.getElementById('mensaje');
+        const countMensaje = document.getElementById('contador-mensaje');
+        const inputEmail = document.getElementById('email'); // Nuevo para email
+
+        // A. Nombre: Contador
+        if (inputNombre && countNombre) {
+            inputNombre.addEventListener('input', function() {
+                const actual = this.value.length;
+                countNombre.textContent = `${actual}/50`;
+                if(actual === 50) countNombre.classList.add('text-red-400'); 
+                else countNombre.classList.remove('text-red-400'); 
+            });
+        }
+
+        // B. Teléfono: Solo números
+        if (inputTel) {
+            inputTel.addEventListener('input', function() {
+                this.value = this.value.replace(/[^0-9]/g, '');
+            });
+        }
+
+        // C. Mensaje: Contador
+        if (inputMensaje && countMensaje) {
+            inputMensaje.addEventListener('input', function() {
+                const max = 100;
+                const actual = this.value.length;
+                const restantes = max - actual;
+                countMensaje.textContent = `${actual} / ${max} (Quedan: ${restantes})`;
+                if (restantes < 10) {
+                    countMensaje.classList.replace('text-brand-secondary', 'text-red-400');
+                    countMensaje.classList.replace('bg-brand-primary/10', 'bg-red-500/10');
+                    countMensaje.classList.replace('border-brand-primary/20', 'border-red-500/20');
+                } else {
+                    countMensaje.classList.replace('text-red-400', 'text-brand-secondary');
+                    countMensaje.classList.replace('bg-red-500/10', 'bg-brand-primary/10');
+                    countMensaje.classList.replace('border-red-500/20', 'border-brand-primary/20');
                 }
             });
         }
 
-        if (uploadForm) {
-            uploadForm.addEventListener('submit', async (e) => {
+        // ------------------------------------------------------
+        // 4. LÓGICA DE ENVÍO DE CONTACTO
+        // ------------------------------------------------------
+
+        const contactForm = document.getElementById('contactForm');
+        const submitBtn = document.getElementById('submitBtn');
+
+        // Regex robusto para validar email
+        // Debe tener texto + @ + texto + . + extensión de 2 o más letras
+        const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+
+        if (contactForm) {
+            contactForm.addEventListener('submit', async function(e) {
                 e.preventDefault();
-                const file = fileInput.files[0];
-                if (!file) {
-                    Swal.fire({ icon: 'warning', title: 'Falta imagen', text: 'Selecciona una imagen primero.', confirmButtonColor: '#0B0F19' });
+
+                // 1. Validar Email
+                if (!emailRegex.test(inputEmail.value)) {
+                    Swal.fire({
+                        icon: 'warning',
+                        title: 'Correo inválido',
+                        text: 'Por favor, ingresa un correo electrónico válido (ej: nombre@dominio.com).',
+                        background: '#0B0F19', color: '#fff', confirmButtonColor: '#6366f1'
+                    });
                     return;
                 }
 
-                const formData = new FormData();
-                formData.append('imagen', file);
-                
-                const originalText = btnUpload.innerHTML;
-                btnUpload.disabled = true;
-                btnUpload.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Subiendo...';
+                // 2. Validar Teléfono (Longitud exacta)
+                if (inputTel.value.length !== 10) {
+                    Swal.fire({
+                        icon: 'warning',
+                        title: 'Teléfono incompleto',
+                        text: 'El número debe tener exactamente 10 dígitos.',
+                        background: '#0B0F19', color: '#fff', confirmButtonColor: '#6366f1'
+                    });
+                    return;
+                }
+
+                // 3. Validar Captcha
+                const recaptchaToken = grecaptcha.getResponse();
+                if (recaptchaToken.length === 0) {
+                    Swal.fire({
+                        icon: 'warning',
+                        title: 'Verificación requerida',
+                        text: 'Por favor, marca la casilla "No soy un robot".',
+                        background: '#0B0F19', color: '#fff', confirmButtonColor: '#6366f1'
+                    });
+                    return;
+                }
+
+                // Preparar datos
+                const formData = {
+                    nombre: inputNombre.value.trim(),
+                    email: inputEmail.value.trim(),
+                    telefono: inputTel.value,
+                    servicio: document.getElementById('servicio').value,
+                    mensaje: inputMensaje.value.trim(),
+                    recaptchaToken: recaptchaToken
+                };
+
+                // UI Loading
+                const originalBtnText = submitBtn.innerHTML;
+                submitBtn.disabled = true;
+                submitBtn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Enviando...';
 
                 try {
-                    const res = await fetch('/api/upload', { method: 'POST', body: formData });
-                    
-                    if (!res.ok) throw new Error('Error al subir');
-                    
-                    Swal.fire({ icon: 'success', title: '¡Subido!', text: 'Agregado a la galería.', confirmButtonColor: '#6366f1' });
+                    const response = await fetch('/api/contacto', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(formData)
+                    });
+
+                    const result = await response.json();
+
+                    if (!response.ok) {
+                        throw new Error(result.error || 'Error desconocido en el servidor');
+                    }
+
+                    // Éxito
+                    Swal.fire({
+                        icon: 'success',
+                        title: '¡Mensaje Enviado!',
+                        text: 'Hemos recibido tu solicitud correctamente. Te contactaremos pronto.',
+                        background: '#0B0F19', color: '#fff', confirmButtonColor: '#6366f1'
+                    });
                     
                     // Limpieza
-                    uploadForm.reset();
-                    previewImg.classList.add('hidden');
-                    uploadPlaceholder.classList.remove('opacity-0');
+                    contactForm.reset();
+                    grecaptcha.reset();
                     
-                    // RECARGAR GALERÍA
-                    await cargarGaleria(); 
+                    // Reset contadores visuales
+                    if(countNombre) countNombre.textContent = "0/50";
+                    if(countMensaje) {
+                        countMensaje.textContent = "0 / 100 (Quedan: 100)";
+                        countMensaje.className = "text-[10px] font-mono text-brand-secondary bg-brand-primary/10 px-2 py-0.5 rounded border border-brand-primary/20 transition-all";
+                    }
 
-                } catch (err) {
-                    console.error(err);
-                    Swal.fire({ icon: 'error', title: 'Error', text: 'Fallo al conectar con servidor.', confirmButtonColor: '#0B0F19' });
+                } catch (error) {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Hubo un problema',
+                        text: error.message,
+                        background: '#0B0F19', color: '#fff', confirmButtonColor: '#ef4444'
+                    });
                 } finally {
-                    btnUpload.disabled = false;
-                    btnUpload.innerHTML = originalText;
+                    submitBtn.disabled = false;
+                    submitBtn.innerHTML = originalBtnText;
                 }
             });
         }
-    });
-    // ------------------------------------------------------
-    // 5. ENVÍO DE CONTACTO (VALIDACIÓN FINAL Y FETCH)
-    // ------------------------------------------------------
-    const contactForm = document.getElementById('contactForm');
-    const submitBtn = document.getElementById('submitBtn');
-    const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
-
-    if (contactForm) {
-        contactForm.addEventListener('submit', async function(e) {
-            e.preventDefault();
-            
-            // Referencias a inputs
-            const inNombre = document.getElementById('nombre');
-            const inEmail = document.getElementById('email');
-            const inTel = document.getElementById('telefono');
-            const inServicio = document.getElementById('servicio');
-            const inMensaje = document.getElementById('mensaje');
-
-            // 1. Validar Email
-            if (!emailRegex.test(inEmail.value)) {
-                Swal.fire({ icon: 'warning', title: 'Correo inválido', text: 'Verifica el formato del correo.', background: '#0B0F19', color: '#fff', confirmButtonColor: '#6366f1' });
-                return;
-            }
-            if (inNombre.value.trim().length < 3) {
-                 Swal.fire({ icon: 'warning', title: 'Nombre muy corto', text: 'Por favor escribe tu nombre completo.', background: '#0B0F19', color: '#fff', confirmButtonColor: '#6366f1' });
-                 return;
-            }
-
-            // 2. Validar Teléfono (Longitud)
-            if (inTel.value.length !== 10) {
-                Swal.fire({ icon: 'warning', title: 'Teléfono incompleto', text: 'El número debe tener 10 dígitos exactos.', background: '#0B0F19', color: '#fff', confirmButtonColor: '#6366f1' });
-                return;
-            }
-
-            // 3. Validar Captcha
-            const recaptchaToken = grecaptcha.getResponse();
-            if (recaptchaToken.length === 0) {
-                Swal.fire({ icon: 'warning', title: 'Verificación requerida', text: 'Confirma que no eres un robot.', background: '#0B0F19', color: '#fff', confirmButtonColor: '#6366f1' });
-                return;
-            }
-            if (inMensaje.value.trim().length < 10) {
-                Swal.fire({ icon: 'warning', title: 'Mensaje muy corto', text: 'Por favor detalla un poco más tu idea (mínimo 10 caracteres).', background: '#0B0F19', color: '#fff', confirmButtonColor: '#6366f1' });
-                return;
-            }
-
-            // Preparar envío
-            const formData = {
-                nombre: inNombre.value.trim(),
-                email: inEmail.value.trim(),
-                telefono: inTel.value,
-                servicio: inServicio.value,
-                mensaje: inMensaje.value.trim(),
-                recaptchaToken: recaptchaToken
-            };
-
-            // UI Loading
-            const originalBtnText = submitBtn.innerHTML;
-            submitBtn.disabled = true;
-            submitBtn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Enviando...';
-
-            try {
-                const response = await fetch('/api/contacto', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(formData)
-                });
-                
-                const result = await response.json();
-                if (!response.ok) throw new Error(result.error || 'Error del servidor');
-
-                // Éxito
-                Swal.fire({ icon: 'success', title: '¡Enviado!', text: 'Te contactaremos pronto.', background: '#0B0F19', color: '#fff', confirmButtonColor: '#6366f1' });
-                
-                // Reset Total
-                contactForm.reset();
-                grecaptcha.reset();
-                
-                // Reset Barras Visuales
-                document.getElementById('bar-nombre').style.width = '0%';
-                document.getElementById('count-nombre').textContent = '0/50';
-                
-                document.getElementById('count-telefono').textContent = '0/10';
-                document.getElementById('count-telefono').classList.remove('text-green-400', 'font-bold');
-                
-                document.getElementById('bar-mensaje').style.width = '0%';
-                document.getElementById('num-restante').textContent = '100';
-                document.getElementById('bar-mensaje').className = 'h-full bg-brand-primary w-0 transition-all duration-300';
-
-            } catch (error) {
-                Swal.fire({ icon: 'error', title: 'Error', text: error.message, background: '#0B0F19', color: '#fff', confirmButtonColor: '#ef4444' });
-            } finally {
-                submitBtn.disabled = false;
-                submitBtn.innerHTML = originalBtnText;
-            }
-        });
-    }
-</script>
+    </script>
