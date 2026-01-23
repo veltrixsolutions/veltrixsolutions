@@ -1372,6 +1372,11 @@
                 return;
             }
 
+            if (inMensaje.value.trim().length < 10) {
+                Swal.fire({ icon: 'warning', title: 'Mensaje muy corto', text: 'Por favor detalla un poco más tu idea (mínimo 10 caracteres).', background: '#0B0F19', color: '#fff', confirmButtonColor: '#6366f1' });
+                return;
+            }
+
             // Preparar envío
             const formData = {
                 nombre: inNombre.value.trim(),
