@@ -1322,6 +1322,10 @@
                 Swal.fire({ icon: 'warning', title: 'Correo inválido', text: 'Verifica el formato del correo.', background: '#0B0F19', color: '#fff', confirmButtonColor: '#6366f1' });
                 return;
             }
+            if (inNombre.value.trim().length < 3) {
+                 Swal.fire({ icon: 'warning', title: 'Nombre muy corto', text: 'Por favor escribe tu nombre completo.', background: '#0B0F19', color: '#fff', confirmButtonColor: '#6366f1' });
+                 return;
+            }
 
             // 2. Validar Teléfono (Longitud)
             if (inTel.value.length !== 10) {
@@ -1333,6 +1337,10 @@
             const recaptchaToken = grecaptcha.getResponse();
             if (recaptchaToken.length === 0) {
                 Swal.fire({ icon: 'warning', title: 'Verificación requerida', text: 'Confirma que no eres un robot.', background: '#0B0F19', color: '#fff', confirmButtonColor: '#6366f1' });
+                return;
+            }
+            if (inMensaje.value.trim().length < 10) {
+                Swal.fire({ icon: 'warning', title: 'Mensaje muy corto', text: 'Por favor detalla un poco más tu idea (mínimo 10 caracteres).', background: '#0B0F19', color: '#fff', confirmButtonColor: '#6366f1' });
                 return;
             }
 
