@@ -49,8 +49,15 @@
     </script>
 
     <style>
+        html { scroll-padding-top: 120px; }
         .swiper-pagination-bullet-active { background-color: #6366f1 !important; }
         .swiper-button-next, .swiper-button-prev { color: #6366f1 !important; }
+
+        .breadcrumb-enter { animation: fadeInRight 0.5s ease-out; }
+        @keyframes fadeInRight {
+            from { opacity: 0; transform: translateX(-10px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
 
         .bg-grid {
             background-size: 40px 40px;
@@ -148,6 +155,18 @@
             </a>
         </div>
     </nav>
+
+<div id="breadcrumbs-container" class="fixed top-20 left-0 w-full z-40 bg-brand-dark/95 border-b border-white/5 py-2 px-4 backdrop-blur-md transition-all duration-300 transform -translate-y-full opacity-0 shadow-lg">
+    <div class="max-w-7xl mx-auto text-xs font-mono flex items-center gap-2">
+        <a href="#inicio" class="text-slate-500 hover:text-brand-primary transition-colors">
+            <i class="fa-solid fa-house"></i> Inicio
+        </a>
+        <span class="text-slate-600">/</span>
+        <span id="breadcrumb-current" class="text-brand-primary font-bold uppercase tracking-wider">
+            </span>
+    </div>
+</div>
+
     <section id="inicio" class="relative pt-32 pb-16 lg:pt-48 lg:pb-32 overflow-hidden bg-brand-dark border-b border-white/5">
         <div class="absolute inset-0 bg-grid opacity-20"></div>
         <div class="absolute top-20 right-0 w-[200px] sm:w-[300px] md:w-[500px] h-[300px] md:h-[500px] bg-brand-primary/20 rounded-full blur-[100px] -z-10"></div>
@@ -983,30 +1002,31 @@
     <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
 
    <script>
-        // ------------------------------------------------------
-        // 1. INICIALIZACIÓN DE ANIMACIONES Y UI
-        // ------------------------------------------------------
-        
-        // Iniciar AOS (Animaciones al hacer scroll)
-        AOS.init({ duration: 800, once: true, offset: 100 });
+    // ------------------------------------------------------
+    // 1. INICIALIZACIÓN GLOBAL Y UI
+    // ------------------------------------------------------
+    
+    // Iniciar AOS (Animaciones)
+    AOS.init({ duration: 800, once: true, offset: 100 });
 
-        // Lógica del Navbar (Cambio de color al bajar)
-        window.addEventListener('scroll', () => {
-            const nav = document.getElementById('navbar');
-            if (window.scrollY > 50) {
-                nav.classList.add('shadow-lg');
-                nav.classList.replace('bg-brand-dark/90', 'bg-brand-dark/95');
-            } else {
-                nav.classList.remove('shadow-lg');
-                nav.classList.replace('bg-brand-dark/95', 'bg-brand-dark/90');
-            }
-        });
+    // Lógica del Navbar (Sombra al hacer scroll)
+    window.addEventListener('scroll', () => {
+        const nav = document.getElementById('navbar');
+        if (window.scrollY > 50) {
+            nav.classList.add('shadow-lg');
+            nav.classList.replace('bg-brand-dark/90', 'bg-brand-dark/95');
+        } else {
+            nav.classList.remove('shadow-lg');
+            nav.classList.replace('bg-brand-dark/95', 'bg-brand-dark/90');
+        }
+    });
 
-        // Lógica del Menú Móvil (Abrir/Cerrar)
-        const btn = document.getElementById('mobile-menu-btn');
-        const menu = document.getElementById('mobile-menu');
-        const links = document.querySelectorAll('.mobile-link');
+    // Menú Móvil
+    const btn = document.getElementById('mobile-menu-btn');
+    const menu = document.getElementById('mobile-menu');
+    const links = document.querySelectorAll('.mobile-link');
 
+    if(btn && menu) {
         btn.addEventListener('click', () => {
             menu.classList.toggle('hidden');
             menu.classList.toggle('flex');
@@ -1018,383 +1038,389 @@
                 menu.classList.remove('flex');
             });
         });
+    }
 
-        // ------------------------------------------------------
-        // 2. VALIDACIÓN EN TIEMPO REAL (Visualización Dinámica)
-        // ------------------------------------------------------
+    // ------------------------------------------------------
+    // 2. LÓGICA DE BREADCRUMBS (INTEGRACIÓN NUEVA)
+    // ------------------------------------------------------
+    document.addEventListener('DOMContentLoaded', () => {
+        const breadcrumbContainer = document.getElementById('breadcrumbs-container');
+        const breadcrumbCurrent = document.getElementById('breadcrumb-current');
+        const sections = document.querySelectorAll('section');
 
-        // Elementos del DOM
+        // Configuración del observador
+        const observerOptions = {
+            root: null,
+            threshold: 0.2, // Se activa cuando el 20% de la sección es visible
+            rootMargin: "-10% 0px -50% 0px" // Ajuste para detectar mejor el centro de pantalla
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    const id = entry.target.id;
+                    
+                    // Si estamos en el inicio, ocultar breadcrumbs
+                    if (id === 'inicio') {
+                        breadcrumbContainer.classList.add('-translate-y-full', 'opacity-0');
+                    } else {
+                        // Mostrar breadcrumbs y actualizar texto
+                        breadcrumbContainer.classList.remove('-translate-y-full', 'opacity-0');
+                        // Capitalizar primera letra
+                        const nombreSeccion = id.charAt(0).toUpperCase() + id.slice(1);
+                        breadcrumbCurrent.textContent = nombreSeccion;
+                        
+                        // Pequeña animación de texto
+                        breadcrumbCurrent.classList.remove('animate-pulse');
+                        void breadcrumbCurrent.offsetWidth; // Trigger reflow
+                        breadcrumbCurrent.classList.add('animate-pulse');
+                    }
+                }
+            });
+        }, observerOptions);
+
+        sections.forEach(section => observer.observe(section));
+    });
+
+    // ------------------------------------------------------
+    // 3. VALIDACIÓN VISUAL DE FORMULARIO (CORREGIDO)
+    // ------------------------------------------------------
+    document.addEventListener('DOMContentLoaded', () => {
+        
+        // Elementos: Nombre
         const inputNombre = document.getElementById('nombre');
-        const countNombre = document.getElementById('count-nombre'); // ID del contador de nombre
-        
-        const inputTel = document.getElementById('telefono');
-        
-        const inputMensaje = document.getElementById('mensaje');
-        const countMensaje = document.getElementById('contador-mensaje'); // ID del contador de mensaje
+        const barNombre = document.getElementById('bar-nombre');
+        const countNombre = document.getElementById('count-nombre');
 
-        // A. NOMBRE: Contador simple (0/50)
-        // Se actualiza cada vez que el usuario escribe
-        if (inputNombre && countNombre) {
+        // Elementos: Teléfono
+        const inputTel = document.getElementById('telefono');
+        const countTel = document.getElementById('count-telefono');
+
+        // Elementos: Mensaje
+        const inputMensaje = document.getElementById('mensaje');
+        const barMensaje = document.getElementById('bar-mensaje');
+        const numRestante = document.getElementById('num-restante');
+        const txtMensaje = document.getElementById('txt-mensaje');
+
+        // A. Lógica Nombre (Progreso y Límite)
+        if (inputNombre && barNombre && countNombre) {
             inputNombre.addEventListener('input', function() {
+                const max = 50;
                 const actual = this.value.length;
-                countNombre.textContent = `${actual}/50`;
-                
-                // Color rojo si llega al límite
-                if(actual === 50) { 
-                    countNombre.classList.add('text-red-400'); 
-                } else { 
-                    countNombre.classList.remove('text-red-400'); 
+                const porcentaje = (actual / max) * 100;
+
+                countNombre.textContent = `${actual}/${max}`;
+                barNombre.style.width = `${porcentaje}%`;
+
+                if (actual >= max) {
+                    countNombre.classList.add('text-red-400', 'font-bold');
+                    barNombre.classList.remove('bg-brand-secondary');
+                    barNombre.classList.add('bg-red-500');
+                } else {
+                    countNombre.classList.remove('text-red-400', 'font-bold');
+                    barNombre.classList.add('bg-brand-secondary');
+                    barNombre.classList.remove('bg-red-500');
                 }
             });
         }
 
-        // B. TELÉFONO: Filtro estricto (Solo números)
-        // Si el usuario intenta escribir letras, se borran instantáneamente
-        if (inputTel) {
+        // B. Lógica Teléfono (Solo números y longitud exacta)
+        if (inputTel && countTel) {
             inputTel.addEventListener('input', function() {
+                // Eliminar no numéricos
                 this.value = this.value.replace(/[^0-9]/g, '');
+                
+                const actual = this.value.length;
+                countTel.textContent = `${actual}/10`;
+
+                if (actual === 10) {
+                    countTel.classList.remove('text-slate-500');
+                    countTel.classList.add('text-green-400', 'font-bold');
+                    countTel.classList.replace('bg-white/5', 'bg-green-500/20');
+                } else {
+                    countTel.classList.add('text-slate-500');
+                    countTel.classList.remove('text-green-400', 'font-bold');
+                    countTel.classList.replace('bg-green-500/20', 'bg-white/5');
+                }
             });
         }
 
-        // C. MENSAJE: Contador avanzado (Escritos vs Restantes)
-        if (inputMensaje && countMensaje) {
+        // C. Lógica Mensaje (Cuenta regresiva y barra dinámica)
+        if (inputMensaje && barMensaje && numRestante) {
             inputMensaje.addEventListener('input', function() {
-                const max = 100; // Límite estricto solicitado
+                const max = 100;
                 const actual = this.value.length;
                 const restantes = max - actual;
+                const porcentaje = (actual / max) * 100;
+
+                numRestante.textContent = restantes;
+                barMensaje.style.width = `${porcentaje}%`;
+
+                // Colores según estado
+                barMensaje.className = "h-full w-0 transition-all duration-300"; // Reset base classes
                 
-                // Actualizar texto del contador
-                countMensaje.textContent = `${actual} / ${max} (Quedan: ${restantes})`;
-
-                // Cambiar estilo visual cuando quedan pocos caracteres (Alerta visual)
                 if (restantes < 10) {
-                    countMensaje.classList.replace('text-brand-secondary', 'text-red-400');
-                    countMensaje.classList.replace('bg-brand-primary/10', 'bg-red-500/10');
-                    countMensaje.classList.replace('border-brand-primary/20', 'border-red-500/20');
+                    // Crítico (Rojo)
+                    barMensaje.classList.add('bg-red-500');
+                    numRestante.classList.add('text-red-500', 'font-bold');
+                    txtMensaje.classList.remove('text-slate-400');
+                } else if (restantes < 30) {
+                    // Advertencia (Amarillo)
+                    barMensaje.classList.add('bg-yellow-400');
+                    numRestante.classList.remove('text-red-500', 'font-bold');
+                    numRestante.classList.add('text-yellow-400');
+                    txtMensaje.classList.remove('text-slate-400');
                 } else {
-                    countMensaje.classList.replace('text-red-400', 'text-brand-secondary');
-                    countMensaje.classList.replace('bg-red-500/10', 'bg-brand-primary/10');
-                    countMensaje.classList.replace('border-red-500/20', 'border-brand-primary/20');
+                    // Normal (Primary)
+                    barMensaje.classList.add('bg-brand-primary');
+                    numRestante.classList.remove('text-red-500', 'text-yellow-400', 'font-bold');
+                    numRestante.classList.add('text-white');
+                    txtMensaje.classList.add('text-slate-400');
                 }
             });
         }
+    });
 
-        // ------------------------------------------------------
-        // 3. LÓGICA DE ENVÍO DEL FORMULARIO (Fetch API)
-        // ------------------------------------------------------
-
-        const contactForm = document.getElementById('contactForm');
-        const submitBtn = document.getElementById('submitBtn');
-
-        if (contactForm) {
-            contactForm.addEventListener('submit', async function(e) {
-                e.preventDefault(); // Evitar recarga de página
-
-                // VALIDACIÓN 1: Longitud exacta del teléfono
-                // Aunque HTML tiene maxlength, esto asegura que no envíen números incompletos (ej: "55")
-                if (inputTel.value.length !== 10) {
-                    Swal.fire({
-                        icon: 'warning',
-                        title: 'Teléfono incompleto',
-                        text: 'El número debe tener exactamente 10 dígitos.',
-                        background: '#0B0F19', color: '#fff', confirmButtonColor: '#6366f1'
-                    });
-                    return; // Detener envío
-                }
-
-                // VALIDACIÓN 2: ReCAPTCHA
-                const recaptchaToken = grecaptcha.getResponse();
-                if (recaptchaToken.length === 0) {
-                    Swal.fire({
-                        icon: 'warning',
-                        title: 'Verificación requerida',
-                        text: 'Por favor, marca la casilla "No soy un robot".',
-                        background: '#0B0F19', color: '#fff', confirmButtonColor: '#6366f1'
-                    });
-                    return; // Detener envío
-                }
-
-                // PREPARACIÓN DE DATOS
-                const formData = {
-                    nombre: inputNombre.value.trim(),
-                    email: document.getElementById('email').value.trim(),
-                    telefono: inputTel.value, // Ya va limpio gracias al evento input
-                    servicio: document.getElementById('servicio').value,
-                    mensaje: inputMensaje.value.trim(),
-                    recaptchaToken: recaptchaToken
-                };
-
-                // UI LOADING (Feedback visual)
-                const originalBtnText = submitBtn.innerHTML;
-                submitBtn.disabled = true;
-                submitBtn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Enviando...';
-
-                try {
-                    // PETICIÓN AL BACKEND
-                    const response = await fetch('/api/contacto', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify(formData)
-                    });
-
-                    const result = await response.json();
-
-                    if (!response.ok) {
-                        throw new Error(result.error || 'Error desconocido en el servidor');
-                    }
-
-                    // ÉXITO
-                    Swal.fire({
-                        icon: 'success',
-                        title: '¡Mensaje Enviado!',
-                        text: 'Hemos recibido tu solicitud correctamente. Te contactaremos pronto.',
-                        background: '#0B0F19', color: '#fff', confirmButtonColor: '#6366f1'
-                    });
-                    
-                    // LIMPIEZA
-                    contactForm.reset();
-                    grecaptcha.reset();
-                    
-                    // Resetear visualmente los contadores
-                    if(countNombre) countNombre.textContent = "0/50";
-                    if(countMensaje) {
-                        countMensaje.textContent = "0 / 100 (Quedan: 100)";
-                        countMensaje.className = "text-[10px] font-mono text-brand-secondary bg-brand-primary/10 px-2 py-0.5 rounded border border-brand-primary/20 transition-all";
-                    }
-
-                } catch (error) {
-                    // ERROR
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'Hubo un problema',
-                        text: error.message,
-                        background: '#0B0F19', color: '#fff', confirmButtonColor: '#ef4444'
-                    });
-                } finally {
-                    // RESTAURAR BOTÓN
-                    submitBtn.disabled = false;
-                    submitBtn.innerHTML = originalBtnText;
-                }
-            });
-        }
-        // ------------------------------------------------------
-    // INDICADORES VISUALES DINÁMICOS
     // ------------------------------------------------------
-
-    // 1. NOMBRE (Barra de progreso simple)
-    const inNombre = document.getElementById('nombre');
-    const txtNombre = document.getElementById('count-nombre');
-    const barNombre = document.getElementById('bar-nombre');
-
-    if (inNombre && txtNombre && barNombre) {
-        inNombre.addEventListener('input', function() {
-            const len = this.value.length;
-            const max = 50;
-            const percentage = (len / max) * 100;
-            
-            txtNombre.innerText = `${len}/${max}`;
-            barNombre.style.width = `${percentage}%`;
-
-            // Cambio de color al llegar al límite
-            if(len === max) {
-                txtNombre.classList.add('text-red-400');
-                barNombre.classList.replace('bg-brand-secondary', 'bg-red-500');
-            } else {
-                txtNombre.classList.remove('text-red-400');
-                barNombre.classList.replace('bg-red-500', 'bg-brand-secondary');
-            }
-        });
-    }
-
-    // 2. TELÉFONO (Validación visual estricta)
-    const inTel = document.getElementById('telefono');
-    const txtTel = document.getElementById('count-telefono');
-
-    if (inTel && txtTel) {
-        inTel.addEventListener('input', function() {
-            // Limpiar no numéricos
-            this.value = this.value.replace(/[^0-9]/g, '');
-            const len = this.value.length;
-            txtTel.innerText = `${len}/10`;
-
-            // Lógica de colores (Semáforo)
-            if (len === 10) {
-                // Correcto (Verde)
-                txtTel.className = "text-[10px] font-mono font-bold px-2 py-0.5 rounded bg-green-500/20 text-green-400 border border-green-500/30 transition-all";
-                txtTel.innerHTML = '<i class="fa-solid fa-check mr-1"></i> 10/10';
-            } else if (len > 0) {
-                // Incompleto (Amarillo)
-                txtTel.className = "text-[10px] font-mono px-2 py-0.5 rounded bg-yellow-500/10 text-yellow-500 border border-yellow-500/20 transition-all";
-            } else {
-                // Vacío (Gris)
-                txtTel.className = "text-[10px] font-mono px-2 py-0.5 rounded bg-white/5 text-slate-500 border border-transparent transition-all";
-            }
-        });
-    }
-
-    // 3. MENSAJE (Barra de progreso + Contador inverso)
-    const inMsg = document.getElementById('mensaje');
-    const numRestante = document.getElementById('num-restante');
-    const barMsg = document.getElementById('bar-mensaje');
-
-    if (inMsg && numRestante && barMsg) {
-        inMsg.addEventListener('input', function() {
-            const len = this.value.length;
-            const max = 100;
-            const left = max - len;
-            const percentage = (len / max) * 100;
-
-            numRestante.innerText = left;
-            barMsg.style.width = `${percentage}%`;
-
-            // Colores dinámicos según el espacio restante
-            if (left < 10) {
-                // Peligro (Rojo)
-                numRestante.className = "text-red-500 font-bold animate-pulse";
-                barMsg.classList.remove('bg-brand-primary', 'bg-yellow-400');
-                barMsg.classList.add('bg-red-500');
-            } else if (left < 30) {
-                // Precaución (Amarillo)
-                numRestante.className = "text-yellow-400 font-bold";
-                barMsg.classList.remove('bg-brand-primary', 'bg-red-500');
-                barMsg.classList.add('bg-yellow-400');
-            } else {
-                // Seguro (Azul/Original)
-                numRestante.className = "text-white";
-                barMsg.classList.remove('bg-red-500', 'bg-yellow-400');
-                barMsg.classList.add('bg-brand-primary');
-            }
-        });
-    }
-
-
-    //Imagnes subida 
-document.addEventListener('DOMContentLoaded', () => {
+    // 4. GALERÍA Y SUBIDA DE IMÁGENES (LÓGICA ORIGINAL)
+    // ------------------------------------------------------
+    document.addEventListener('DOMContentLoaded', () => {
         
-        // 1. INICIALIZAR SWIPER
-        const swiper = new Swiper(".mySwiper", {
-            slidesPerView: 1,
-            spaceBetween: 20,
-            loop: true,
-            autoplay: { delay: 4000, disableOnInteraction: false },
-            pagination: { el: ".swiper-pagination", clickable: true },
-            navigation: {
-                nextEl: ".swiper-next-btn",
-                prevEl: ".swiper-prev-btn",
-            },
-            breakpoints: {
-                640: { slidesPerView: 2, spaceBetween: 20 }, // Tablet
-                1024: { slidesPerView: 2.5, spaceBetween: 20 }, // Desktop
-            },
-        });
+        // Función para inicializar Swiper (Destruye y Recrea)
+        function initSwiper() {
+            if (gallerySwiper) {
+                gallerySwiper.destroy(true, true); // Destrucción total para evitar conflictos
+            }
+            
+            gallerySwiper = new Swiper(".mySwiper", {
+                slidesPerView: 1,
+                spaceBetween: 20,
+                loop: true, // El loop funciona mejor si se reinicia
+                observer: true,
+                observeParents: true,
+                autoplay: { delay: 4000, disableOnInteraction: false },
+                pagination: { el: ".swiper-pagination", clickable: true },
+                navigation: {
+                    nextEl: ".swiper-next-btn",
+                    prevEl: ".swiper-prev-btn",
+                },
+                breakpoints: {
+                    640: { slidesPerView: 2, spaceBetween: 20 },
+                    1024: { slidesPerView: 2.5, spaceBetween: 20 },
+                },
+            });
+        }
 
-        // 2. FUNCIÓN PARA CARGAR IMÁGENES
+        // Cargar Galería
         async function cargarGaleria() {
             const container = document.getElementById('galeria-container');
+            if(!container) return;
+
             try {
-                const response = await fetch('/api/proyectos'); // Usa tu endpoint GET
+                // Agregamos timestamp para evitar que el navegador guarde cache viejo
+                const response = await fetch(`/api/proyectos?t=${Date.now()}`);
                 const proyectos = await response.json();
 
-                if(proyectos.length > 0) {
-                    container.innerHTML = ''; // Limpiar loader
+                console.log("Proyectos recibidos:", proyectos); // Para depuración
+
+                if(proyectos && proyectos.length > 0) {
+                    container.innerHTML = ''; // Limpiamos el DOM
+                    
                     proyectos.forEach(proy => {
-                        // Creamos el slide
                         const slide = document.createElement('div');
                         slide.className = 'swiper-slide relative group overflow-hidden rounded-2xl';
+                        // Usamos fallback por si imagenUrl viene vacío
+                        const imgUrl = proy.imagenUrl || 'https://via.placeholder.com/400x300?text=Proyecto';
+                        
                         slide.innerHTML = `
-                            <img src="${proy.imagenUrl}" alt="${proy.titulo}" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110">
+                            <img src="${imgUrl}" alt="${proy.titulo}" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110">
                             <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-end p-6">
-                                <span class="text-brand-accent text-xs font-bold uppercase mb-1">${proy.categoria}</span>
-                                <h5 class="text-white font-bold text-lg">${proy.titulo}</h5>
+                                <span class="text-brand-accent text-xs font-bold uppercase mb-1">${proy.categoria || 'Proyecto'}</span>
+                                <h5 class="text-white font-bold text-lg">${proy.titulo || 'Sin Título'}</h5>
                             </div>
                         `;
                         container.append(slide);
                     });
-                    swiper.update(); // Actualizar Swiper con los nuevos slides
+
+                    // Reiniciamos Swiper con los nuevos elementos
+                    initSwiper();
+
                 } else {
-                    container.innerHTML = '<div class="flex items-center justify-center h-full w-full text-gray-400">Sin imágenes aún</div>';
+                    container.innerHTML = '<div class="flex items-center justify-center h-full w-full text-gray-400 p-10">Sin imágenes disponibles</div>';
                 }
             } catch (error) {
                 console.error("Error al cargar galería:", error);
+                // Fallback visual para cuando no hay API real
+                container.innerHTML = '<div class="swiper-slide bg-gray-800 rounded-2xl flex items-center justify-center text-gray-500">Demo: Conecta tu API</div>';
+                initSwiper();
             }
         }
 
         // Cargar al inicio
         cargarGaleria();
 
-        // 3. LÓGICA DE SUBIDA (PREVIEW Y UPLOAD)
+        // Lógica de Subida
+        const uploadForm = document.getElementById('uploadForm');
         const fileInput = document.getElementById('imagenInput');
         const previewImg = document.getElementById('previewImg');
         const uploadPlaceholder = document.getElementById('uploadPlaceholder');
-        const uploadForm = document.getElementById('uploadForm');
         const btnUpload = document.getElementById('btnUpload');
 
-        // Preview de imagen
-        fileInput.addEventListener('change', function() {
-            const file = this.files[0];
-            if (file) {
-                if (file.size > 2 * 1024 * 1024) { // 2MB
-                    Swal.fire({ icon: 'error', title: 'Muy pesado', text: 'La imagen debe pesar menos de 2MB', confirmButtonColor: '#0B0F19' });
-                    this.value = '';
+        if (fileInput) {
+            fileInput.addEventListener('change', function() {
+                const file = this.files[0];
+                if (file) {
+                    if (file.size > 2 * 1024 * 1024) { 
+                        Swal.fire({ icon: 'error', title: 'Muy pesado', text: 'Máximo 2MB', confirmButtonColor: '#0B0F19' });
+                        this.value = '';
+                        return;
+                    }
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        previewImg.src = e.target.result;
+                        previewImg.classList.remove('hidden');
+                        uploadPlaceholder.classList.add('opacity-0');
+                    }
+                    reader.readAsDataURL(file);
+                }
+            });
+        }
+
+        if (uploadForm) {
+            uploadForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const file = fileInput.files[0];
+                if (!file) {
+                    Swal.fire({ icon: 'warning', title: 'Falta imagen', text: 'Selecciona una imagen primero.', confirmButtonColor: '#0B0F19' });
                     return;
                 }
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    previewImg.src = e.target.result;
-                    previewImg.classList.remove('hidden');
-                    uploadPlaceholder.classList.add('opacity-0'); // Ocultar texto pero mantener espacio
-                }
-                reader.readAsDataURL(file);
-            }
-        });
 
-        // Subir imagen
-        uploadForm.addEventListener('submit', async (e) => {
+                const formData = new FormData();
+                formData.append('imagen', file);
+                
+                const originalText = btnUpload.innerHTML;
+                btnUpload.disabled = true;
+                btnUpload.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Subiendo...';
+
+                try {
+                    const res = await fetch('/api/upload', { method: 'POST', body: formData });
+                    
+                    if (!res.ok) throw new Error('Error al subir');
+                    
+                    Swal.fire({ icon: 'success', title: '¡Subido!', text: 'Agregado a la galería.', confirmButtonColor: '#6366f1' });
+                    
+                    // Limpieza
+                    uploadForm.reset();
+                    previewImg.classList.add('hidden');
+                    uploadPlaceholder.classList.remove('opacity-0');
+                    
+                    // RECARGAR GALERÍA
+                    await cargarGaleria(); 
+
+                } catch (err) {
+                    console.error(err);
+                    Swal.fire({ icon: 'error', title: 'Error', text: 'Fallo al conectar con servidor.', confirmButtonColor: '#0B0F19' });
+                } finally {
+                    btnUpload.disabled = false;
+                    btnUpload.innerHTML = originalText;
+                }
+            });
+        }
+    });
+    // ------------------------------------------------------
+    // 5. ENVÍO DE CONTACTO (VALIDACIÓN FINAL Y FETCH)
+    // ------------------------------------------------------
+    const contactForm = document.getElementById('contactForm');
+    const submitBtn = document.getElementById('submitBtn');
+    const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+
+    if (contactForm) {
+        contactForm.addEventListener('submit', async function(e) {
             e.preventDefault();
-            const file = fileInput.files[0];
             
-            if (!file) {
-                Swal.fire({ icon: 'warning', title: 'Falta imagen', text: 'Selecciona una imagen primero.', confirmButtonColor: '#0B0F19' });
+            // Referencias a inputs
+            const inNombre = document.getElementById('nombre');
+            const inEmail = document.getElementById('email');
+            const inTel = document.getElementById('telefono');
+            const inServicio = document.getElementById('servicio');
+            const inMensaje = document.getElementById('mensaje');
+
+            // 1. Validar Email
+            if (!emailRegex.test(inEmail.value)) {
+                Swal.fire({ icon: 'warning', title: 'Correo inválido', text: 'Verifica el formato del correo.', background: '#0B0F19', color: '#fff', confirmButtonColor: '#6366f1' });
+                return;
+            }
+            if (inNombre.value.trim().length < 3) {
+                 Swal.fire({ icon: 'warning', title: 'Nombre muy corto', text: 'Por favor escribe tu nombre completo.', background: '#0B0F19', color: '#fff', confirmButtonColor: '#6366f1' });
+                 return;
+            }
+
+            // 2. Validar Teléfono (Longitud)
+            if (inTel.value.length !== 10) {
+                Swal.fire({ icon: 'warning', title: 'Teléfono incompleto', text: 'El número debe tener 10 dígitos exactos.', background: '#0B0F19', color: '#fff', confirmButtonColor: '#6366f1' });
                 return;
             }
 
-            const formData = new FormData();
-            formData.append('imagen', file); // 'imagen' debe coincidir con el backend
+            // 3. Validar Captcha
+            const recaptchaToken = grecaptcha.getResponse();
+            if (recaptchaToken.length === 0) {
+                Swal.fire({ icon: 'warning', title: 'Verificación requerida', text: 'Confirma que no eres un robot.', background: '#0B0F19', color: '#fff', confirmButtonColor: '#6366f1' });
+                return;
+            }
+            if (inMensaje.value.trim().length < 10) {
+                Swal.fire({ icon: 'warning', title: 'Mensaje muy corto', text: 'Por favor detalla un poco más tu idea (mínimo 10 caracteres).', background: '#0B0F19', color: '#fff', confirmButtonColor: '#6366f1' });
+                return;
+            }
+
+            // Preparar envío
+            const formData = {
+                nombre: inNombre.value.trim(),
+                email: inEmail.value.trim(),
+                telefono: inTel.value,
+                servicio: inServicio.value,
+                mensaje: inMensaje.value.trim(),
+                recaptchaToken: recaptchaToken
+            };
 
             // UI Loading
-            const originalText = btnUpload.innerHTML;
-            btnUpload.disabled = true;
-            btnUpload.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Subiendo...';
+            const originalBtnText = submitBtn.innerHTML;
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Enviando...';
 
             try {
-                const res = await fetch('/api/upload', {
+                const response = await fetch('/api/contacto', {
                     method: 'POST',
-                    body: formData
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(formData)
                 });
-
-                if (!res.ok) throw new Error('Error al subir');
-
-                Swal.fire({ 
-                    icon: 'success', 
-                    title: '¡Subido!', 
-                    text: 'Tu diseño se ha agregado a la galería.',
-                    confirmButtonColor: '#6366f1' 
-                });
-
-                // Resetear form
-                uploadForm.reset();
-                previewImg.classList.add('hidden');
-                uploadPlaceholder.classList.remove('opacity-0');
                 
-                // Recargar el carrusel para ver la nueva foto
-                cargarGaleria();
+                const result = await response.json();
+                if (!response.ok) throw new Error(result.error || 'Error del servidor');
 
-            } catch (err) {
-                Swal.fire({ icon: 'error', title: 'Error', text: 'No se pudo subir la imagen.', confirmButtonColor: '#0B0F19' });
+                // Éxito
+                Swal.fire({ icon: 'success', title: '¡Enviado!', text: 'Te contactaremos pronto.', background: '#0B0F19', color: '#fff', confirmButtonColor: '#6366f1' });
+                
+                // Reset Total
+                contactForm.reset();
+                grecaptcha.reset();
+                
+                // Reset Barras Visuales
+                document.getElementById('bar-nombre').style.width = '0%';
+                document.getElementById('count-nombre').textContent = '0/50';
+                
+                document.getElementById('count-telefono').textContent = '0/10';
+                document.getElementById('count-telefono').classList.remove('text-green-400', 'font-bold');
+                
+                document.getElementById('bar-mensaje').style.width = '0%';
+                document.getElementById('num-restante').textContent = '100';
+                document.getElementById('bar-mensaje').className = 'h-full bg-brand-primary w-0 transition-all duration-300';
+
+            } catch (error) {
+                Swal.fire({ icon: 'error', title: 'Error', text: error.message, background: '#0B0F19', color: '#fff', confirmButtonColor: '#ef4444' });
             } finally {
-                btnUpload.disabled = false;
-                btnUpload.innerHTML = originalText;
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = originalBtnText;
             }
         });
-    });
-    </script>
+    }
+</script>
