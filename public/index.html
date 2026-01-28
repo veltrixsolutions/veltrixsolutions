@@ -1001,12 +1001,24 @@
     <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
 
-   <script>
+<script>
     // ------------------------------------------------------
-    // 1. INICIALIZACIÓN GLOBAL Y UI
+    // 0. CONFIGURACIÓN GLOBAL
     // ------------------------------------------------------
     
-    // Iniciar AOS (Animaciones)
+    // Detectamos si estamos en local para apuntar al puerto 8080 de Go
+    // Si estamos en producción (dominio real), se usa la ruta relativa vacía.
+    const API_BASE_URL = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' 
+        ? 'http://localhost:8080' 
+        : '';
+
+    let gallerySwiper = null; // Variable global para la instancia del carrusel
+
+    // ------------------------------------------------------
+    // 1. INICIALIZACIÓN UI Y EFECTOS
+    // ------------------------------------------------------
+    
+    // Iniciar AOS (Animaciones al hacer scroll)
     AOS.init({ duration: 800, once: true, offset: 100 });
 
     // Lógica del Navbar (Sombra al hacer scroll)
@@ -1040,39 +1052,31 @@
         });
     }
 
-    // ------------------------------------------------------
-    // 2. LÓGICA DE BREADCRUMBS (INTEGRACIÓN NUEVA)
-    // ------------------------------------------------------
+    // Breadcrumbs (Muestra la sección actual en la parte superior)
     document.addEventListener('DOMContentLoaded', () => {
         const breadcrumbContainer = document.getElementById('breadcrumbs-container');
         const breadcrumbCurrent = document.getElementById('breadcrumb-current');
         const sections = document.querySelectorAll('section');
 
-        // Configuración del observador
         const observerOptions = {
             root: null,
-            threshold: 0.2, // Se activa cuando el 20% de la sección es visible
-            rootMargin: "-10% 0px -50% 0px" // Ajuste para detectar mejor el centro de pantalla
+            threshold: 0.2,
+            rootMargin: "-10% 0px -50% 0px"
         };
 
         const observer = new IntersectionObserver((entries) => {
             entries.forEach(entry => {
                 if (entry.isIntersecting) {
                     const id = entry.target.id;
-                    
-                    // Si estamos en el inicio, ocultar breadcrumbs
                     if (id === 'inicio') {
                         breadcrumbContainer.classList.add('-translate-y-full', 'opacity-0');
                     } else {
-                        // Mostrar breadcrumbs y actualizar texto
                         breadcrumbContainer.classList.remove('-translate-y-full', 'opacity-0');
-                        // Capitalizar primera letra
                         const nombreSeccion = id.charAt(0).toUpperCase() + id.slice(1);
                         breadcrumbCurrent.textContent = nombreSeccion;
                         
-                        // Pequeña animación de texto
                         breadcrumbCurrent.classList.remove('animate-pulse');
-                        void breadcrumbCurrent.offsetWidth; // Trigger reflow
+                        void breadcrumbCurrent.offsetWidth; 
                         breadcrumbCurrent.classList.add('animate-pulse');
                     }
                 }
@@ -1083,27 +1087,19 @@
     });
 
     // ------------------------------------------------------
-    // 3. VALIDACIÓN VISUAL DE FORMULARIO (CORREGIDO)
+    // 2. VALIDACIÓN VISUAL DE FORMULARIO (AJUSTADO A TUS REGLAS)
     // ------------------------------------------------------
     document.addEventListener('DOMContentLoaded', () => {
         
-        // Elementos: Nombre
+        // --- A. NOMBRE (Max 50 caracteres) ---
         const inputNombre = document.getElementById('nombre');
         const barNombre = document.getElementById('bar-nombre');
         const countNombre = document.getElementById('count-nombre');
 
-        // Elementos: Teléfono
-        const inputTel = document.getElementById('telefono');
-        const countTel = document.getElementById('count-telefono');
-
-        // Elementos: Mensaje
-        const inputMensaje = document.getElementById('mensaje');
-        const barMensaje = document.getElementById('bar-mensaje');
-        const numRestante = document.getElementById('num-restante');
-        const txtMensaje = document.getElementById('txt-mensaje');
-
-        // A. Lógica Nombre (Progreso y Límite)
         if (inputNombre && barNombre && countNombre) {
+            // Forzamos el atributo HTML por si acaso
+            inputNombre.setAttribute('maxlength', '50');
+
             inputNombre.addEventListener('input', function() {
                 const max = 50;
                 const actual = this.value.length;
@@ -1112,7 +1108,8 @@
                 countNombre.textContent = `${actual}/${max}`;
                 barNombre.style.width = `${porcentaje}%`;
 
-                if (actual >= max) {
+                // Cambio de color visual si se acerca al límite
+                if (actual === max) {
                     countNombre.classList.add('text-red-400', 'font-bold');
                     barNombre.classList.remove('bg-brand-secondary');
                     barNombre.classList.add('bg-red-500');
@@ -1124,10 +1121,15 @@
             });
         }
 
-        // B. Lógica Teléfono (Solo números y longitud exacta)
+        // --- B. TELÉFONO (Max 10 dígitos, Solo Números) ---
+        const inputTel = document.getElementById('telefono');
+        const countTel = document.getElementById('count-telefono');
+
         if (inputTel && countTel) {
+            inputTel.setAttribute('maxlength', '10');
+
             inputTel.addEventListener('input', function() {
-                // Eliminar no numéricos
+                // EXPRESIÓN REGULAR: Elimina todo lo que NO sea número
                 this.value = this.value.replace(/[^0-9]/g, '');
                 
                 const actual = this.value.length;
@@ -1145,8 +1147,18 @@
             });
         }
 
-        // C. Lógica Mensaje (Cuenta regresiva y barra dinámica)
+        // --- C. MENSAJE (Max 100 caracteres) ---
+        const inputMensaje = document.getElementById('mensaje');
+        const barMensaje = document.getElementById('bar-mensaje');
+        const numRestante = document.getElementById('num-restante');
+        const txtMensaje = document.getElementById('txt-mensaje');
+
         if (inputMensaje && barMensaje && numRestante) {
+            // Actualizamos el límite a 100 como pediste
+            inputMensaje.setAttribute('maxlength', '100'); 
+            // Reiniciamos el contador visual inicial
+            numRestante.textContent = '100';
+
             inputMensaje.addEventListener('input', function() {
                 const max = 100;
                 const actual = this.value.length;
@@ -1156,177 +1168,185 @@
                 numRestante.textContent = restantes;
                 barMensaje.style.width = `${porcentaje}%`;
 
-                // Colores según estado
-                barMensaje.className = "h-full w-0 transition-all duration-300"; // Reset base classes
+                // Colores dinámicos
+                barMensaje.className = "h-full w-0 transition-all duration-300"; // Reset clases base
                 
                 if (restantes < 10) {
-                    // Crítico (Rojo)
+                    // Crítico (Rojo - Queda poco espacio)
                     barMensaje.classList.add('bg-red-500');
                     numRestante.classList.add('text-red-500', 'font-bold');
-                    txtMensaje.classList.remove('text-slate-400');
                 } else if (restantes < 30) {
                     // Advertencia (Amarillo)
                     barMensaje.classList.add('bg-yellow-400');
                     numRestante.classList.remove('text-red-500', 'font-bold');
                     numRestante.classList.add('text-yellow-400');
-                    txtMensaje.classList.remove('text-slate-400');
                 } else {
-                    // Normal (Primary)
+                    // Normal (Primary - Azul/Violeta)
                     barMensaje.classList.add('bg-brand-primary');
                     numRestante.classList.remove('text-red-500', 'text-yellow-400', 'font-bold');
                     numRestante.classList.add('text-white');
-                    txtMensaje.classList.add('text-slate-400');
                 }
             });
         }
     });
 
     // ------------------------------------------------------
-    // 4. GALERÍA Y SUBIDA DE IMÁGENES (LÓGICA ORIGINAL)
+    // 3. LÓGICA DE GALERÍA Y CAROUSEL (SWIPER + FETCH)
     // ------------------------------------------------------
-    document.addEventListener('DOMContentLoaded', () => {
+    
+    // Función para inicializar/reiniciar Swiper
+    function initSwiper(cantidadImagenes) {
+        if (gallerySwiper) {
+            gallerySwiper.destroy(true, true); // Destruir instancia previa
+        }
         
-        // Función para inicializar Swiper (Destruye y Recrea)
-        function initSwiper() {
-            if (gallerySwiper) {
-                gallerySwiper.destroy(true, true); // Destrucción total para evitar conflictos
-            }
+        // Habilitar loop solo si hay suficientes imágenes para evitar bugs visuales
+        const enableLoop = cantidadImagenes > 2;
+
+        gallerySwiper = new Swiper(".mySwiper", {
+            slidesPerView: 1,
+            spaceBetween: 20,
+            loop: enableLoop, 
+            autoplay: { delay: 4000, disableOnInteraction: false },
+            pagination: { el: ".swiper-pagination", clickable: true },
+            navigation: {
+                nextEl: ".swiper-next-btn",
+                prevEl: ".swiper-prev-btn",
+            },
+            breakpoints: {
+                640: { slidesPerView: 2, spaceBetween: 20 },
+                1024: { slidesPerView: 2.5, spaceBetween: 20 },
+            },
+        });
+    }
+
+    // Cargar Galería desde el Backend
+    async function cargarGaleria() {
+        const container = document.getElementById('galeria-container');
+        if(!container) return;
+
+        try {
+            // Usamos API_BASE_URL para asegurar la conexión correcta
+            const response = await fetch(`${API_BASE_URL}/api/proyectos?t=${Date.now()}`);
             
-            gallerySwiper = new Swiper(".mySwiper", {
-                slidesPerView: 1,
-                spaceBetween: 20,
-                loop: true, // El loop funciona mejor si se reinicia
-                observer: true,
-                observeParents: true,
-                autoplay: { delay: 4000, disableOnInteraction: false },
-                pagination: { el: ".swiper-pagination", clickable: true },
-                navigation: {
-                    nextEl: ".swiper-next-btn",
-                    prevEl: ".swiper-prev-btn",
-                },
-                breakpoints: {
-                    640: { slidesPerView: 2, spaceBetween: 20 },
-                    1024: { slidesPerView: 2.5, spaceBetween: 20 },
-                },
-            });
-        }
+            if (!response.ok) throw new Error("Error al obtener imágenes");
+            
+            const proyectos = await response.json();
 
-        // Cargar Galería
-        async function cargarGaleria() {
-            const container = document.getElementById('galeria-container');
-            if(!container) return;
+            container.innerHTML = ''; // Limpiar loader
 
-            try {
-                // Agregamos timestamp para evitar que el navegador guarde cache viejo
-                const response = await fetch(`/api/proyectos?t=${Date.now()}`);
-                const proyectos = await response.json();
-
-                console.log("Proyectos recibidos:", proyectos); // Para depuración
-
-                if(proyectos && proyectos.length > 0) {
-                    container.innerHTML = ''; // Limpiamos el DOM
+            if(proyectos && proyectos.length > 0) {
+                proyectos.forEach(proy => {
+                    const slide = document.createElement('div');
+                    slide.className = 'swiper-slide relative group overflow-hidden rounded-2xl h-full'; 
                     
-                    proyectos.forEach(proy => {
-                        const slide = document.createElement('div');
-                        slide.className = 'swiper-slide relative group overflow-hidden rounded-2xl';
-                        // Usamos fallback por si imagenUrl viene vacío
-                        const imgUrl = proy.imagenUrl || 'https://via.placeholder.com/400x300?text=Proyecto';
+                    // Construir URL completa si viene relativa (/uploads...)
+                    let imgUrl = proy.imagenUrl || '';
+                    if (imgUrl.startsWith('/')) {
+                        imgUrl = `${API_BASE_URL}${imgUrl}`;
+                    }
+
+                    // Fallback de imagen en caso de error 404
+                    slide.innerHTML = `
+                        <img src="${imgUrl}" 
+                             alt="${proy.titulo}" 
+                             class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                             onerror="this.onerror=null;this.src='https://via.placeholder.com/400x300?text=Imagen+No+Disponible';">
                         
-                        slide.innerHTML = `
-                            <img src="${imgUrl}" alt="${proy.titulo}" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110">
-                            <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-end p-6">
-                                <span class="text-brand-accent text-xs font-bold uppercase mb-1">${proy.categoria || 'Proyecto'}</span>
-                                <h5 class="text-white font-bold text-lg">${proy.titulo || 'Sin Título'}</h5>
-                            </div>
-                        `;
-                        container.append(slide);
-                    });
+                        <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-end p-6">
+                            <span class="text-brand-accent text-xs font-bold uppercase mb-1">${proy.categoria || 'Proyecto'}</span>
+                            <h5 class="text-white font-bold text-lg">${proy.titulo || 'Sin Título'}</h5>
+                        </div>
+                    `;
+                    container.append(slide);
+                });
 
-                    // Reiniciamos Swiper con los nuevos elementos
-                    initSwiper();
+                // Inicializar carrusel con la cantidad correcta
+                initSwiper(proyectos.length);
 
-                } else {
-                    container.innerHTML = '<div class="flex items-center justify-center h-full w-full text-gray-400 p-10">Sin imágenes disponibles</div>';
-                }
-            } catch (error) {
-                console.error("Error al cargar galería:", error);
-                // Fallback visual para cuando no hay API real
-                container.innerHTML = '<div class="swiper-slide bg-gray-800 rounded-2xl flex items-center justify-center text-gray-500">Demo: Conecta tu API</div>';
-                initSwiper();
+            } else {
+                container.innerHTML = '<div class="flex items-center justify-center h-full w-full text-gray-400 p-10">Sé el primero en subir un proyecto</div>';
             }
+        } catch (error) {
+            console.error("Error galería:", error);
+            container.innerHTML = '<div class="flex items-center justify-center h-full w-full text-red-400 p-10 text-sm text-center">No se pudo conectar con el servidor.<br>Asegúrate de ejecutar "go run main.go"</div>';
         }
+    }
 
-        // Cargar al inicio
-        cargarGaleria();
+    // Cargar al inicio
+    document.addEventListener('DOMContentLoaded', cargarGaleria);
 
-        // Lógica de Subida
-        const uploadForm = document.getElementById('uploadForm');
-        const fileInput = document.getElementById('imagenInput');
-        const previewImg = document.getElementById('previewImg');
-        const uploadPlaceholder = document.getElementById('uploadPlaceholder');
-        const btnUpload = document.getElementById('btnUpload');
+    // ------------------------------------------------------
+    // 4. SUBIDA DE IMÁGENES
+    // ------------------------------------------------------
+    const uploadForm = document.getElementById('uploadForm');
+    const fileInput = document.getElementById('imagenInput');
+    const previewImg = document.getElementById('previewImg');
+    const uploadPlaceholder = document.getElementById('uploadPlaceholder');
+    const btnUpload = document.getElementById('btnUpload');
 
-        if (fileInput) {
-            fileInput.addEventListener('change', function() {
-                const file = this.files[0];
-                if (file) {
-                    if (file.size > 2 * 1024 * 1024) { 
-                        Swal.fire({ icon: 'error', title: 'Muy pesado', text: 'Máximo 2MB', confirmButtonColor: '#0B0F19' });
-                        this.value = '';
-                        return;
-                    }
-                    const reader = new FileReader();
-                    reader.onload = function(e) {
-                        previewImg.src = e.target.result;
-                        previewImg.classList.remove('hidden');
-                        uploadPlaceholder.classList.add('opacity-0');
-                    }
-                    reader.readAsDataURL(file);
-                }
-            });
-        }
-
-        if (uploadForm) {
-            uploadForm.addEventListener('submit', async (e) => {
-                e.preventDefault();
-                const file = fileInput.files[0];
-                if (!file) {
-                    Swal.fire({ icon: 'warning', title: 'Falta imagen', text: 'Selecciona una imagen primero.', confirmButtonColor: '#0B0F19' });
+    if (fileInput) {
+        fileInput.addEventListener('change', function() {
+            const file = this.files[0];
+            if (file) {
+                if (file.size > 2 * 1024 * 1024) { 
+                    Swal.fire({ icon: 'error', title: 'Muy pesado', text: 'Máximo 2MB', confirmButtonColor: '#0B0F19' });
+                    this.value = '';
                     return;
                 }
-
-                const formData = new FormData();
-                formData.append('imagen', file);
-                
-                const originalText = btnUpload.innerHTML;
-                btnUpload.disabled = true;
-                btnUpload.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Subiendo...';
-
-                try {
-                    const res = await fetch('/api/upload', { method: 'POST', body: formData });
-                    
-                    if (!res.ok) throw new Error('Error al subir');
-                    
-                    Swal.fire({ icon: 'success', title: '¡Subido!', text: 'Agregado a la galería.', confirmButtonColor: '#6366f1' });
-                    
-                    // Limpieza
-                    uploadForm.reset();
-                    previewImg.classList.add('hidden');
-                    uploadPlaceholder.classList.remove('opacity-0');
-                    
-                    // RECARGAR GALERÍA
-                    await cargarGaleria(); 
-
-                } catch (err) {
-                    console.error(err);
-                    Swal.fire({ icon: 'error', title: 'Error', text: 'Fallo al conectar con servidor.', confirmButtonColor: '#0B0F19' });
-                } finally {
-                    btnUpload.disabled = false;
-                    btnUpload.innerHTML = originalText;
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    previewImg.src = e.target.result;
+                    previewImg.classList.remove('hidden');
+                    uploadPlaceholder.classList.add('opacity-0');
                 }
-            });
-        }
-    });
+                reader.readAsDataURL(file);
+            }
+        });
+    }
+
+    if (uploadForm) {
+        uploadForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const file = fileInput.files[0];
+            if (!file) {
+                Swal.fire({ icon: 'warning', title: 'Falta imagen', text: 'Selecciona una imagen primero.', confirmButtonColor: '#0B0F19' });
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append('imagen', file);
+            
+            const originalText = btnUpload.innerHTML;
+            btnUpload.disabled = true;
+            btnUpload.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Subiendo...';
+
+            try {
+                // Fetch al endpoint de subida
+                const res = await fetch(`${API_BASE_URL}/api/upload`, { method: 'POST', body: formData });
+                
+                if (!res.ok) throw new Error('Error al subir');
+                
+                Swal.fire({ icon: 'success', title: '¡Subido!', text: 'Agregado a la galería.', confirmButtonColor: '#6366f1' });
+                
+                // Limpieza del formulario
+                uploadForm.reset();
+                previewImg.classList.add('hidden');
+                uploadPlaceholder.classList.remove('opacity-0');
+                
+                // RECARGAR GALERÍA AUTOMÁTICAMENTE
+                await cargarGaleria(); 
+
+            } catch (err) {
+                console.error(err);
+                Swal.fire({ icon: 'error', title: 'Error', text: 'Fallo al conectar con servidor.', confirmButtonColor: '#0B0F19' });
+            } finally {
+                btnUpload.disabled = false;
+                btnUpload.innerHTML = originalText;
+            }
+        });
+    }
+
     // ------------------------------------------------------
     // 5. ENVÍO DE CONTACTO (VALIDACIÓN FINAL Y FETCH)
     // ------------------------------------------------------
@@ -1345,35 +1365,36 @@
             const inServicio = document.getElementById('servicio');
             const inMensaje = document.getElementById('mensaje');
 
-            // 1. Validar Email
+            // --- VALIDACIONES FINALES ---
+
+            // 1. Email
             if (!emailRegex.test(inEmail.value)) {
                 Swal.fire({ icon: 'warning', title: 'Correo inválido', text: 'Verifica el formato del correo.', background: '#0B0F19', color: '#fff', confirmButtonColor: '#6366f1' });
                 return;
             }
-            if (inNombre.value.trim().length < 3) {
-                 Swal.fire({ icon: 'warning', title: 'Nombre muy corto', text: 'Por favor escribe tu nombre completo.', background: '#0B0F19', color: '#fff', confirmButtonColor: '#6366f1' });
+            
+            // 2. Nombre (Min 2)
+            if (inNombre.value.trim().length < 2) {
+                 Swal.fire({ icon: 'warning', title: 'Nombre muy corto', text: 'Mínimo 2 caracteres.', background: '#0B0F19', color: '#fff', confirmButtonColor: '#6366f1' });
                  return;
             }
 
-            // 2. Validar Teléfono (Longitud)
+            // 3. Teléfono (Exactamente 10)
             if (inTel.value.length !== 10) {
                 Swal.fire({ icon: 'warning', title: 'Teléfono incompleto', text: 'El número debe tener 10 dígitos exactos.', background: '#0B0F19', color: '#fff', confirmButtonColor: '#6366f1' });
                 return;
             }
 
-            // 3. Validar Captcha
-            const recaptchaToken = grecaptcha.getResponse();
-            if (recaptchaToken.length === 0) {
-                Swal.fire({ icon: 'warning', title: 'Verificación requerida', text: 'Confirma que no eres un robot.', background: '#0B0F19', color: '#fff', confirmButtonColor: '#6366f1' });
-                return;
-            }
+            // 4. Mensaje (Min 10)
             if (inMensaje.value.trim().length < 10) {
-                Swal.fire({ icon: 'warning', title: 'Mensaje muy corto', text: 'Por favor detalla un poco más tu idea (mínimo 10 caracteres).', background: '#0B0F19', color: '#fff', confirmButtonColor: '#6366f1' });
+                Swal.fire({ icon: 'warning', title: 'Mensaje muy corto', text: 'Detalla un poco más (min 10 caracteres).', background: '#0B0F19', color: '#fff', confirmButtonColor: '#6366f1' });
                 return;
             }
 
-            if (inMensaje.value.trim().length < 10) {
-                Swal.fire({ icon: 'warning', title: 'Mensaje muy corto', text: 'Por favor detalla un poco más tu idea (mínimo 10 caracteres).', background: '#0B0F19', color: '#fff', confirmButtonColor: '#6366f1' });
+            // 5. Captcha
+            const recaptchaToken = grecaptcha.getResponse();
+            if (recaptchaToken.length === 0) {
+                Swal.fire({ icon: 'warning', title: 'Verificación requerida', text: 'Completa el reCAPTCHA.', background: '#0B0F19', color: '#fff', confirmButtonColor: '#6366f1' });
                 return;
             }
 
@@ -1393,7 +1414,7 @@
             submitBtn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Enviando...';
 
             try {
-                const response = await fetch('/api/contacto', {
+                const response = await fetch(`${API_BASE_URL}/api/contacto`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(formData)
@@ -1417,7 +1438,7 @@
                 document.getElementById('count-telefono').classList.remove('text-green-400', 'font-bold');
                 
                 document.getElementById('bar-mensaje').style.width = '0%';
-                document.getElementById('num-restante').textContent = '100';
+                document.getElementById('num-restante').textContent = '100'; // Reset a 100
                 document.getElementById('bar-mensaje').className = 'h-full bg-brand-primary w-0 transition-all duration-300';
 
             } catch (error) {
