@@ -234,18 +234,7 @@ func obtenerProyectosBD(c echo.Context) error {
 }
 
 // C. Servir la Imagen Visual (Src del <img>)
-func servirImagenBD(c echo.Context) error {
-	id := c.Param("id")
-	var proy Proyecto
-
-	// Buscamos el registro completo (incluyendo los bytes)
-	if result := db.First(&proy, id); result.Error != nil {
-		return c.NoContent(http.StatusNotFound)
-	}
-
-	// Escribimos los bytes como respuesta con el MimeType correcto
-	return c.Blob(http.StatusOK, proy.MimeType, proy.Datos)
-}
+// (Handler implemented later with logging and redirects)
 
 func manejarContacto(c echo.Context) error {
 	req := new(ContactoRequest)
@@ -292,4 +281,25 @@ func validarCaptchaGoogle(token string) bool {
 	var result RecaptchaResponse
 	json.NewDecoder(resp.Body).Decode(&result)
 	return result.Success
+}
+
+// C. Servir la Imagen Visual (Src del <img>)
+func servirImagenBD(c echo.Context) error {
+	id := c.Param("id")
+	var proy Proyecto
+
+	// Buscamos el registro completo
+	if result := db.First(&proy, id); result.Error != nil {
+		fmt.Println("❌ Error: Imagen no encontrada para ID:", id) // Log para ver en Railway
+		return c.Redirect(http.StatusFound, "https://placehold.co/600x400?text=No+Encontrado")
+	}
+
+	// Si el array de bytes está vacío, algo falló en la subida
+	if len(proy.Datos) == 0 {
+		fmt.Println("⚠️ Advertencia: El registro existe pero no tiene datos de imagen (ID:", id, ")")
+		return c.Redirect(http.StatusFound, "https://placehold.co/600x400?text=Imagen+Vacia")
+	}
+
+	// Escribimos los bytes
+	return c.Blob(http.StatusOK, proy.MimeType, proy.Datos)
 }
