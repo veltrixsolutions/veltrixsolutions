@@ -68,8 +68,7 @@ type RecaptchaResponse struct {
 	Success bool `json:"success"`
 }
 
-// ---------------------------------------------------------
-// 2. CONFIGURACIÓN
+// 2. CONFIGURACIÓN DEL VALIDADOR
 // ---------------------------------------------------------
 
 type CustomValidator struct {
@@ -78,7 +77,55 @@ type CustomValidator struct {
 
 func (cv *CustomValidator) Validate(i interface{}) error {
 	if err := cv.validator.Struct(i); err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+		// Intentamos convertir el error a una lista de errores de validación
+		if validationErrors, ok := err.(validator.ValidationErrors); ok {
+			// Solo tomamos el primer error para no saturar al usuario
+			for _, e := range validationErrors {
+
+				// Traducimos según el campo (Struct Field) y la regla (Tag)
+				switch e.Field() {
+				case "Nombre":
+					if e.Tag() == "required" {
+						return fmt.Errorf("El nombre es obligatorio.")
+					}
+					if e.Tag() == "min" {
+						return fmt.Errorf("El nombre es muy corto.")
+					}
+
+				case "Email":
+					if e.Tag() == "required" {
+						return fmt.Errorf("El correo es obligatorio.")
+					}
+					if e.Tag() == "email" {
+						return fmt.Errorf("El formato del correo no es válido.")
+					}
+
+				case "Telefono":
+					if e.Tag() == "numeric" {
+						return fmt.Errorf("El teléfono solo debe contener números.")
+					}
+					if e.Tag() == "max" {
+						return fmt.Errorf("El teléfono no debe exceder 10 dígitos.")
+					}
+
+				case "Mensaje":
+					if e.Tag() == "required" {
+						return fmt.Errorf("Por favor escribe un mensaje.")
+					}
+					if e.Tag() == "min" {
+						return fmt.Errorf("El mensaje es muy corto (mínimo 10 caracteres).")
+					}
+					if e.Tag() == "max" {
+						return fmt.Errorf("El mensaje es demasiado largo.")
+					}
+
+				case "RecaptchaToken":
+					return fmt.Errorf("Error de seguridad (Captcha). Recarga la página.")
+				}
+			}
+		}
+		// Fallback por si es otro tipo de error
+		return fmt.Errorf("Datos inválidos en el formulario.")
 	}
 	return nil
 }
