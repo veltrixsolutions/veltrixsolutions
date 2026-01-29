@@ -77,13 +77,12 @@ type CustomValidator struct {
 
 func (cv *CustomValidator) Validate(i interface{}) error {
 	if err := cv.validator.Struct(i); err != nil {
-		// Intentamos convertir el error a una lista de errores de validación
 		if validationErrors, ok := err.(validator.ValidationErrors); ok {
-			// Solo tomamos el primer error para no saturar al usuario
 			for _, e := range validationErrors {
 
-				// Traducimos según el campo (Struct Field) y la regla (Tag)
+				// --- TRADUCCIÓN DE ERRORES ---
 				switch e.Field() {
+
 				case "Nombre":
 					if e.Tag() == "required" {
 						return fmt.Errorf("El nombre es obligatorio.")
@@ -101,11 +100,25 @@ func (cv *CustomValidator) Validate(i interface{}) error {
 					}
 
 				case "Telefono":
+					// Si cambias el struct a 'required'
+					if e.Tag() == "required" {
+						return fmt.Errorf("El teléfono es obligatorio.")
+					}
+
+					// Error: contiene letras o símbolos
 					if e.Tag() == "numeric" {
-						return fmt.Errorf("El teléfono solo debe contener números.")
+						return fmt.Errorf("El teléfono solo debe contener números (sin espacios ni guiones).")
+					}
+
+					// Error: longitud exacta (len) o mínima (min)
+					if e.Tag() == "len" {
+						return fmt.Errorf("El teléfono debe tener exactamente 10 dígitos.")
+					}
+					if e.Tag() == "min" {
+						return fmt.Errorf("El teléfono es muy corto (mínimo 10 dígitos).")
 					}
 					if e.Tag() == "max" {
-						return fmt.Errorf("El teléfono no debe exceder 10 dígitos.")
+						return fmt.Errorf("El teléfono es demasiado largo.")
 					}
 
 				case "Mensaje":
@@ -124,7 +137,6 @@ func (cv *CustomValidator) Validate(i interface{}) error {
 				}
 			}
 		}
-		// Fallback por si es otro tipo de error
 		return fmt.Errorf("Datos inválidos en el formulario.")
 	}
 	return nil
