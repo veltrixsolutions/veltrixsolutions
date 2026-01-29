@@ -7,7 +7,6 @@ import (
 	"log"
 	"net/http"
 	"os"
-	"path/filepath"
 	"strings"
 	"time"
 
@@ -24,13 +23,25 @@ import (
 // 1. MODELOS DE DATOS
 // ---------------------------------------------------------
 
+// Modelo Proyecto: Guarda la imagen en BINARIO (Byte Array) para persistencia en Railway
 type Proyecto struct {
-	ID          uint      `gorm:"primaryKey" json:"id"`
-	Titulo      string    `gorm:"type:varchar(100)" json:"titulo"`
-	Categoria   string    `gorm:"type:varchar(50)" json:"categoria"`
-	Descripcion string    `gorm:"type:text" json:"descripcion"`
-	ImagenURL   string    `gorm:"type:text" json:"imagenUrl"`
-	CreatedAt   time.Time `json:"fecha"`
+	ID        uint   `gorm:"primaryKey" json:"id"`
+	Titulo    string `gorm:"type:varchar(100)" json:"titulo"`
+	Categoria string `gorm:"type:varchar(50)" json:"categoria"`
+
+	// DATOS BINARIOS DE LA IMAGEN
+	Datos    []byte `gorm:"type:bytea" json:"-"`              // json:"-" para no enviarlo en la lista
+	MimeType string `gorm:"type:varchar(50)" json:"mimeType"` // ej: image/jpeg
+
+	CreatedAt time.Time `json:"fecha"`
+}
+
+// Estructura ligera para enviar la lista al frontend (sin los bytes pesados)
+type ProyectoResponse struct {
+	ID        uint      `json:"id"`
+	Titulo    string    `json:"titulo"`
+	Categoria string    `json:"categoria"`
+	CreatedAt time.Time `json:"fecha"`
 }
 
 type ContactoWeb struct {
@@ -58,7 +69,7 @@ type RecaptchaResponse struct {
 }
 
 // ---------------------------------------------------------
-// 2. CONFIGURACIÓN DEL VALIDADOR
+// 2. CONFIGURACIÓN
 // ---------------------------------------------------------
 
 type CustomValidator struct {
@@ -75,26 +86,29 @@ func (cv *CustomValidator) Validate(i interface{}) error {
 var db *gorm.DB
 
 // ---------------------------------------------------------
-// 3. FUNCIÓN MAIN
+// 3. MAIN
 // ---------------------------------------------------------
 
 func main() {
+	// Cargar variables (opcional si usas Railway Variables)
 	if err := godotenv.Load(); err != nil {
-		fmt.Println("ℹ️ Nota: No se encontró .env, usando variables del sistema.")
+		fmt.Println("ℹ️ Nota: Usando variables de entorno del sistema.")
 	}
 
+	// Conexión DB
 	dsn := os.Getenv("DB_DSN")
 	if dsn == "" {
-		log.Fatal("❌ Error crítico: La variable DB_DSN está vacía.")
+		log.Fatal("❌ Error: DB_DSN está vacía.")
 	}
 
 	var err error
 	db, err = gorm.Open(postgres.Open(dsn), &gorm.Config{})
 	if err != nil {
-		log.Fatal("❌ Falló la conexión a la base de datos: ", err)
+		log.Fatal("❌ Falló conexión a DB: ", err)
 	}
-	fmt.Println("✅ Conexión a PostgreSQL establecida.")
+	fmt.Println("✅ Conectado a PostgreSQL")
 
+	// Migraciones
 	db.AutoMigrate(&ContactoWeb{}, &Proyecto{})
 
 	e := echo.New()
@@ -104,8 +118,9 @@ func main() {
 	e.Use(middleware.Logger())
 	e.Use(middleware.Recover())
 	e.Use(middleware.Secure())
-	e.Use(middleware.BodyLimit("5M"))
+	e.Use(middleware.BodyLimit("5M")) // Permitir subidas de hasta 5MB
 
+	// CORS
 	allowOrigin := os.Getenv("FRONTEND_URL")
 	if allowOrigin == "" {
 		allowOrigin = "*"
@@ -115,6 +130,7 @@ func main() {
 		AllowMethods: []string{http.MethodPost, http.MethodGet},
 	}))
 
+	// Rate Limiter
 	e.Use(middleware.RateLimiterWithConfig(middleware.RateLimiterConfig{
 		Skipper: middleware.DefaultSkipper,
 		Store:   middleware.NewRateLimiterMemoryStore(rate.Limit(5)),
@@ -123,15 +139,18 @@ func main() {
 		},
 	}))
 
-	// RUTAS Y ARCHIVOS ESTÁTICOS
+	// RUTAS
 	e.Static("/", "public")
-	// CORRECCIÓN: Servir /uploads apuntando a la carpeta física public/uploads
-	e.Static("/uploads", "public/uploads")
 
+	// API Rutas
 	e.POST("/api/contacto", manejarContacto)
-	e.POST("/api/upload", subirProyecto)
-	e.GET("/api/proyectos", obtenerProyectos)
 
+	// --- RUTAS DE IMÁGENES (SISTEMA DE BD) ---
+	e.POST("/api/upload", subirProyectoBD)      // Subir bytes
+	e.GET("/api/proyectos", obtenerProyectosBD) // Obtener lista JSON
+	e.GET("/api/imagen/:id", servirImagenBD)    // Obtener la imagen visual
+
+	// Puerto
 	port := os.Getenv("PORT")
 	if port == "" {
 		port = "8080"
@@ -140,7 +159,7 @@ func main() {
 		port = ":" + port
 	}
 
-	fmt.Println("🚀 Servidor Veltrix corriendo en " + port)
+	fmt.Println("🚀 Servidor corriendo en " + port)
 	e.Logger.Fatal(e.Start(port))
 }
 
@@ -148,14 +167,95 @@ func main() {
 // 4. HANDLERS
 // ---------------------------------------------------------
 
+// A. Subir Imagen a Base de Datos
+func subirProyectoBD(c echo.Context) error {
+	// 1. Obtener archivo
+	file, err := c.FormFile("imagen")
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, map[string]string{"error": "No se envió imagen"})
+	}
+
+	// 2. Validar extensión
+	ext := strings.ToLower(file.Filename)
+	if !strings.HasSuffix(ext, ".jpg") && !strings.HasSuffix(ext, ".jpeg") && !strings.HasSuffix(ext, ".png") {
+		return c.JSON(http.StatusBadRequest, map[string]string{"error": "Solo formato JPG o PNG"})
+	}
+
+	// 3. Abrir
+	src, err := file.Open()
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, map[string]string{"error": "Error al procesar archivo"})
+	}
+	defer src.Close()
+
+	// 4. Leer BYTES (Esto es lo que guardaremos en Postgres)
+	fileBytes, err := io.ReadAll(src)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, map[string]string{"error": "Error al leer bytes"})
+	}
+
+	// 5. Guardar en DB
+	nuevoProyecto := Proyecto{
+		Titulo:    "Diseño de Comunidad",
+		Categoria: "Upload",
+		Datos:     fileBytes, // Guardamos el binario
+		MimeType:  file.Header.Get("Content-Type"),
+		CreatedAt: time.Now(),
+	}
+
+	if result := db.Create(&nuevoProyecto); result.Error != nil {
+		fmt.Println("Error DB:", result.Error)
+		return c.JSON(http.StatusInternalServerError, map[string]string{"error": "Error guardando en base de datos"})
+	}
+
+	return c.JSON(http.StatusCreated, map[string]string{"mensaje": "Imagen guardada correctamente"})
+}
+
+// B. Obtener Lista de Proyectos (Ligera)
+func obtenerProyectosBD(c echo.Context) error {
+	var proyectos []Proyecto
+	// Seleccionamos solo campos necesarios (EXCLUYENDO 'Datos' que es pesado)
+	if result := db.Select("id", "titulo", "categoria", "created_at").Order("created_at desc").Limit(20).Find(&proyectos); result.Error != nil {
+		return c.JSON(http.StatusInternalServerError, map[string]string{"error": "Error al obtener lista"})
+	}
+
+	// Mapear a respuesta limpia
+	var response []ProyectoResponse
+	for _, p := range proyectos {
+		response = append(response, ProyectoResponse{
+			ID:        p.ID,
+			Titulo:    p.Titulo,
+			Categoria: p.Categoria,
+			CreatedAt: p.CreatedAt,
+		})
+	}
+
+	return c.JSON(http.StatusOK, response)
+}
+
+// C. Servir la Imagen Visual (Src del <img>)
+func servirImagenBD(c echo.Context) error {
+	id := c.Param("id")
+	var proy Proyecto
+
+	// Buscamos el registro completo (incluyendo los bytes)
+	if result := db.First(&proy, id); result.Error != nil {
+		return c.NoContent(http.StatusNotFound)
+	}
+
+	// Escribimos los bytes como respuesta con el MimeType correcto
+	return c.Blob(http.StatusOK, proy.MimeType, proy.Datos)
+}
+
 func manejarContacto(c echo.Context) error {
 	req := new(ContactoRequest)
 	if err := c.Bind(req); err != nil {
-		return c.JSON(http.StatusBadRequest, map[string]string{"error": "Formato inválido"})
+		return c.JSON(http.StatusBadRequest, map[string]string{"error": "JSON inválido"})
 	}
 	if err := c.Validate(req); err != nil {
 		return c.JSON(http.StatusBadRequest, map[string]string{"error": err.Error()})
 	}
+
 	if !validarCaptchaGoogle(req.RecaptchaToken) {
 		return c.JSON(http.StatusUnauthorized, map[string]string{"error": "Captcha inválido"})
 	}
@@ -170,70 +270,16 @@ func manejarContacto(c echo.Context) error {
 	}
 
 	if result := db.Create(&nuevoContacto); result.Error != nil {
-		return c.JSON(http.StatusInternalServerError, map[string]string{"error": "Error interno"})
+		return c.JSON(http.StatusInternalServerError, map[string]string{"error": "Error DB"})
 	}
 
-	return c.JSON(http.StatusCreated, map[string]string{"mensaje": "Enviado correctamente"})
-}
-
-func subirProyecto(c echo.Context) error {
-	file, err := c.FormFile("imagen")
-	if err != nil {
-		return c.JSON(http.StatusBadRequest, map[string]string{"error": "No se envió imagen"})
-	}
-
-	ext := strings.ToLower(filepath.Ext(file.Filename))
-	if ext != ".jpg" && ext != ".jpeg" && ext != ".png" {
-		return c.JSON(http.StatusBadRequest, map[string]string{"error": "Solo JPG o PNG"})
-	}
-
-	src, err := file.Open()
-	if err != nil {
-		return c.JSON(http.StatusInternalServerError, map[string]string{"error": "Error al abrir"})
-	}
-	defer src.Close()
-
-	// Carpeta física
-	uploadDir := filepath.Join("public", "uploads")
-	os.MkdirAll(uploadDir, 0755)
-
-	newFileName := fmt.Sprintf("%d%s", time.Now().Unix(), ext)
-	dstPath := filepath.Join(uploadDir, newFileName)
-
-	dst, err := os.Create(dstPath)
-	if err != nil {
-		return c.JSON(http.StatusInternalServerError, map[string]string{"error": "Error al crear archivo"})
-	}
-	defer dst.Close()
-
-	if _, err = io.Copy(dst, src); err != nil {
-		return c.JSON(http.StatusInternalServerError, map[string]string{"error": "Error al escribir"})
-	}
-
-	// URL pública que guardamos en DB
-	publicURL := fmt.Sprintf("/uploads/%s", newFileName)
-
-	nuevoProyecto := Proyecto{
-		Titulo:    "Diseño de Comunidad",
-		Categoria: "Upload",
-		ImagenURL: publicURL,
-	}
-
-	db.Create(&nuevoProyecto)
-
-	return c.JSON(http.StatusCreated, map[string]string{"url": publicURL})
-}
-
-func obtenerProyectos(c echo.Context) error {
-	var proyectos []Proyecto
-	db.Order("created_at desc").Limit(10).Find(&proyectos)
-	return c.JSON(http.StatusOK, proyectos)
+	return c.JSON(http.StatusCreated, map[string]string{"mensaje": "Enviado"})
 }
 
 func validarCaptchaGoogle(token string) bool {
 	secret := os.Getenv("RECAPTCHA_SECRET")
 	if secret == "" {
-		return false
+		return false // Falla segura
 	}
 	resp, err := http.PostForm("https://www.google.com/recaptcha/api/siteverify", map[string][]string{
 		"secret":   {secret},
