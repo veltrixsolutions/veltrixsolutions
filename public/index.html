@@ -1006,7 +1006,7 @@
     // 0. CONFIGURACIÓN GLOBAL
     // ------------------------------------------------------
     
-    // Detectamos si estamos en local para apuntar al puerto 8080 de Go
+    // Detectamos si estamos en local para apuntar al puerto 8080 de Go.
     // Si estamos en producción (dominio real), se usa la ruta relativa vacía.
     const API_BASE_URL = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' 
         ? 'http://localhost:8080' 
@@ -1087,7 +1087,7 @@
     });
 
     // ------------------------------------------------------
-    // 2. VALIDACIÓN VISUAL DE FORMULARIO (AJUSTADO A TUS REGLAS)
+    // 2. VALIDACIÓN VISUAL DE FORMULARIO (BARRAS DE PROGRESO)
     // ------------------------------------------------------
     document.addEventListener('DOMContentLoaded', () => {
         
@@ -1097,7 +1097,6 @@
         const countNombre = document.getElementById('count-nombre');
 
         if (inputNombre && barNombre && countNombre) {
-            // Forzamos el atributo HTML por si acaso
             inputNombre.setAttribute('maxlength', '50');
 
             inputNombre.addEventListener('input', function() {
@@ -1108,7 +1107,6 @@
                 countNombre.textContent = `${actual}/${max}`;
                 barNombre.style.width = `${porcentaje}%`;
 
-                // Cambio de color visual si se acerca al límite
                 if (actual === max) {
                     countNombre.classList.add('text-red-400', 'font-bold');
                     barNombre.classList.remove('bg-brand-secondary');
@@ -1129,7 +1127,6 @@
             inputTel.setAttribute('maxlength', '10');
 
             inputTel.addEventListener('input', function() {
-                // EXPRESIÓN REGULAR: Elimina todo lo que NO sea número
                 this.value = this.value.replace(/[^0-9]/g, '');
                 
                 const actual = this.value.length;
@@ -1151,12 +1148,9 @@
         const inputMensaje = document.getElementById('mensaje');
         const barMensaje = document.getElementById('bar-mensaje');
         const numRestante = document.getElementById('num-restante');
-        const txtMensaje = document.getElementById('txt-mensaje');
-
+        
         if (inputMensaje && barMensaje && numRestante) {
-            // Actualizamos el límite a 100 como pediste
             inputMensaje.setAttribute('maxlength', '100'); 
-            // Reiniciamos el contador visual inicial
             numRestante.textContent = '100';
 
             inputMensaje.addEventListener('input', function() {
@@ -1169,19 +1163,16 @@
                 barMensaje.style.width = `${porcentaje}%`;
 
                 // Colores dinámicos
-                barMensaje.className = "h-full w-0 transition-all duration-300"; // Reset clases base
+                barMensaje.className = "h-full w-0 transition-all duration-300"; 
                 
                 if (restantes < 10) {
-                    // Crítico (Rojo - Queda poco espacio)
                     barMensaje.classList.add('bg-red-500');
                     numRestante.classList.add('text-red-500', 'font-bold');
                 } else if (restantes < 30) {
-                    // Advertencia (Amarillo)
                     barMensaje.classList.add('bg-yellow-400');
                     numRestante.classList.remove('text-red-500', 'font-bold');
                     numRestante.classList.add('text-yellow-400');
                 } else {
-                    // Normal (Primary - Azul/Violeta)
                     barMensaje.classList.add('bg-brand-primary');
                     numRestante.classList.remove('text-red-500', 'text-yellow-400', 'font-bold');
                     numRestante.classList.add('text-white');
@@ -1194,13 +1185,11 @@
     // 3. LÓGICA DE GALERÍA Y CAROUSEL (SWIPER + FETCH)
     // ------------------------------------------------------
     
-    // Función para inicializar/reiniciar Swiper
     function initSwiper(cantidadImagenes) {
         if (gallerySwiper) {
-            gallerySwiper.destroy(true, true); // Destruir instancia previa
+            gallerySwiper.destroy(true, true);
         }
         
-        // Habilitar loop solo si hay suficientes imágenes para evitar bugs visuales
         const enableLoop = cantidadImagenes > 2;
 
         gallerySwiper = new Swiper(".mySwiper", {
@@ -1220,13 +1209,12 @@
         });
     }
 
-    // Cargar Galería desde el Backend
     async function cargarGaleria() {
         const container = document.getElementById('galeria-container');
         if(!container) return;
 
         try {
-            // Usamos API_BASE_URL para asegurar la conexión correcta
+            // Se añade timestamp para evitar caché
             const response = await fetch(`${API_BASE_URL}/api/proyectos?t=${Date.now()}`);
             
             if (!response.ok) throw new Error("Error al obtener imágenes");
@@ -1240,18 +1228,19 @@
                     const slide = document.createElement('div');
                     slide.className = 'swiper-slide relative group overflow-hidden rounded-2xl h-full'; 
                     
-                    // Construir URL completa si viene relativa (/uploads...)
+                    // --- CORRECCIÓN DE RUTA DE IMAGEN ---
                     let imgUrl = proy.imagenUrl || '';
-                    if (imgUrl.startsWith('/')) {
+                    // Si la ruta comienza con /uploads (es local), le pegamos el dominio del backend
+                    if (imgUrl.startsWith('/uploads')) {
                         imgUrl = `${API_BASE_URL}${imgUrl}`;
                     }
+                    // ------------------------------------
 
-                    // Fallback de imagen en caso de error 404
                     slide.innerHTML = `
                         <img src="${imgUrl}" 
                              alt="${proy.titulo}" 
                              class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
-                             onerror="this.onerror=null;this.src='https://via.placeholder.com/400x300?text=Imagen+No+Disponible';">
+                             onerror="this.onerror=null;this.src='https://placehold.co/400x300?text=Error+Carga';">
                         
                         <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-end p-6">
                             <span class="text-brand-accent text-xs font-bold uppercase mb-1">${proy.categoria || 'Proyecto'}</span>
@@ -1261,7 +1250,6 @@
                     container.append(slide);
                 });
 
-                // Inicializar carrusel con la cantidad correcta
                 initSwiper(proyectos.length);
 
             } else {
@@ -1322,19 +1310,16 @@
             btnUpload.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Subiendo...';
 
             try {
-                // Fetch al endpoint de subida
                 const res = await fetch(`${API_BASE_URL}/api/upload`, { method: 'POST', body: formData });
                 
                 if (!res.ok) throw new Error('Error al subir');
                 
                 Swal.fire({ icon: 'success', title: '¡Subido!', text: 'Agregado a la galería.', confirmButtonColor: '#6366f1' });
                 
-                // Limpieza del formulario
                 uploadForm.reset();
                 previewImg.classList.add('hidden');
                 uploadPlaceholder.classList.remove('opacity-0');
                 
-                // RECARGAR GALERÍA AUTOMÁTICAMENTE
                 await cargarGaleria(); 
 
             } catch (err) {
@@ -1358,47 +1343,37 @@
         contactForm.addEventListener('submit', async function(e) {
             e.preventDefault();
             
-            // Referencias a inputs
             const inNombre = document.getElementById('nombre');
             const inEmail = document.getElementById('email');
             const inTel = document.getElementById('telefono');
             const inServicio = document.getElementById('servicio');
             const inMensaje = document.getElementById('mensaje');
 
-            // --- VALIDACIONES FINALES ---
-
-            // 1. Email
+            // --- VALIDACIONES ---
             if (!emailRegex.test(inEmail.value)) {
                 Swal.fire({ icon: 'warning', title: 'Correo inválido', text: 'Verifica el formato del correo.', background: '#0B0F19', color: '#fff', confirmButtonColor: '#6366f1' });
                 return;
             }
-            
-            // 2. Nombre (Min 2)
             if (inNombre.value.trim().length < 2) {
                  Swal.fire({ icon: 'warning', title: 'Nombre muy corto', text: 'Mínimo 2 caracteres.', background: '#0B0F19', color: '#fff', confirmButtonColor: '#6366f1' });
                  return;
             }
-
-            // 3. Teléfono (Exactamente 10)
             if (inTel.value.length !== 10) {
                 Swal.fire({ icon: 'warning', title: 'Teléfono incompleto', text: 'El número debe tener 10 dígitos exactos.', background: '#0B0F19', color: '#fff', confirmButtonColor: '#6366f1' });
                 return;
             }
-
-            // 4. Mensaje (Min 10)
             if (inMensaje.value.trim().length < 10) {
                 Swal.fire({ icon: 'warning', title: 'Mensaje muy corto', text: 'Detalla un poco más (min 10 caracteres).', background: '#0B0F19', color: '#fff', confirmButtonColor: '#6366f1' });
                 return;
             }
 
-            // 5. Captcha
+            // Validar Captcha
             const recaptchaToken = grecaptcha.getResponse();
             if (recaptchaToken.length === 0) {
                 Swal.fire({ icon: 'warning', title: 'Verificación requerida', text: 'Completa el reCAPTCHA.', background: '#0B0F19', color: '#fff', confirmButtonColor: '#6366f1' });
                 return;
             }
 
-            // Preparar envío
             const formData = {
                 nombre: inNombre.value.trim(),
                 email: inEmail.value.trim(),
@@ -1408,7 +1383,6 @@
                 recaptchaToken: recaptchaToken
             };
 
-            // UI Loading
             const originalBtnText = submitBtn.innerHTML;
             submitBtn.disabled = true;
             submitBtn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Enviando...';
@@ -1423,10 +1397,8 @@
                 const result = await response.json();
                 if (!response.ok) throw new Error(result.error || 'Error del servidor');
 
-                // Éxito
                 Swal.fire({ icon: 'success', title: '¡Enviado!', text: 'Te contactaremos pronto.', background: '#0B0F19', color: '#fff', confirmButtonColor: '#6366f1' });
                 
-                // Reset Total
                 contactForm.reset();
                 grecaptcha.reset();
                 
@@ -1438,7 +1410,7 @@
                 document.getElementById('count-telefono').classList.remove('text-green-400', 'font-bold');
                 
                 document.getElementById('bar-mensaje').style.width = '0%';
-                document.getElementById('num-restante').textContent = '100'; // Reset a 100
+                document.getElementById('num-restante').textContent = '100'; 
                 document.getElementById('bar-mensaje').className = 'h-full bg-brand-primary w-0 transition-all duration-300';
 
             } catch (error) {

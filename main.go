@@ -21,20 +21,18 @@ import (
 )
 
 // ---------------------------------------------------------
-// 1. MODELOS DE DATOS (STRUCTS)
+// 1. MODELOS DE DATOS
 // ---------------------------------------------------------
 
-// Proyecto representa las imágenes de la galería/carrusel
 type Proyecto struct {
 	ID          uint      `gorm:"primaryKey" json:"id"`
 	Titulo      string    `gorm:"type:varchar(100)" json:"titulo"`
 	Categoria   string    `gorm:"type:varchar(50)" json:"categoria"`
 	Descripcion string    `gorm:"type:text" json:"descripcion"`
-	ImagenURL   string    `gorm:"type:text" json:"imagenUrl"` // Ruta pública (ej: /uploads/foto.jpg)
+	ImagenURL   string    `gorm:"type:text" json:"imagenUrl"`
 	CreatedAt   time.Time `json:"fecha"`
 }
 
-// ContactoWeb representa los mensajes del formulario
 type ContactoWeb struct {
 	ID        uint      `gorm:"primaryKey" json:"id"`
 	Nombre    string    `gorm:"type:varchar(100);not null" json:"nombre"`
@@ -46,7 +44,6 @@ type ContactoWeb struct {
 	CreatedAt time.Time `json:"fecha"`
 }
 
-// ContactoRequest valida los datos que llegan del frontend
 type ContactoRequest struct {
 	Nombre         string `json:"nombre" validate:"required,min=2,max=100"`
 	Email          string `json:"email" validate:"required,email,max=150"`
@@ -56,7 +53,6 @@ type ContactoRequest struct {
 	RecaptchaToken string `json:"recaptchaToken" validate:"required"`
 }
 
-// RecaptchaResponse mapea la respuesta de Google
 type RecaptchaResponse struct {
 	Success bool `json:"success"`
 }
@@ -76,20 +72,17 @@ func (cv *CustomValidator) Validate(i interface{}) error {
 	return nil
 }
 
-// Variable global para la DB
 var db *gorm.DB
 
 // ---------------------------------------------------------
-// 3. FUNCIÓN MAIN (Punto de Entrada)
+// 3. FUNCIÓN MAIN
 // ---------------------------------------------------------
 
 func main() {
-	// A. Cargar variables de entorno
 	if err := godotenv.Load(); err != nil {
 		fmt.Println("ℹ️ Nota: No se encontró .env, usando variables del sistema.")
 	}
 
-	// B. Conexión a Base de Datos
 	dsn := os.Getenv("DB_DSN")
 	if dsn == "" {
 		log.Fatal("❌ Error crítico: La variable DB_DSN está vacía.")
@@ -102,23 +95,17 @@ func main() {
 	}
 	fmt.Println("✅ Conexión a PostgreSQL establecida.")
 
-	// Migración automática
 	db.AutoMigrate(&ContactoWeb{}, &Proyecto{})
 
-	// C. Inicializar Echo
 	e := echo.New()
 	e.Validator = &CustomValidator{validator: validator.New()}
 
-	// ---------------------------------------------------------
-	// 4. MIDDLEWARES
-	// ---------------------------------------------------------
-
+	// MIDDLEWARES
 	e.Use(middleware.Logger())
 	e.Use(middleware.Recover())
 	e.Use(middleware.Secure())
-	e.Use(middleware.BodyLimit("5M")) // Aumentado a 5MB para permitir imágenes
+	e.Use(middleware.BodyLimit("5M"))
 
-	// CORS
 	allowOrigin := os.Getenv("FRONTEND_URL")
 	if allowOrigin == "" {
 		allowOrigin = "*"
@@ -128,38 +115,22 @@ func main() {
 		AllowMethods: []string{http.MethodPost, http.MethodGet},
 	}))
 
-	// Rate Limiter
-	configRateLimit := middleware.RateLimiterConfig{
+	e.Use(middleware.RateLimiterWithConfig(middleware.RateLimiterConfig{
 		Skipper: middleware.DefaultSkipper,
-		Store: middleware.NewRateLimiterMemoryStoreWithConfig(
-			middleware.RateLimiterMemoryStoreConfig{Rate: rate.Limit(5), Burst: 10, ExpiresIn: 3 * time.Minute},
-		),
+		Store:   middleware.NewRateLimiterMemoryStore(rate.Limit(5)),
 		IdentifierExtractor: func(ctx echo.Context) (string, error) {
 			return ctx.RealIP(), nil
 		},
-		ErrorHandler: func(context echo.Context, err error) error {
-			return context.JSON(http.StatusTooManyRequests, map[string]string{"error": "Demasiadas peticiones."})
-		},
-	}
-	e.Use(middleware.RateLimiterWithConfig(configRateLimit))
+	}))
 
-	// ---------------------------------------------------------
-	// 5. RUTAS Y ARCHIVOS ESTÁTICOS
-	// ---------------------------------------------------------
-
-	// Servir index.html y assets (css, js)
+	// RUTAS Y ARCHIVOS ESTÁTICOS
 	e.Static("/", "public")
-	// IMPORTANTE: Servir la carpeta de subidas para que las imágenes sean visibles
+	// CORRECCIÓN: Servir /uploads apuntando a la carpeta física public/uploads
 	e.Static("/uploads", "public/uploads")
 
-	// API Endpoints
 	e.POST("/api/contacto", manejarContacto)
-	e.POST("/api/upload", subirProyecto)      // Subir imagen para galería
-	e.GET("/api/proyectos", obtenerProyectos) // Leer imágenes para el carrusel
-
-	// ---------------------------------------------------------
-	// 6. ARRANQUE
-	// ---------------------------------------------------------
+	e.POST("/api/upload", subirProyecto)
+	e.GET("/api/proyectos", obtenerProyectos)
 
 	port := os.Getenv("PORT")
 	if port == "" {
@@ -174,17 +145,16 @@ func main() {
 }
 
 // ---------------------------------------------------------
-// 7. HANDLERS (Lógica)
+// 4. HANDLERS
 // ---------------------------------------------------------
 
-// --- A. CONTACTO ---
 func manejarContacto(c echo.Context) error {
 	req := new(ContactoRequest)
 	if err := c.Bind(req); err != nil {
 		return c.JSON(http.StatusBadRequest, map[string]string{"error": "Formato inválido"})
 	}
 	if err := c.Validate(req); err != nil {
-		return c.JSON(http.StatusBadRequest, map[string]string{"error": "Datos inválidos: " + err.Error()})
+		return c.JSON(http.StatusBadRequest, map[string]string{"error": err.Error()})
 	}
 	if !validarCaptchaGoogle(req.RecaptchaToken) {
 		return c.JSON(http.StatusUnauthorized, map[string]string{"error": "Captcha inválido"})
@@ -200,97 +170,72 @@ func manejarContacto(c echo.Context) error {
 	}
 
 	if result := db.Create(&nuevoContacto); result.Error != nil {
-		fmt.Println("Error DB:", result.Error)
 		return c.JSON(http.StatusInternalServerError, map[string]string{"error": "Error interno"})
 	}
 
 	return c.JSON(http.StatusCreated, map[string]string{"mensaje": "Enviado correctamente"})
 }
 
-// --- B. SUBIR IMAGEN (Para la Galería) ---
 func subirProyecto(c echo.Context) error {
-	// 1. Leer archivo del form-data
 	file, err := c.FormFile("imagen")
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, map[string]string{"error": "No se envió imagen"})
 	}
 
-	// 2. Validar extensión y tamaño
 	ext := strings.ToLower(filepath.Ext(file.Filename))
 	if ext != ".jpg" && ext != ".jpeg" && ext != ".png" {
-		return c.JSON(http.StatusBadRequest, map[string]string{"error": "Solo se permiten JPG o PNG"})
-	}
-	if file.Size > 2*1024*1024 { // 2MB
-		return c.JSON(http.StatusBadRequest, map[string]string{"error": "Imagen muy pesada (Max 2MB)"})
+		return c.JSON(http.StatusBadRequest, map[string]string{"error": "Solo JPG o PNG"})
 	}
 
 	src, err := file.Open()
 	if err != nil {
-		return c.JSON(http.StatusInternalServerError, map[string]string{"error": "Error al abrir archivo"})
+		return c.JSON(http.StatusInternalServerError, map[string]string{"error": "Error al abrir"})
 	}
 	defer src.Close()
 
-	// 3. Crear carpeta si no existe
-	uploadDir := "public/uploads"
-	if _, err := os.Stat(uploadDir); os.IsNotExist(err) {
-		os.MkdirAll(uploadDir, 0755)
-	}
+	// Carpeta física
+	uploadDir := filepath.Join("public", "uploads")
+	os.MkdirAll(uploadDir, 0755)
 
-	// 4. Guardar archivo en disco con nombre único
 	newFileName := fmt.Sprintf("%d%s", time.Now().Unix(), ext)
 	dstPath := filepath.Join(uploadDir, newFileName)
 
 	dst, err := os.Create(dstPath)
 	if err != nil {
-		return c.JSON(http.StatusInternalServerError, map[string]string{"error": "Error al guardar en disco"})
+		return c.JSON(http.StatusInternalServerError, map[string]string{"error": "Error al crear archivo"})
 	}
 	defer dst.Close()
 
 	if _, err = io.Copy(dst, src); err != nil {
-		return c.JSON(http.StatusInternalServerError, map[string]string{"error": "Error al escribir archivo"})
+		return c.JSON(http.StatusInternalServerError, map[string]string{"error": "Error al escribir"})
 	}
 
-	// 5. Guardar referencia en Base de Datos
-	// Construimos la URL pública para el frontend
+	// URL pública que guardamos en DB
 	publicURL := fmt.Sprintf("/uploads/%s", newFileName)
 
 	nuevoProyecto := Proyecto{
-		Titulo:      "Diseño de Comunidad",
-		Categoria:   "Upload",
-		Descripcion: "Imagen subida por usuario",
-		ImagenURL:   publicURL, // Guardamos la ruta, no los bytes
+		Titulo:    "Diseño de Comunidad",
+		Categoria: "Upload",
+		ImagenURL: publicURL,
 	}
 
-	if result := db.Create(&nuevoProyecto); result.Error != nil {
-		return c.JSON(http.StatusInternalServerError, map[string]string{"error": "Error DB"})
-	}
+	db.Create(&nuevoProyecto)
 
-	return c.JSON(http.StatusCreated, map[string]string{"mensaje": "Subido correctamente", "url": publicURL})
+	return c.JSON(http.StatusCreated, map[string]string{"url": publicURL})
 }
 
-// --- C. OBTENER PROYECTOS (Para el Carrusel) ---
 func obtenerProyectos(c echo.Context) error {
 	var proyectos []Proyecto
-	// Traemos los últimos 10 proyectos
-	if result := db.Order("created_at desc").Limit(10).Find(&proyectos); result.Error != nil {
-		return c.JSON(http.StatusInternalServerError, map[string]string{"error": "Error al obtener datos"})
-	}
+	db.Order("created_at desc").Limit(10).Find(&proyectos)
 	return c.JSON(http.StatusOK, proyectos)
 }
-
-// ---------------------------------------------------------
-// 8. HELPERS
-// ---------------------------------------------------------
 
 func validarCaptchaGoogle(token string) bool {
 	secret := os.Getenv("RECAPTCHA_SECRET")
 	if secret == "" {
-		fmt.Println("❌ Error: Falta RECAPTCHA_SECRET")
 		return false
 	}
-
-	client := &http.Client{Timeout: 10 * time.Second}
-	resp, err := client.PostForm("https://www.google.com/recaptcha/api/siteverify", map[string][]string{
+	resp, err := http.PostForm("https://www.google.com/recaptcha/api/siteverify", map[string][]string{
 		"secret":   {secret},
 		"response": {token},
 	})
@@ -298,10 +243,7 @@ func validarCaptchaGoogle(token string) bool {
 		return false
 	}
 	defer resp.Body.Close()
-
-	var googleResult RecaptchaResponse
-	if err := json.NewDecoder(resp.Body).Decode(&googleResult); err != nil {
-		return false
-	}
-	return googleResult.Success
+	var result RecaptchaResponse
+	json.NewDecoder(resp.Body).Decode(&result)
+	return result.Success
 }
