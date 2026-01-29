@@ -1211,7 +1211,7 @@
                 await cargarGaleria(); 
 
             } catch (err) {
-                Swal.fire({ icon: 'error', title: 'Error', text: 'No se pudo guardar la imagen.', confirmButtonColor: '#0B0F19' });
+                Swal.fire({ icon: 'error', title: 'Error', text: 'Formato invalido, por favor intenta de nuevo (jpg,png)', confirmButtonColor: '#0B0F19' });
             } finally {
                 btnUpload.disabled = false;
                 btnUpload.innerHTML = originalText;
