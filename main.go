@@ -174,6 +174,8 @@ func main() {
 	db.AutoMigrate(&ContactoWeb{}, &Proyecto{})
 
 	e := echo.New()
+	e.HTTPErrorHandler = customHTTPErrorHandler
+	// Validador personalizado
 	e.Validator = &CustomValidator{validator: validator.New()}
 
 	// MIDDLEWARES
@@ -364,4 +366,29 @@ func servirImagenBD(c echo.Context) error {
 
 	// Escribimos los bytes
 	return c.Blob(http.StatusOK, proy.MimeType, proy.Datos)
+}
+
+// ---------------------------------------------------------
+// MANEJADOR DE ERRORES PERSONALIZADO (404)
+// ---------------------------------------------------------
+func customHTTPErrorHandler(err error, c echo.Context) {
+	code := http.StatusInternalServerError
+	if he, ok := err.(*echo.HTTPError); ok {
+		code = he.Code
+	}
+
+	// Si el error es "Página no encontrada" (404)
+	if code == http.StatusNotFound {
+		// Importante: Si la ruta NO empieza con /api/, servimos el HTML visual.
+		// Si es /api/, dejamos que Echo devuelva el JSON de error estándar.
+		if !strings.HasPrefix(c.Path(), "/api/") {
+			if err := c.File("public/404.html"); err != nil {
+				c.Logger().Error(err)
+			}
+			return
+		}
+	}
+
+	// Para cualquier otro error, usar el default de Echo (JSON text)
+	c.Echo().DefaultHTTPErrorHandler(err, c)
 }
