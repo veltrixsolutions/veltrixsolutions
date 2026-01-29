@@ -55,15 +55,27 @@ type ContactoWeb struct {
 	CreatedAt time.Time `json:"fecha"`
 }
 
+// ---------------------------------------------------------
+// MODELO DE PETICIÓN (ESTRICTO)
+// ---------------------------------------------------------
 type ContactoRequest struct {
-	Nombre         string `json:"nombre" validate:"required,min=2,max=100"`
-	Email          string `json:"email" validate:"required,email,max=150"`
-	Telefono       string `json:"telefono" validate:"omitempty,numeric,max=20"`
-	Servicio       string `json:"servicio" validate:"max=50"`
-	Mensaje        string `json:"mensaje" validate:"required,min=10,max=2000"`
+	// Regla: Requerido, min 3 letras, max 50.
+	Nombre string `json:"nombre" validate:"required,min=3,max=50"`
+
+	// Regla: Requerido, formato email real.
+	Email string `json:"email" validate:"required,email,max=100"`
+
+	// Regla: Requerido, NUMÉRICO y EXACTAMENTE 10 dígitos.
+	Telefono string `json:"telefono" validate:"required,numeric,len=10"`
+
+	// Regla: Debe ser UNO DE estos valores exactos.
+	Servicio string `json:"servicio" validate:"required,oneof='Desarrollo Web' 'E-Commerce' 'App Movil' 'Software a Medida' 'Otro'"`
+
+	// Regla: Requerido, min 10, max 300 (para no saturar BD).
+	Mensaje string `json:"mensaje" validate:"required,min=10,max=300"`
+
 	RecaptchaToken string `json:"recaptchaToken" validate:"required"`
 }
-
 type RecaptchaResponse struct {
 	Success bool `json:"success"`
 }
@@ -79,16 +91,13 @@ func (cv *CustomValidator) Validate(i interface{}) error {
 	if err := cv.validator.Struct(i); err != nil {
 		if validationErrors, ok := err.(validator.ValidationErrors); ok {
 			for _, e := range validationErrors {
-
-				// --- TRADUCCIÓN DE ERRORES ---
 				switch e.Field() {
-
 				case "Nombre":
 					if e.Tag() == "required" {
 						return fmt.Errorf("El nombre es obligatorio.")
 					}
 					if e.Tag() == "min" {
-						return fmt.Errorf("El nombre es muy corto.")
+						return fmt.Errorf("El nombre es muy corto (mínimo 3 letras).")
 					}
 
 				case "Email":
@@ -96,48 +105,42 @@ func (cv *CustomValidator) Validate(i interface{}) error {
 						return fmt.Errorf("El correo es obligatorio.")
 					}
 					if e.Tag() == "email" {
-						return fmt.Errorf("El formato del correo no es válido.")
+						return fmt.Errorf("El formato del correo es inválido.")
 					}
 
 				case "Telefono":
-					// Si cambias el struct a 'required'
 					if e.Tag() == "required" {
 						return fmt.Errorf("El teléfono es obligatorio.")
 					}
-
-					// Error: contiene letras o símbolos
 					if e.Tag() == "numeric" {
-						return fmt.Errorf("El teléfono solo debe contener números (sin espacios ni guiones).")
+						return fmt.Errorf("El teléfono solo admite números.")
 					}
-
-					// Error: longitud exacta (len) o mínima (min)
 					if e.Tag() == "len" {
 						return fmt.Errorf("El teléfono debe tener exactamente 10 dígitos.")
 					}
-					if e.Tag() == "min" {
-						return fmt.Errorf("El teléfono es muy corto (mínimo 10 dígitos).")
-					}
-					if e.Tag() == "max" {
-						return fmt.Errorf("El teléfono es demasiado largo.")
+
+				case "Servicio":
+					if e.Tag() == "oneof" {
+						return fmt.Errorf("Por favor selecciona un servicio válido de la lista.")
 					}
 
 				case "Mensaje":
 					if e.Tag() == "required" {
-						return fmt.Errorf("Por favor escribe un mensaje.")
+						return fmt.Errorf("El mensaje no puede estar vacío.")
 					}
 					if e.Tag() == "min" {
-						return fmt.Errorf("El mensaje es muy corto (mínimo 10 caracteres).")
+						return fmt.Errorf("Detalla un poco más tu idea (mínimo 10 caracteres).")
 					}
 					if e.Tag() == "max" {
-						return fmt.Errorf("El mensaje es demasiado largo.")
+						return fmt.Errorf("El mensaje es muy largo (máximo 300 caracteres).")
 					}
 
 				case "RecaptchaToken":
-					return fmt.Errorf("Error de seguridad (Captcha). Recarga la página.")
+					return fmt.Errorf("Error de seguridad. Recarga la página.")
 				}
 			}
 		}
-		return fmt.Errorf("Datos inválidos en el formulario.")
+		return fmt.Errorf("Datos inválidos. Revisa el formulario.")
 	}
 	return nil
 }
