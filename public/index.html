@@ -1074,36 +1074,37 @@
         });
     }
 
-    async function cargarGaleria() {
+  async function cargarGaleria() {
         const container = document.getElementById('galeria-container');
         if(!container) return;
 
         try {
-            // Petición al endpoint que devuelve la lista (IDs y Títulos)
-            // Añadimos timestamp para evitar caché del navegador
+            // 1. Pedir lista de proyectos (con timestamp para evitar caché de la lista)
             const response = await fetch(`${API_BASE_URL}/api/proyectos?t=${Date.now()}`);
             
-            if (!response.ok) throw new Error("Error al obtener imágenes");
+            if (!response.ok) throw new Error("Error al obtener lista de imágenes");
             
             const proyectos = await response.json();
 
-            container.innerHTML = ''; // Limpiar loader
+            container.innerHTML = ''; // Limpiar el loader
 
             if(proyectos && proyectos.length > 0) {
                 proyectos.forEach(proy => {
                     const slide = document.createElement('div');
                     slide.className = 'swiper-slide relative group overflow-hidden rounded-2xl h-full'; 
                     
-                    // --- PUNTO CLAVE: URL APUNTA AL ENDPOINT DE IMAGEN ---
-                    // El servidor buscará los bytes en la BD usando el ID
-                    const imgUrl = `${API_BASE_URL}/api/imagen/${proy.id}`;
+                    // 2. CONSTRUCCIÓN DE LA URL DE LA IMAGEN
+                    // Agregamos timestamp ?t=... para que el navegador no use una versión vieja o cacheada
+                    const imgUrl = `${API_BASE_URL}/api/imagen/${proy.id}?t=${Date.now()}`;
+
+                    console.log("Cargando imagen:", imgUrl); // <--- MIRA ESTO EN LA CONSOLA (F12)
 
                     slide.innerHTML = `
                         <img src="${imgUrl}" 
                              alt="${proy.titulo}" 
                              loading="lazy"
                              class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
-                             onerror="this.parentNode.style.display='none';"> 
+                             onerror="this.onerror=null; this.src='https://placehold.co/600x400?text=Sin+Imagen';"> 
                         
                         <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-end p-6">
                             <span class="text-brand-accent text-xs font-bold uppercase mb-1">${proy.categoria || 'Comunidad'}</span>
@@ -1113,6 +1114,7 @@
                     container.append(slide);
                 });
 
+                // Reiniciar el Swiper para que detecte los nuevos slides
                 initSwiper(proyectos.length);
 
             } else {
