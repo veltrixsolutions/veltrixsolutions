@@ -760,7 +760,71 @@
         </div>
     </div>
 </section>
-    
+    <section id="admin-panel" class="py-16 bg-white border-t border-gray-200">
+    <div class="max-w-6xl mx-auto px-4">
+        <div class="text-center mb-10">
+            <h2 class="text-brand-primary font-bold uppercase text-sm mb-3 tracking-wider">Gestión</h2>
+            <h3 class="text-3xl font-extrabold text-brand-dark">Panel de Administración</h3>
+            <p class="text-gray-500 mt-2">Edita o elimina los proyectos subidos.</p>
+        </div>
+
+        <div class="overflow-x-auto rounded-2xl shadow-xl border border-gray-100">
+            <table class="w-full text-left border-collapse">
+                <thead>
+                    <tr class="bg-brand-dark text-white text-sm uppercase">
+                        <th class="p-4">ID</th>
+                        <th class="p-4">Imagen</th>
+                        <th class="p-4">Título</th>
+                        <th class="p-4">Categoría</th>
+                        <th class="p-4 text-center">Acciones</th>
+                    </tr>
+                </thead>
+                <tbody id="admin-table-body" class="text-sm text-gray-600 divide-y divide-gray-100 bg-white">
+                    </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div id="editModal" class="fixed inset-0 z-[60] hidden overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+        <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+            <div class="fixed inset-0 bg-gray-900 bg-opacity-75 transition-opacity" aria-hidden="true" onclick="closeModal()"></div>
+
+            <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
+
+            <div class="inline-block align-bottom bg-white rounded-2xl text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg w-full">
+                <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+                    <h3 class="text-lg leading-6 font-medium text-gray-900 mb-4" id="modal-title">Editar Proyecto</h3>
+                    <input type="hidden" id="edit-id">
+                    
+                    <div class="mb-4">
+                        <label class="block text-gray-700 text-sm font-bold mb-2">Título</label>
+                        <input type="text" id="edit-titulo" class="w-full border rounded-lg px-3 py-2 text-gray-700 focus:outline-none focus:ring-2 focus:ring-brand-primary">
+                    </div>
+                    
+                    <div class="mb-4">
+                        <label class="block text-gray-700 text-sm font-bold mb-2">Categoría</label>
+                        <select id="edit-categoria" class="w-full border rounded-lg px-3 py-2 text-gray-700 focus:outline-none focus:ring-2 focus:ring-brand-primary">
+                            <option value="Comunidad">Comunidad</option>
+                            <option value="Desarrollo Web">Desarrollo Web</option>
+                            <option value="E-Commerce">E-Commerce</option>
+                            <option value="App Movil">App Movil</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse gap-2">
+                    <button type="button" onclick="saveEdit()" class="w-full inline-flex justify-center rounded-xl border border-transparent shadow-sm px-4 py-2 bg-brand-primary text-base font-medium text-white hover:bg-brand-secondary focus:outline-none sm:ml-3 sm:w-auto sm:text-sm">
+                        Guardar Cambios
+                    </button>
+                    <button type="button" onclick="closeModal()" class="mt-3 w-full inline-flex justify-center rounded-xl border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm">
+                        Cancelar
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+
 
 <section id="contacto" class="relative py-24 bg-brand-dark border-t border-white/5 overflow-hidden">
     
@@ -1361,4 +1425,128 @@
 
     // Cargar Galería al inicio
     document.addEventListener('DOMContentLoaded', cargarGaleria);
+
+
+//-----------------------------------------------------------------//
+// Función para cargar la tabla de administración
+    async function cargarTablaAdmin() {
+        const tbody = document.getElementById('admin-table-body');
+        if(!tbody) return;
+
+        try {
+            const response = await fetch(`${API_BASE_URL}/api/proyectos?t=${Date.now()}`);
+            if (!response.ok) throw new Error("Error cargando datos");
+            const proyectos = await response.json();
+
+            tbody.innerHTML = '';
+            
+            if(proyectos.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="5" class="p-4 text-center">No hay registros</td></tr>';
+                return;
+            }
+
+            proyectos.forEach(p => {
+                const tr = document.createElement('tr');
+                tr.className = "hover:bg-gray-50 transition-colors border-b last:border-0";
+                
+                // Miniatura de imagen
+                const imgUrl = `${API_BASE_URL}/api/imagen/${p.id}`;
+                
+                tr.innerHTML = `
+                    <td class="p-4 font-mono text-xs text-gray-500">#${p.id}</td>
+                    <td class="p-4">
+                        <div class="w-12 h-12 rounded-lg overflow-hidden bg-gray-100 border border-gray-200">
+                            <img src="${imgUrl}" alt="Img" class="w-full h-full object-cover">
+                        </div>
+                    </td>
+                    <td class="p-4 font-bold text-gray-800">${p.titulo}</td>
+                    <td class="p-4"><span class="bg-brand-primary/10 text-brand-primary px-2 py-1 rounded text-xs font-bold uppercase">${p.categoria}</span></td>
+                    <td class="p-4 text-center">
+                        <div class="flex justify-center gap-2">
+                            <button onclick="openEditModal(${p.id}, '${p.titulo}', '${p.categoria}')" class="w-8 h-8 rounded bg-blue-50 text-blue-600 hover:bg-blue-100 transition flex items-center justify-center">
+                                <i class="fa-solid fa-pen text-xs"></i>
+                            </button>
+                            <button onclick="deleteItem(${p.id})" class="w-8 h-8 rounded bg-red-50 text-red-600 hover:bg-red-100 transition flex items-center justify-center">
+                                <i class="fa-solid fa-trash text-xs"></i>
+                            </button>
+                        </div>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+
+        } catch (error) {
+            console.error(error);
+        }
+    }
+
+    // --- FUNCIONES DE ELIMINAR ---
+    window.deleteItem = async (id) => {
+        const result = await Swal.fire({
+            title: '¿Estás seguro?',
+            text: "No podrás revertir esta acción.",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#ef4444',
+            cancelButtonColor: '#1f2937',
+            confirmButtonText: 'Sí, eliminar',
+            cancelButtonText: 'Cancelar'
+        });
+
+        if (result.isConfirmed) {
+            try {
+                const res = await fetch(`${API_BASE_URL}/api/proyectos/${id}`, { method: 'DELETE' });
+                if(res.ok) {
+                    Swal.fire('Eliminado', 'El proyecto ha sido eliminado.', 'success');
+                    cargarTablaAdmin(); // Recargar tabla
+                    cargarGaleria();    // Recargar galería principal (Swiper)
+                } else {
+                    Swal.fire('Error', 'No se pudo eliminar.', 'error');
+                }
+            } catch (e) {
+                Swal.fire('Error', 'Error de conexión.', 'error');
+            }
+        }
+    };
+
+    // --- FUNCIONES DE EDICIÓN ---
+    window.openEditModal = (id, titulo, categoria) => {
+        document.getElementById('edit-id').value = id;
+        document.getElementById('edit-titulo').value = titulo;
+        document.getElementById('edit-categoria').value = categoria;
+        document.getElementById('editModal').classList.remove('hidden');
+    };
+
+    window.closeModal = () => {
+        document.getElementById('editModal').classList.add('hidden');
+    };
+
+    window.saveEdit = async () => {
+        const id = document.getElementById('edit-id').value;
+        const titulo = document.getElementById('edit-titulo').value;
+        const categoria = document.getElementById('edit-categoria').value;
+
+        try {
+            const res = await fetch(`${API_BASE_URL}/api/proyectos/${id}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ titulo, categoria })
+            });
+
+            if(res.ok) {
+                Swal.fire({icon: 'success', title: 'Actualizado', toast: true, position: 'top-end', showConfirmButton: false, timer: 3000});
+                closeModal();
+                cargarTablaAdmin();
+                cargarGaleria(); // Actualizar galería visual también
+            } else {
+                Swal.fire('Error', 'No se pudo actualizar.', 'error');
+            }
+        } catch (e) {
+            Swal.fire('Error', 'Error de conexión.', 'error');
+        }
+    };
+
+    // Cargar la tabla al iniciar también
+    document.addEventListener('DOMContentLoaded', cargarTablaAdmin);
+
 </script>

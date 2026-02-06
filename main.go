@@ -210,9 +210,11 @@ func main() {
 	e.POST("/api/contacto", manejarContacto)
 
 	// --- RUTAS DE IMÁGENES (SISTEMA DE BD) ---
-	e.POST("/api/upload", subirProyectoBD)      // Subir bytes
-	e.GET("/api/proyectos", obtenerProyectosBD) // Obtener lista JSON
-	e.GET("/api/imagen/:id", servirImagenBD)    // Obtener la imagen visual
+	e.POST("/api/upload", subirProyectoBD)             // Subir bytes
+	e.GET("/api/proyectos", obtenerProyectosBD)        // Obtener lista JSON
+	e.GET("/api/imagen/:id", servirImagenBD)           // Obtener la imagen visual
+	e.PUT("/api/proyectos/:id", actualizarProyectoBD)  // Editar Título/Categoría
+	e.DELETE("/api/proyectos/:id", eliminarProyectoBD) // Eliminar proyecto
 
 	// Puerto
 	port := os.Getenv("PORT")
@@ -391,4 +393,51 @@ func customHTTPErrorHandler(err error, c echo.Context) {
 
 	// Para cualquier otro error, usar el default de Echo (JSON text)
 	c.Echo().DefaultHTTPErrorHandler(err, c)
+}
+
+// D. Actualizar Proyecto (Solo metadatos: Título y Categoría)
+func actualizarProyectoBD(c echo.Context) error {
+	id := c.Param("id")
+	var proy Proyecto
+
+	// 1. Buscar si existe
+	if result := db.First(&proy, id); result.Error != nil {
+		return c.JSON(http.StatusNotFound, map[string]string{"error": "Proyecto no encontrado"})
+	}
+
+	// 2. Leer datos del JSON enviado
+	type UpdateRequest struct {
+		Titulo    string `json:"titulo"`
+		Categoria string `json:"categoria"`
+	}
+	var req UpdateRequest
+	if err := c.Bind(&req); err != nil {
+		return c.JSON(http.StatusBadRequest, map[string]string{"error": "Datos inválidos"})
+	}
+
+	// 3. Actualizar campos
+	if req.Titulo != "" {
+		proy.Titulo = req.Titulo
+	}
+	if req.Categoria != "" {
+		proy.Categoria = req.Categoria
+	}
+
+	// 4. Guardar cambios en BD
+	db.Save(&proy)
+
+	return c.JSON(http.StatusOK, map[string]string{"mensaje": "Proyecto actualizado correctamente"})
+}
+
+// E. Eliminar Proyecto
+func eliminarProyectoBD(c echo.Context) error {
+	id := c.Param("id")
+
+	// 1. Buscar y eliminar (GORM soft delete si tienes DeletedAt, o hard delete si no)
+	// Usamos Unscoped() para borrado físico permanente de la imagen pesada
+	if result := db.Unscoped().Delete(&Proyecto{}, id); result.Error != nil {
+		return c.JSON(http.StatusInternalServerError, map[string]string{"error": "Error al eliminar"})
+	}
+
+	return c.JSON(http.StatusOK, map[string]string{"mensaje": "Proyecto eliminado"})
 }
