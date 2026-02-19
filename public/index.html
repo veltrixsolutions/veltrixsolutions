@@ -812,33 +812,94 @@
                 </div>
 
                 <div id="tab-admin" class="tab-content hidden transition-opacity duration-300">
-                    <div class="flex justify-between items-center mb-6">
-                        <h4 class="text-2xl font-bold text-brand-dark">Panel Administrativo</h4>
-                        <button onclick="cargarTablaAdmin()" class="text-sm text-brand-primary hover:underline"><i class="fa-solid fa-rotate-right"></i> Refrescar</button>
-                    </div>
-                    
-                    <div class="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
-                        <div class="overflow-x-auto">
-                            <table class="w-full text-left border-collapse">
-                                <thead>
-                                    <tr class="bg-gray-50 text-gray-500 text-xs uppercase tracking-wider border-b border-gray-200">
-                                        <th class="p-4 font-semibold">ID</th>
-                                        <th class="p-4 font-semibold">Vista Previa</th>
-                                        <th class="p-4 font-semibold">Título</th>
-                                        <th class="p-4 font-semibold">Categoría</th>
-                                        <th class="p-4 text-center font-semibold">Acciones</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="admin-table-body" class="text-sm text-gray-600 divide-y divide-gray-100">
-                                    </tbody>
-                            </table>
-                        </div>
+    
+    <div class="flex flex-col sm:flex-row justify-between items-center mb-6 gap-4">
+        <h4 class="text-2xl font-bold text-brand-dark">Panel Administrativo</h4>
+        <div class="flex gap-3">
+            <button onclick="cargarTablaAdmin()" class="px-4 py-2 text-sm font-medium text-brand-dark bg-white border border-gray-200 rounded-xl hover:bg-gray-50 transition-colors">
+                <i class="fa-solid fa-rotate-right mr-1"></i> Refrescar
+            </button>
+            <button onclick="openAddModal()" class="px-4 py-2 text-sm font-bold text-white bg-brand-primary rounded-xl shadow-lg hover:bg-brand-secondary hover:shadow-brand-primary/50 transition-all transform active:scale-95">
+                <i class="fa-solid fa-plus mr-1"></i> Nuevo Proyecto
+            </button>
+        </div>
+    </div>
+    
+    <div class="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
+        <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse">
+                <thead>
+                    <tr class="bg-gray-50 text-gray-500 text-xs uppercase tracking-wider border-b border-gray-200">
+                        <th class="p-4 font-semibold">ID</th>
+                        <th class="p-4 font-semibold">Vista Previa</th>
+                        <th class="p-4 font-semibold">Título</th>
+                        <th class="p-4 font-semibold">Categoría</th>
+                        <th class="p-4 text-center font-semibold">Acciones</th>
+                    </tr>
+                </thead>
+                <tbody id="admin-table-body" class="text-sm text-gray-600 divide-y divide-gray-100">
+                    </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<div id="addModal" class="fixed inset-0 z-[70] hidden" role="dialog" aria-modal="true">
+    <div class="fixed inset-0 bg-gray-900/70 backdrop-blur-sm transition-opacity" onclick="closeAddModal()"></div>
+
+    <div class="flex items-center justify-center min-h-screen p-4">
+        <div class="relative bg-white rounded-2xl shadow-2xl max-w-md w-full overflow-hidden transform transition-all scale-100">
+            
+            <div class="bg-brand-dark px-6 py-4 flex justify-between items-center">
+                <h3 class="text-lg font-bold text-white">Nuevo Proyecto</h3>
+                <button onclick="closeAddModal()" class="text-white/50 hover:text-white transition">
+                    <i class="fa-solid fa-xmark text-xl"></i>
+                </button>
+            </div>
+
+            <form id="formAddProject" class="p-6 space-y-4">
+                
+                <div>
+                    <label class="block text-xs font-bold text-gray-500 uppercase mb-2">Imagen del Proyecto</label>
+                    <div class="relative">
+                        <input type="file" id="add-imagen" accept="image/*" required 
+                               class="block w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-semibold file:bg-brand-primary/10 file:text-brand-primary hover:file:bg-brand-primary/20 transition-all"/>
                     </div>
                 </div>
 
-            </main>
+                <div>
+                    <label class="block text-xs font-bold text-gray-500 uppercase mb-2">Título</label>
+                    <input type="text" id="add-titulo" required placeholder="Ej: E-Commerce Moda" 
+                           class="w-full border border-gray-300 rounded-lg px-3 py-2 text-gray-700 focus:outline-none focus:ring-2 focus:ring-brand-primary focus:border-transparent transition-all">
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-gray-500 uppercase mb-2">Categoría</label>
+                    <select id="add-categoria" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-gray-700 focus:outline-none focus:ring-2 focus:ring-brand-primary focus:border-transparent transition-all">
+                        <option value="Desarrollo Web">Desarrollo Web</option>
+                        <option value="E-Commerce">E-Commerce</option>
+                        <option value="App Movil">App Movil</option>
+                        <option value="Software a Medida">Software a Medida</option>
+                        <option value="Comunidad">Comunidad</option>
+                    </select>
+                </div>
+
+                <div class="pt-4 flex gap-3">
+                    <button type="button" onclick="closeAddModal()" class="flex-1 px-4 py-2 bg-gray-100 text-gray-700 rounded-xl font-medium hover:bg-gray-200 transition-colors">
+                        Cancelar
+                    </button>
+                    <button type="submit" id="btnAddSubmit" class="flex-1 px-4 py-2 bg-brand-primary text-white rounded-xl font-bold shadow-lg hover:bg-brand-secondary transition-all flex justify-center items-center gap-2">
+                        <span>Guardar</span>
+                        <i class="fa-solid fa-arrow-right"></i>
+                    </button>
+                </div>
+            </form>
         </div>
     </div>
+</div>      
+</main>
+</div>
+</div>
 </section>
 
     <div id="editModal" class="fixed inset-0 z-[60] hidden overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
@@ -1761,4 +1822,84 @@ async function cargarTablaAdmin() {
             `;
         }).join('');
     }
+
+    // ======================================================
+    // 8. LÓGICA MODAL "AGREGAR PROYECTO" (ADMIN)
+    // ======================================================
+    
+    // Abrir Modal
+    function openAddModal() {
+        const modal = document.getElementById('addModal');
+        modal.classList.remove('hidden');
+        // Pequeña animación de entrada
+        const content = modal.querySelector('div.relative');
+        content.classList.remove('scale-95', 'opacity-0');
+        content.classList.add('scale-100', 'opacity-100');
+    }
+
+    // Cerrar Modal
+    function closeAddModal() {
+        const modal = document.getElementById('addModal');
+        modal.classList.add('hidden');
+        document.getElementById('formAddProject').reset(); // Limpiar campos
+    }
+
+    // Manejar el Envío del Formulario
+    const formAdd = document.getElementById('formAddProject');
+    if(formAdd) {
+        formAdd.addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            // 1. Obtener datos
+            const titulo = document.getElementById('add-titulo').value;
+            const categoria = document.getElementById('add-categoria').value;
+            const fileInput = document.getElementById('add-imagen');
+            const file = fileInput.files[0];
+
+            if(!file) return Swal.fire('Error', 'Debes seleccionar una imagen', 'warning');
+
+            // 2. Crear FormData
+            const formData = new FormData();
+            formData.append('titulo', titulo);
+            formData.append('categoria', categoria);
+            formData.append('imagen', file);
+
+            // 3. UI Loading
+            const btn = document.getElementById('btnAddSubmit');
+            const originalText = btn.innerHTML;
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Guardando...';
+
+            try {
+                // 4. Enviar al Backend (usamos la misma ruta /api/upload pero ahora procesa titulo/cat)
+                const res = await fetch(`${API_BASE_URL}/api/upload`, {
+                    method: 'POST',
+                    body: formData
+                });
+
+                if(!res.ok) throw new Error('Error al subir');
+
+                // 5. Éxito
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Proyecto Agregado',
+                    text: 'El proyecto se ha guardado correctamente.',
+                    timer: 2000,
+                    showConfirmButton: false
+                });
+
+                closeAddModal();
+                cargarTablaAdmin(); // Refrescar la tabla automáticamente
+                cargarGaleria();    // Actualizar también el swiper principal
+
+            } catch (error) {
+                console.error(error);
+                Swal.fire('Error', 'No se pudo guardar el proyecto', 'error');
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = originalText;
+            }
+        });
+    }
+
 </script>

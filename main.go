@@ -219,37 +219,46 @@ func main() {
 // 4. HANDLERS
 // ---------------------------------------------------------
 
-// A. Subir Imagen a Base de Datos
+// A. Subir Imagen a Base de Datos (Con Datos Dinámicos)
 func subirProyectoBD(c echo.Context) error {
-	// 1. Obtener archivo
+	// 1. Obtener campos de texto
+	titulo := c.FormValue("titulo")
+	categoria := c.FormValue("categoria")
+
+	// Validacion simple
+	if titulo == "" || categoria == "" {
+		return c.JSON(http.StatusBadRequest, map[string]string{"error": "Título y categoría son obligatorios"})
+	}
+
+	// 2. Obtener archivo
 	file, err := c.FormFile("imagen")
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, map[string]string{"error": "No se envió imagen"})
 	}
 
-	// 2. Validar extensión
+	// 3. Validar extensión
 	ext := strings.ToLower(file.Filename)
 	if !strings.HasSuffix(ext, ".jpg") && !strings.HasSuffix(ext, ".jpeg") && !strings.HasSuffix(ext, ".png") {
 		return c.JSON(http.StatusBadRequest, map[string]string{"error": "Solo formato JPG o PNG"})
 	}
 
-	// 3. Abrir
+	// 4. Abrir
 	src, err := file.Open()
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, map[string]string{"error": "Error al procesar archivo"})
 	}
 	defer src.Close()
 
-	// 4. Leer BYTES
+	// 5. Leer BYTES
 	fileBytes, err := io.ReadAll(src)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, map[string]string{"error": "Error al leer bytes"})
 	}
 
-	// 5. Guardar en DB
+	// 6. Guardar en DB
 	nuevoProyecto := Proyecto{
-		Titulo:    "Diseño de Comunidad",
-		Categoria: "Comunidad", // Valor por defecto
+		Titulo:    titulo,    // Dato del formulario
+		Categoria: categoria, // Dato del formulario
 		Datos:     fileBytes,
 		MimeType:  file.Header.Get("Content-Type"),
 		CreatedAt: time.Now(),
@@ -260,7 +269,7 @@ func subirProyectoBD(c echo.Context) error {
 		return c.JSON(http.StatusInternalServerError, map[string]string{"error": "Error guardando en base de datos"})
 	}
 
-	return c.JSON(http.StatusCreated, map[string]string{"mensaje": "Imagen guardada correctamente"})
+	return c.JSON(http.StatusCreated, map[string]string{"mensaje": "Proyecto creado correctamente"})
 }
 
 // B. Obtener Lista de Proyectos (CON BÚSQUEDA INTEGRADA)
