@@ -88,6 +88,16 @@
             overflow-x: hidden;
             width: 100%;
         }
+
+        /* Estilo para la pestaña activa en el menú lateral */
+.active-tab {
+    background-color: rgba(255, 255, 255, 0.1);
+    color: #ffffff;
+    border-right: 3px solid #6366f1; /* Brand Primary */
+}
+.active-tab i {
+    color: #ffffff !important;
+}
     </style>
 </head>
 
@@ -683,143 +693,153 @@
         </div>
     </section>
 
-<section id="galeria-upload" class="py-20 bg-slate-50 relative border-t border-gray-200 overflow-hidden">
-    <div class="absolute top-0 right-0 w-64 h-64 bg-brand-primary/5 rounded-full blur-3xl -z-10"></div>
-    <div class="absolute bottom-0 left-0 w-64 h-64 bg-brand-secondary/5 rounded-full blur-3xl -z-10"></div>
+<section id="dashboard" class="py-20 bg-slate-50 border-t border-gray-200 relative overflow-hidden">
+    <div class="absolute top-0 left-0 w-full h-96 bg-brand-dark -z-10"></div>
+    <div class="absolute top-20 right-0 w-96 h-96 bg-brand-primary/20 rounded-full blur-[100px] -z-10"></div>
 
-    <div class="max-w-6xl mx-auto px-4">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         
         <div class="text-center mb-12">
-            <h2 class="text-brand-primary font-bold uppercase text-sm mb-3 tracking-wider">Zona Creativa</h2>
-            <h3 class="text-3xl md:text-4xl font-extrabold text-brand-dark">Comparte y Descubre</h3>
-            <p class="text-gray-500 mt-2 max-w-2xl mx-auto">Sube tu referencia para una cotización o inspírate con lo que estamos construyendo.</p>
+            <h2 class="text-brand-accent font-bold uppercase text-sm mb-3 tracking-wider">Centro de Control</h2>
+            <h3 class="text-3xl md:text-4xl font-extrabold text-white">Plataforma de Proyectos</h3>
         </div>
 
-        <div class="grid grid-cols-1 lg:grid-cols-12 gap-10 items-start">
+        <div class="bg-white rounded-3xl shadow-2xl overflow-hidden border border-gray-100 flex flex-col lg:flex-row min-h-[800px]">
             
-            <div class="lg:col-span-4">
-                <div class="bg-white p-6 rounded-3xl shadow-xl border border-gray-100 sticky top-24">
-                    <h4 class="text-lg font-bold text-brand-dark mb-4 flex items-center gap-2">
-                        <i class="fa-solid fa-cloud-arrow-up text-brand-primary"></i> Subir Referencia
-                    </h4>
-                    
-                    <form id="uploadForm" class="space-y-4">
-                        <div class="relative group">
-                            <label for="imagenInput" class="flex flex-col items-center justify-center w-full h-48 border-2 border-dashed border-gray-300 rounded-2xl cursor-pointer bg-gray-50 hover:bg-brand-primary/5 hover:border-brand-primary transition-all duration-300 overflow-hidden relative">
-                                
-                                <img id="previewImg" class="hidden absolute inset-0 w-full h-full object-cover p-1 rounded-2xl z-10" />
-                                
-                                <div id="uploadPlaceholder" class="flex flex-col items-center justify-center pt-5 pb-6 text-center px-4 z-0">
-                                    <div class="w-10 h-10 bg-white shadow-sm text-brand-primary rounded-full flex items-center justify-center text-xl mb-3 group-hover:scale-110 transition-transform">
-                                        <i class="fa-solid fa-image"></i>
-                                    </div>
-                                    <p class="mb-1 text-xs text-gray-500"><span class="font-bold text-brand-primary">Clic</span> o arrastra</p>
-                                    <p class="text-[10px] text-gray-400">JPG, PNG (Max 2MB)</p>
-                                </div>
-                                <input id="imagenInput" type="file" class="hidden" accept="image/png, image/jpeg, image/jpg" />
-                            </label>
+            <aside class="w-full lg:w-72 bg-brand-dark text-slate-400 flex-shrink-0 flex flex-col">
+                <div class="p-6 border-b border-white/10">
+                    <span class="text-xs font-bold uppercase tracking-widest text-brand-primary">Menú</span>
+                </div>
+                
+                <nav class="flex-1 p-4 space-y-2">
+                    <button onclick="switchTab('search')" id="btn-search" class="w-full flex items-center gap-4 px-4 py-3 rounded-xl transition-all duration-300 hover:bg-white/5 hover:text-white text-left group active-tab">
+                        <div class="w-8 h-8 rounded-lg bg-white/5 flex items-center justify-center text-brand-primary group-hover:scale-110 transition-transform">
+                            <i class="fa-solid fa-magnifying-glass"></i>
+                        </div>
+                        <span class="font-medium">Explorador</span>
+                    </button>
+
+                    <button onclick="switchTab('gallery')" id="btn-gallery" class="w-full flex items-center gap-4 px-4 py-3 rounded-xl transition-all duration-300 hover:bg-white/5 hover:text-white text-left group">
+                        <div class="w-8 h-8 rounded-lg bg-white/5 flex items-center justify-center text-brand-secondary group-hover:scale-110 transition-transform">
+                            <i class="fa-solid fa-images"></i>
+                        </div>
+                        <span class="font-medium">Galería & Upload</span>
+                    </button>
+
+                    <button onclick="switchTab('admin')" id="btn-admin" class="w-full flex items-center gap-4 px-4 py-3 rounded-xl transition-all duration-300 hover:bg-white/5 hover:text-white text-left group">
+                        <div class="w-8 h-8 rounded-lg bg-white/5 flex items-center justify-center text-red-400 group-hover:scale-110 transition-transform">
+                            <i class="fa-solid fa-user-shield"></i>
+                        </div>
+                        <span class="font-medium">Administración</span>
+                    </button>
+                </nav>
+
+                <div class="p-6 border-t border-white/10">
+                    <div class="bg-gradient-to-br from-brand-primary to-brand-secondary rounded-xl p-4 text-center">
+                        <p class="text-white text-xs font-bold mb-2">¿Necesitas ayuda?</p>
+                        <a href="https://wa.me/5563986246" class="text-white/80 text-xs hover:text-white underline">Contactar Soporte</a>
+                    </div>
+                </div>
+            </aside>
+
+            <main class="flex-1 bg-gray-50 relative overflow-y-auto max-h-[800px] scroll-smooth p-6 lg:p-10">
+                
+                <div id="tab-search" class="tab-content transition-opacity duration-300">
+                    <div class="max-w-3xl mx-auto">
+                        <div class="text-center mb-8">
+                            <h4 class="text-2xl font-bold text-brand-dark">Buscador Inteligente</h4>
+                            <p class="text-gray-500 text-sm">Filtra proyectos por nombre o categoría en tiempo real.</p>
                         </div>
 
-                        <button type="submit" id="btnUpload" class="w-full py-3 rounded-xl bg-brand-dark text-white font-bold text-sm shadow-lg hover:shadow-xl hover:bg-brand-primary transition-all duration-300 disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center gap-2 group">
-                            <span>Guardar en Galería</span> 
-                            <i class="fa-solid fa-arrow-right group-hover:translate-x-1 transition-transform"></i>
-                        </button>
-                    </form>
-                </div>
-            </div>
+                        <div class="relative group mb-10">
+                            <div class="absolute -inset-1 bg-gradient-to-r from-brand-primary to-brand-secondary rounded-2xl blur opacity-25 group-hover:opacity-50 transition duration-1000"></div>
+                            <div class="relative bg-white shadow-lg rounded-2xl flex items-center p-2 border border-gray-100">
+                                <span class="pl-4 text-gray-400 text-xl"><i class="fa-solid fa-magnifying-glass"></i></span>
+                                <input type="text" id="inputBuscador" placeholder="Ej: ecommerce, web, app..." class="w-full bg-transparent border-none text-gray-800 placeholder-gray-400 focus:ring-0 text-lg py-3 px-4 outline-none" autocomplete="off">
+                                <div id="loadingSearch" class="hidden pr-4 text-brand-primary animate-spin"><i class="fa-solid fa-circle-notch"></i></div>
+                            </div>
+                        </div>
 
-            <div class="lg:col-span-8 w-full overflow-hidden">
-                <div class="flex justify-between items-end mb-6 px-2">
-                    <div>
-                        <h4 class="text-xl font-bold text-brand-dark">Galería de Proyectos</h4>
-                        <p class="text-sm text-gray-500">Últimas subidas de la comunidad</p>
-                    </div>
-                    <div class="flex gap-2">
-                        <button class="swiper-prev-btn w-8 h-8 rounded-full border border-gray-300 flex items-center justify-center text-gray-500 hover:bg-brand-primary hover:text-white hover:border-brand-primary transition-all">
-                            <i class="fa-solid fa-chevron-left text-xs"></i>
-                        </button>
-                        <button class="swiper-next-btn w-8 h-8 rounded-full border border-gray-300 flex items-center justify-center text-gray-500 hover:bg-brand-primary hover:text-white hover:border-brand-primary transition-all">
-                            <i class="fa-solid fa-chevron-right text-xs"></i>
-                        </button>
-                    </div>
-                </div>
-
-                <div class="swiper mySwiper w-full h-[400px] rounded-3xl">
-                    <div class="swiper-wrapper" id="galeria-container">
-                        <div class="swiper-slide flex items-center justify-center bg-white rounded-2xl border border-gray-100">
-                            <div class="text-center text-gray-400">
-                                <i class="fa-solid fa-circle-notch fa-spin text-2xl mb-2"></i>
-                                <p class="text-sm">Cargando galería...</p>
+                        <div id="resultadosBusqueda" class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                            <div class="col-span-full text-center text-gray-400 py-10 italic border-2 border-dashed border-gray-200 rounded-2xl">
+                                Empieza a escribir para ver resultados...
                             </div>
                         </div>
                     </div>
-                    <div class="swiper-pagination"></div>
                 </div>
-            </div>
 
+                <div id="tab-gallery" class="tab-content hidden transition-opacity duration-300">
+                    <div class="grid grid-cols-1 xl:grid-cols-12 gap-8">
+                        <div class="xl:col-span-4">
+                            <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-200">
+                                <h4 class="text-lg font-bold text-brand-dark mb-4 flex items-center gap-2">
+                                    <i class="fa-solid fa-cloud-arrow-up text-brand-primary"></i> Subir Proyecto
+                                </h4>
+                                <form id="uploadForm" class="space-y-4">
+                                    <div class="relative group">
+                                        <label for="imagenInput" class="flex flex-col items-center justify-center w-full h-40 border-2 border-dashed border-gray-300 rounded-xl cursor-pointer bg-gray-50 hover:bg-brand-primary/5 hover:border-brand-primary transition-all overflow-hidden relative">
+                                            <img id="previewImg" class="hidden absolute inset-0 w-full h-full object-cover p-1 rounded-xl z-10" />
+                                            <div id="uploadPlaceholder" class="flex flex-col items-center justify-center pt-5 pb-6 text-center px-4 z-0">
+                                                <div class="w-8 h-8 bg-white shadow-sm text-brand-primary rounded-full flex items-center justify-center mb-2"><i class="fa-solid fa-image"></i></div>
+                                                <p class="text-xs text-gray-500">Clic o arrastra imagen</p>
+                                            </div>
+                                            <input id="imagenInput" type="file" class="hidden" accept="image/png, image/jpeg, image/jpg" />
+                                        </label>
+                                    </div>
+                                    <button type="submit" id="btnUpload" class="w-full py-2.5 rounded-xl bg-brand-dark text-white font-bold text-sm shadow-lg hover:bg-brand-primary transition-all">
+                                        Guardar
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+
+                        <div class="xl:col-span-8">
+                            <div class="flex justify-between items-center mb-4">
+                                <h4 class="text-xl font-bold text-brand-dark">Últimos Diseños</h4>
+                                <div class="flex gap-2">
+                                    <button class="swiper-prev-btn w-8 h-8 rounded-full border border-gray-300 flex items-center justify-center text-gray-500 hover:bg-brand-primary hover:text-white transition-all"><i class="fa-solid fa-chevron-left text-xs"></i></button>
+                                    <button class="swiper-next-btn w-8 h-8 rounded-full border border-gray-300 flex items-center justify-center text-gray-500 hover:bg-brand-primary hover:text-white transition-all"><i class="fa-solid fa-chevron-right text-xs"></i></button>
+                                </div>
+                            </div>
+                            <div class="swiper mySwiper w-full h-[400px] rounded-2xl shadow-sm border border-gray-200 bg-white">
+                                <div class="swiper-wrapper" id="galeria-container">
+                                    <div class="swiper-slide flex items-center justify-center"><i class="fa-solid fa-circle-notch fa-spin text-gray-400"></i></div>
+                                </div>
+                                <div class="swiper-pagination"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="tab-admin" class="tab-content hidden transition-opacity duration-300">
+                    <div class="flex justify-between items-center mb-6">
+                        <h4 class="text-2xl font-bold text-brand-dark">Panel Administrativo</h4>
+                        <button onclick="cargarTablaAdmin()" class="text-sm text-brand-primary hover:underline"><i class="fa-solid fa-rotate-right"></i> Refrescar</button>
+                    </div>
+                    
+                    <div class="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left border-collapse">
+                                <thead>
+                                    <tr class="bg-gray-50 text-gray-500 text-xs uppercase tracking-wider border-b border-gray-200">
+                                        <th class="p-4 font-semibold">ID</th>
+                                        <th class="p-4 font-semibold">Vista Previa</th>
+                                        <th class="p-4 font-semibold">Título</th>
+                                        <th class="p-4 font-semibold">Categoría</th>
+                                        <th class="p-4 text-center font-semibold">Acciones</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="admin-table-body" class="text-sm text-gray-600 divide-y divide-gray-100">
+                                    </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+            </main>
         </div>
     </div>
 </section>
-
-
-<section id="buscador-proyectos" class="py-16 bg-brand-dark border-t border-white/5 relative overflow-hidden">
-    <div class="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full max-w-4xl bg-brand-primary/5 blur-3xl -z-10 pointer-events-none"></div>
-
-    <div class="max-w-4xl mx-auto px-4">
-        <div class="text-center mb-10">
-            <h2 class="text-brand-accent font-bold uppercase text-sm mb-3 tracking-wider">Explorador</h2>
-            <h3 class="text-3xl font-extrabold text-white">Buscador Inteligente</h3>
-            <p class="text-slate-400 mt-2">Encuentra proyectos por título o categoría en tiempo real.</p>
-        </div>
-
-        <div class="relative group max-w-2xl mx-auto mb-12">
-            <div class="absolute -inset-1 bg-gradient-to-r from-brand-primary to-brand-secondary rounded-2xl blur opacity-25 group-hover:opacity-50 transition duration-1000 group-hover:duration-200"></div>
-            <div class="relative bg-brand-card ring-1 ring-white/10 rounded-2xl flex items-center p-2">
-                <span class="pl-4 text-slate-500 text-xl"><i class="fa-solid fa-magnifying-glass"></i></span>
-                <input type="text" 
-                       id="inputBuscador" 
-                       placeholder="Escribe para buscar (ej: web, app, ecommerce)..." 
-                       class="w-full bg-transparent border-none text-white placeholder-slate-500 focus:ring-0 text-lg py-3 px-4 outline-none"
-                       autocomplete="off">
-                <div id="loadingSearch" class="hidden pr-4 text-brand-primary animate-spin">
-                    <i class="fa-solid fa-circle-notch"></i>
-                </div>
-            </div>
-        </div>
-
-        <div id="resultadosBusqueda" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 transition-all duration-300 min-h-[100px]">
-            <div class="col-span-full text-center text-slate-500 py-10 italic">
-                Empieza a escribir para ver resultados...
-            </div>
-        </div>
-    </div>
-</section>
-
-
-    <section id="admin-panel" class="py-16 bg-white border-t border-gray-200">
-    <div class="max-w-6xl mx-auto px-4">
-        <div class="text-center mb-10">
-            <h2 class="text-brand-primary font-bold uppercase text-sm mb-3 tracking-wider">Gestión</h2>
-            <h3 class="text-3xl font-extrabold text-brand-dark">Panel de Administración</h3>
-            <p class="text-gray-500 mt-2">Edita o elimina los proyectos subidos.</p>
-        </div>
-
-        <div class="overflow-x-auto rounded-2xl shadow-xl border border-gray-100">
-            <table class="w-full text-left border-collapse">
-                <thead>
-                    <tr class="bg-brand-dark text-white text-sm uppercase">
-                        <th class="p-4">ID</th>
-                        <th class="p-4">Imagen</th>
-                        <th class="p-4">Título</th>
-                        <th class="p-4">Categoría</th>
-                        <th class="p-4 text-center">Acciones</th>
-                    </tr>
-                </thead>
-                <tbody id="admin-table-body" class="text-sm text-gray-600 divide-y divide-gray-100 bg-white">
-                    </tbody>
-            </table>
-        </div>
-    </div>
 
     <div id="editModal" class="fixed inset-0 z-[60] hidden overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
         <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
@@ -1199,6 +1219,45 @@
                 1024: { slidesPerView: 2.5, spaceBetween: 20 },
             },
         });
+    }
+
+    // ======================================================
+    // 7. LÓGICA DE PESTAÑAS (SIDEBAR DINÁMICO)
+    // ======================================================
+    function switchTab(tabName) {
+        // 1. Ocultar todos los contenidos
+        document.querySelectorAll('.tab-content').forEach(el => {
+            el.classList.add('hidden');
+            el.classList.remove('animate-fade-in'); // Reset animación
+        });
+
+        // 2. Desactivar todos los botones
+        document.querySelectorAll('aside nav button').forEach(btn => {
+            btn.classList.remove('active-tab');
+            // Restaurar colores de iconos por defecto si es necesario (opcional)
+        });
+
+        // 3. Mostrar el contenido seleccionado
+        const target = document.getElementById(`tab-${tabName}`);
+        if(target) {
+            target.classList.remove('hidden');
+            // Pequeña animación de entrada
+            setTimeout(() => target.classList.add('animate-fade-in'), 10);
+        }
+
+        // 4. Activar el botón seleccionado
+        const btn = document.getElementById(`btn-${tabName}`);
+        if(btn) {
+            btn.classList.add('active-tab');
+        }
+
+        // 5. Cargas perezosas (Lazy Load) según la pestaña
+        if(tabName === 'gallery') {
+            if(gallerySwiper) gallerySwiper.update(); // Actualizar Swiper si estaba oculto
+        }
+        if(tabName === 'admin') {
+            cargarTablaAdmin(); // Recargar datos frescos
+        }
     }
 
     async function cargarGaleria() {
@@ -1668,6 +1727,4 @@
             `;
         }).join('');
     }
-
-
 </script>
