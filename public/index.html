@@ -103,7 +103,7 @@
 
 <body class="bg-brand-dark text-slate-300 antialiased selection:bg-brand-primary selection:text-white">
 
-    <nav class="fixed w-full z-50 transition-all duration-300 border-b border-white/5 bg-brand-dark/90 backdrop-blur-lg" id="navbar">
+   <nav class="fixed w-full z-50 transition-all duration-300 border-b border-white/5 bg-brand-dark/90 backdrop-blur-lg" id="navbar">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between items-center h-20">
                 
@@ -117,26 +117,28 @@
                 <div class="hidden lg:flex space-x-6 xl:space-x-8 items-center">
                     <a href="#inicio" class="text-sm font-medium text-slate-300 hover:text-white transition relative group">
                         Inicio
-                        <span class="absolute -bottom-1 left-0 w-0 h-0.5 bg-brand-primary transition-all group-hover:w-full"></span>
                     </a>
-                    <a href="#nosotros" class="text-sm font-medium text-slate-300 hover:text-white transition relative group">
-                        Nosotros
-                        <span class="absolute -bottom-1 left-0 w-0 h-0.5 bg-brand-primary transition-all group-hover:w-full"></span>
-                    </a>
-                    <a href="#proceso" class="text-sm font-medium text-slate-300 hover:text-white transition relative group">
-                        Metodología
-                        <span class="absolute -bottom-1 left-0 w-0 h-0.5 bg-brand-primary transition-all group-hover:w-full"></span>
-                    </a>
-                    <a href="#portafolio" class="text-sm font-medium text-slate-300 hover:text-white transition relative group">
-                        Portafolio
-                        <span class="absolute -bottom-1 left-0 w-0 h-0.5 bg-brand-primary transition-all group-hover:w-full"></span>
-                    </a>
+                    
+                    <button onclick="navToModule('search')" class="text-sm font-medium text-slate-300 hover:text-brand-primary transition flex items-center gap-1">
+                        <i class="fa-solid fa-magnifying-glass text-xs"></i> Buscador
+                    </button>
+                    
+                    <button onclick="navToModule('gallery')" class="text-sm font-medium text-slate-300 hover:text-brand-secondary transition flex items-center gap-1">
+                        <i class="fa-solid fa-images text-xs"></i> Galería
+                    </button>
+
+                    <button onclick="navToModule('admin')" class="text-sm font-medium text-slate-300 hover:text-red-400 transition flex items-center gap-1">
+                        <i class="fa-solid fa-lock text-xs"></i> Admin
+                    </button>
+
+                    <div class="h-4 w-px bg-white/10"></div>
+
                     <a href="#precios" class="text-sm font-bold text-brand-accent hover:text-white transition">
-                       Ver Precios
+                       Planes
                     </a>
                     
                     <a href="#contacto" class="bg-white text-brand-dark px-6 py-2.5 rounded-full font-bold text-sm hover:bg-brand-primary hover:text-white transition shadow-[0_0_15px_rgba(255,255,255,0.3)] hover:shadow-[0_0_20px_rgba(99,102,241,0.6)]">
-                        ¡Cotizar Ahora!
+                        ¡Cotizar!
                     </a>
                 </div>
 
@@ -154,11 +156,20 @@
             </button>
 
             <a href="#inicio" class="mobile-link text-2xl font-medium text-white hover:text-brand-primary transition-colors">Inicio</a>
-            <a href="#nosotros" class="mobile-link text-2xl font-medium text-white hover:text-brand-primary transition-colors">Nosotros</a>
-            <a href="#proceso" class="mobile-link text-2xl font-medium text-white hover:text-brand-primary transition-colors">Metodología</a>
-            <a href="#portafolio" class="mobile-link text-2xl font-medium text-white hover:text-brand-primary transition-colors">Portafolio</a>
-            <a href="#precios" class="mobile-link text-2xl font-bold text-brand-accent hover:text-white transition-colors">Ver Precios</a>
-            <a href="#ubicacion" class="mobile-link text-xl font-medium text-slate-400 hover:text-white transition-colors">Ubicación</a>
+            
+            <button onclick="navToModule('search')" class="mobile-link text-xl font-medium text-brand-primary hover:text-white transition-colors">
+                <i class="fa-solid fa-search mr-2"></i> Explorador
+            </button>
+            <button onclick="navToModule('gallery')" class="mobile-link text-xl font-medium text-brand-secondary hover:text-white transition-colors">
+                <i class="fa-solid fa-image mr-2"></i> Galería
+            </button>
+            <button onclick="navToModule('admin')" class="mobile-link text-xl font-medium text-red-400 hover:text-white transition-colors">
+                <i class="fa-solid fa-user-shield mr-2"></i> Panel Admin
+            </button>
+
+            <div class="w-20 h-px bg-white/10"></div>
+
+            <a href="#precios" class="mobile-link text-xl font-bold text-white hover:text-brand-accent transition-colors">Ver Precios</a>
             
             <a href="#contacto" class="mobile-link bg-gradient-to-r from-brand-primary to-brand-secondary text-white px-10 py-4 rounded-full font-bold text-xl shadow-lg hover:scale-105 transition-transform w-full max-w-xs text-center">
                 ¡Cotizar Proyecto!
@@ -1902,4 +1913,26 @@ async function cargarTablaAdmin() {
         });
     }
 
+// ======================================================
+    // 9. NAVEGACIÓN INTELIGENTE (NAVBAR -> DASHBOARD)
+    // ======================================================
+    function navToModule(moduleName) {
+        // 1. Cerrar menú móvil si está abierto
+        const menu = document.getElementById('mobile-menu');
+        if(menu && !menu.classList.contains('hidden')) {
+            menu.classList.add('hidden');
+            menu.classList.remove('flex');
+        }
+
+        // 2. Scroll suave hacia la sección Dashboard
+        const dashboardSection = document.getElementById('dashboard');
+        if(dashboardSection) {
+            dashboardSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+
+        // 3. Pequeño delay para permitir que el scroll inicie antes de cambiar la tab visualmente
+        setTimeout(() => {
+            switchTab(moduleName);
+        }, 300);
+    }
 </script>
