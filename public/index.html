@@ -760,6 +760,42 @@
         </div>
     </div>
 </section>
+
+
+<section id="buscador-proyectos" class="py-16 bg-brand-dark border-t border-white/5 relative overflow-hidden">
+    <div class="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full max-w-4xl bg-brand-primary/5 blur-3xl -z-10 pointer-events-none"></div>
+
+    <div class="max-w-4xl mx-auto px-4">
+        <div class="text-center mb-10">
+            <h2 class="text-brand-accent font-bold uppercase text-sm mb-3 tracking-wider">Explorador</h2>
+            <h3 class="text-3xl font-extrabold text-white">Buscador Inteligente</h3>
+            <p class="text-slate-400 mt-2">Encuentra proyectos por título o categoría en tiempo real.</p>
+        </div>
+
+        <div class="relative group max-w-2xl mx-auto mb-12">
+            <div class="absolute -inset-1 bg-gradient-to-r from-brand-primary to-brand-secondary rounded-2xl blur opacity-25 group-hover:opacity-50 transition duration-1000 group-hover:duration-200"></div>
+            <div class="relative bg-brand-card ring-1 ring-white/10 rounded-2xl flex items-center p-2">
+                <span class="pl-4 text-slate-500 text-xl"><i class="fa-solid fa-magnifying-glass"></i></span>
+                <input type="text" 
+                       id="inputBuscador" 
+                       placeholder="Escribe para buscar (ej: web, app, ecommerce)..." 
+                       class="w-full bg-transparent border-none text-white placeholder-slate-500 focus:ring-0 text-lg py-3 px-4 outline-none"
+                       autocomplete="off">
+                <div id="loadingSearch" class="hidden pr-4 text-brand-primary animate-spin">
+                    <i class="fa-solid fa-circle-notch"></i>
+                </div>
+            </div>
+        </div>
+
+        <div id="resultadosBusqueda" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 transition-all duration-300 min-h-[100px]">
+            <div class="col-span-full text-center text-slate-500 py-10 italic">
+                Empieza a escribir para ver resultados...
+            </div>
+        </div>
+    </div>
+</section>
+
+
     <section id="admin-panel" class="py-16 bg-white border-t border-gray-200">
     <div class="max-w-6xl mx-auto px-4">
         <div class="text-center mb-10">
@@ -1026,7 +1062,7 @@
                     <ul class="space-y-4 text-sm">
                         <li class="flex items-start gap-3">
                             <i class="fa-solid fa-location-dot mt-1 text-brand-primary"></i>
-                            <span>Callejón Colonial no., Santa Maria Magdalena, Tepeji del Rio Hidalgo</span>
+                            <span>Callejón Colonial no.10, Santa Maria Magdalena, Tepeji del Rio Hidalgo</span>
                         </li>
                         <li class="flex items-center gap-3">
                             <i class="fa-solid fa-envelope text-brand-primary"></i>
@@ -1548,5 +1584,90 @@
 
     // Cargar la tabla al iniciar también
     document.addEventListener('DOMContentLoaded', cargarTablaAdmin);
+
+
+// ======================================================
+    // 6. LÓGICA DEL BUSCADOR EN VIVO
+    // ======================================================
+    const inputBuscador = document.getElementById('inputBuscador');
+    const resultadosContainer = document.getElementById('resultadosBusqueda');
+    const loadingIcon = document.getElementById('loadingSearch');
+    let timeoutBusqueda = null; // Para el "debounce" (esperar a que deje de escribir)
+
+    if (inputBuscador) {
+        inputBuscador.addEventListener('input', function(e) {
+            const termino = e.target.value.trim();
+
+            // Limpiamos el timeout anterior si el usuario sigue escribiendo rápido
+            clearTimeout(timeoutBusqueda);
+
+            // Si el campo está vacío, reseteamos la vista
+            if (termino.length === 0) {
+                resultadosContainer.innerHTML = `
+                    <div class="col-span-full text-center text-slate-500 py-10 italic">
+                        Empieza a escribir para ver resultados...
+                    </div>`;
+                loadingIcon.classList.add('hidden');
+                return;
+            }
+
+            // Mostramos icono de carga
+            loadingIcon.classList.remove('hidden');
+
+            // Esperamos 300ms después de la última tecla para no saturar el servidor
+            timeoutBusqueda = setTimeout(async () => {
+                try {
+                    // Petición al backend con el parámetro ?q=
+                    const res = await fetch(`${API_BASE_URL}/api/proyectos?q=${encodeURIComponent(termino)}`);
+                    if (!res.ok) throw new Error('Error en búsqueda');
+                    
+                    const proyectos = await res.json();
+                    renderizarResultados(proyectos);
+                    
+                } catch (error) {
+                    console.error(error);
+                    resultadosContainer.innerHTML = `
+                        <div class="col-span-full text-center text-red-400 py-4">
+                            Ocurrió un error al buscar. Intenta de nuevo.
+                        </div>`;
+                } finally {
+                    loadingIcon.classList.add('hidden');
+                }
+            }, 300);
+        });
+    }
+
+    function renderizarResultados(proyectos) {
+        if (proyectos.length === 0) {
+            resultadosContainer.innerHTML = `
+                <div class="col-span-full text-center text-slate-500 py-8">
+                    <i class="fa-regular fa-face-frown text-3xl mb-2 opacity-50"></i><br>
+                    No se encontraron coincidencias.
+                </div>`;
+            return;
+        }
+
+        // Generamos el HTML de las tarjetas
+        resultadosContainer.innerHTML = proyectos.map(p => {
+            // URL de la imagen
+            const imgUrl = `${API_BASE_URL}/api/imagen/${p.id}`;
+            
+            return `
+            <div class="bg-brand-card border border-white/5 rounded-xl overflow-hidden hover:border-brand-primary/50 transition-all group animate-fade-in-up">
+                <div class="h-40 overflow-hidden relative">
+                    <img src="${imgUrl}" alt="${p.titulo}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
+                    <div class="absolute top-2 right-2 bg-brand-dark/80 backdrop-blur text-xs font-bold text-white px-2 py-1 rounded">
+                        ${p.categoria}
+                    </div>
+                </div>
+                <div class="p-4">
+                    <h4 class="text-white font-bold text-lg truncate">${p.titulo}</h4>
+                    <p class="text-slate-500 text-xs mt-1">ID: #${p.id} • ${new Date(p.fecha).toLocaleDateString()}</p>
+                </div>
+            </div>
+            `;
+        }).join('');
+    }
+
 
 </script>

@@ -23,7 +23,7 @@ import (
 // 1. MODELOS DE DATOS
 // ---------------------------------------------------------
 
-// Modelo Proyecto: Guarda la imagen en BINARIO (Byte Array) para persistencia en Railway
+// Modelo Proyecto: Guarda la imagen en BINARIO (Byte Array)
 type Proyecto struct {
 	ID        uint   `gorm:"primaryKey" json:"id"`
 	Titulo    string `gorm:"type:varchar(100)" json:"titulo"`
@@ -59,27 +59,19 @@ type ContactoWeb struct {
 // MODELO DE PETICIÓN (ESTRICTO)
 // ---------------------------------------------------------
 type ContactoRequest struct {
-	// Regla: Requerido, min 3 letras, max 50.
-	Nombre string `json:"nombre" validate:"required,min=3,max=50"`
-
-	// Regla: Requerido, formato email real.
-	Email string `json:"email" validate:"required,email,max=100"`
-
-	// Regla: Requerido, NUMÉRICO y EXACTAMENTE 10 dígitos.
-	Telefono string `json:"telefono" validate:"required,numeric,len=10"`
-
-	// Regla: Debe ser UNO DE estos valores exactos.
-	Servicio string `json:"servicio" validate:"required,oneof='Desarrollo Web' 'E-Commerce' 'App Movil' 'Software a Medida' 'Otro'"`
-
-	// Regla: Requerido, min 10, max 300 (para no saturar BD).
-	Mensaje string `json:"mensaje" validate:"required,min=10,max=300"`
-
+	Nombre         string `json:"nombre" validate:"required,min=3,max=50"`
+	Email          string `json:"email" validate:"required,email,max=100"`
+	Telefono       string `json:"telefono" validate:"required,numeric,len=10"`
+	Servicio       string `json:"servicio" validate:"required,oneof='Desarrollo Web' 'E-Commerce' 'App Movil' 'Software a Medida' 'Otro'"`
+	Mensaje        string `json:"mensaje" validate:"required,min=10,max=300"`
 	RecaptchaToken string `json:"recaptchaToken" validate:"required"`
 }
+
 type RecaptchaResponse struct {
 	Success bool `json:"success"`
 }
 
+// ---------------------------------------------------------
 // 2. CONFIGURACIÓN DEL VALIDADOR
 // ---------------------------------------------------------
 
@@ -99,7 +91,6 @@ func (cv *CustomValidator) Validate(i interface{}) error {
 					if e.Tag() == "min" {
 						return fmt.Errorf("El nombre es muy corto (mínimo 3 letras).")
 					}
-
 				case "Email":
 					if e.Tag() == "required" {
 						return fmt.Errorf("El correo es obligatorio.")
@@ -107,7 +98,6 @@ func (cv *CustomValidator) Validate(i interface{}) error {
 					if e.Tag() == "email" {
 						return fmt.Errorf("El formato del correo es inválido.")
 					}
-
 				case "Telefono":
 					if e.Tag() == "required" {
 						return fmt.Errorf("El teléfono es obligatorio.")
@@ -118,12 +108,10 @@ func (cv *CustomValidator) Validate(i interface{}) error {
 					if e.Tag() == "len" {
 						return fmt.Errorf("El teléfono debe tener exactamente 10 dígitos.")
 					}
-
 				case "Servicio":
 					if e.Tag() == "oneof" {
 						return fmt.Errorf("Por favor selecciona un servicio válido de la lista.")
 					}
-
 				case "Mensaje":
 					if e.Tag() == "required" {
 						return fmt.Errorf("El mensaje no puede estar vacío.")
@@ -134,7 +122,6 @@ func (cv *CustomValidator) Validate(i interface{}) error {
 					if e.Tag() == "max" {
 						return fmt.Errorf("El mensaje es muy largo (máximo 300 caracteres).")
 					}
-
 				case "RecaptchaToken":
 					return fmt.Errorf("Error de seguridad. Recarga la página.")
 				}
@@ -152,7 +139,7 @@ var db *gorm.DB
 // ---------------------------------------------------------
 
 func main() {
-	// Cargar variables (opcional si usas Railway Variables)
+	// Cargar variables
 	if err := godotenv.Load(); err != nil {
 		fmt.Println("ℹ️ Nota: Usando variables de entorno del sistema.")
 	}
@@ -175,7 +162,6 @@ func main() {
 
 	e := echo.New()
 	e.HTTPErrorHandler = customHTTPErrorHandler
-	// Validador personalizado
 	e.Validator = &CustomValidator{validator: validator.New()}
 
 	// MIDDLEWARES
@@ -191,7 +177,7 @@ func main() {
 	}
 	e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
 		AllowOrigins: []string{allowOrigin},
-		AllowMethods: []string{http.MethodPost, http.MethodGet},
+		AllowMethods: []string{http.MethodPost, http.MethodGet, http.MethodPut, http.MethodDelete},
 	}))
 
 	// Rate Limiter
@@ -211,10 +197,10 @@ func main() {
 
 	// --- RUTAS DE IMÁGENES (SISTEMA DE BD) ---
 	e.POST("/api/upload", subirProyectoBD)             // Subir bytes
-	e.GET("/api/proyectos", obtenerProyectosBD)        // Obtener lista JSON
+	e.GET("/api/proyectos", obtenerProyectosBD)        // Obtener lista JSON (CON BÚSQUEDA)
 	e.GET("/api/imagen/:id", servirImagenBD)           // Obtener la imagen visual
-	e.PUT("/api/proyectos/:id", actualizarProyectoBD)  // Editar Título/Categoría
-	e.DELETE("/api/proyectos/:id", eliminarProyectoBD) // Eliminar proyecto
+	e.PUT("/api/proyectos/:id", actualizarProyectoBD)  // Editar
+	e.DELETE("/api/proyectos/:id", eliminarProyectoBD) // Eliminar
 
 	// Puerto
 	port := os.Getenv("PORT")
@@ -254,7 +240,7 @@ func subirProyectoBD(c echo.Context) error {
 	}
 	defer src.Close()
 
-	// 4. Leer BYTES (Esto es lo que guardaremos en Postgres)
+	// 4. Leer BYTES
 	fileBytes, err := io.ReadAll(src)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, map[string]string{"error": "Error al leer bytes"})
@@ -263,8 +249,8 @@ func subirProyectoBD(c echo.Context) error {
 	// 5. Guardar en DB
 	nuevoProyecto := Proyecto{
 		Titulo:    "Diseño de Comunidad",
-		Categoria: "Upload",
-		Datos:     fileBytes, // Guardamos el binario
+		Categoria: "Comunidad", // Valor por defecto
+		Datos:     fileBytes,
 		MimeType:  file.Header.Get("Content-Type"),
 		CreatedAt: time.Now(),
 	}
@@ -277,15 +263,29 @@ func subirProyectoBD(c echo.Context) error {
 	return c.JSON(http.StatusCreated, map[string]string{"mensaje": "Imagen guardada correctamente"})
 }
 
-// B. Obtener Lista de Proyectos (Ligera)
+// B. Obtener Lista de Proyectos (CON BÚSQUEDA INTEGRADA)
 func obtenerProyectosBD(c echo.Context) error {
+	// 1. Recoger parámetro de búsqueda ?q=texto
+	busqueda := c.QueryParam("q")
+
 	var proyectos []Proyecto
-	// Seleccionamos solo campos necesarios (EXCLUYENDO 'Datos' que es pesado)
-	if result := db.Select("id", "titulo", "categoria", "created_at").Order("created_at desc").Limit(20).Find(&proyectos); result.Error != nil {
+
+	// 2. Preparar consulta base (sin los bytes pesados)
+	query := db.Select("id", "titulo", "categoria", "created_at").Order("created_at desc").Limit(20)
+
+	// 3. Aplicar filtro si existe búsqueda
+	if busqueda != "" {
+		// ILIKE es case-insensitive en PostgreSQL. % busca coincidencias parciales.
+		filtro := "%" + busqueda + "%"
+		query = query.Where("titulo ILIKE ? OR categoria ILIKE ?", filtro, filtro)
+	}
+
+	// 4. Ejecutar consulta
+	if result := query.Find(&proyectos); result.Error != nil {
 		return c.JSON(http.StatusInternalServerError, map[string]string{"error": "Error al obtener lista"})
 	}
 
-	// Mapear a respuesta limpia
+	// 5. Mapear respuesta
 	var response []ProyectoResponse
 	for _, p := range proyectos {
 		response = append(response, ProyectoResponse{
@@ -300,8 +300,24 @@ func obtenerProyectosBD(c echo.Context) error {
 }
 
 // C. Servir la Imagen Visual (Src del <img>)
-// (Handler implemented later with logging and redirects)
+func servirImagenBD(c echo.Context) error {
+	id := c.Param("id")
+	var proy Proyecto
 
+	// Buscamos el registro completo (incluyendo Datos)
+	if result := db.First(&proy, id); result.Error != nil {
+		return c.Redirect(http.StatusFound, "https://placehold.co/600x400?text=No+Encontrado")
+	}
+
+	if len(proy.Datos) == 0 {
+		return c.Redirect(http.StatusFound, "https://placehold.co/600x400?text=Imagen+Vacia")
+	}
+
+	// Escribimos los bytes con el mimetype correcto
+	return c.Blob(http.StatusOK, proy.MimeType, proy.Datos)
+}
+
+// D. Manejar Contacto (Formulario)
 func manejarContacto(c echo.Context) error {
 	req := new(ContactoRequest)
 	if err := c.Bind(req); err != nil {
@@ -331,10 +347,53 @@ func manejarContacto(c echo.Context) error {
 	return c.JSON(http.StatusCreated, map[string]string{"mensaje": "Enviado"})
 }
 
+// E. Actualizar Proyecto
+func actualizarProyectoBD(c echo.Context) error {
+	id := c.Param("id")
+	var proy Proyecto
+
+	if result := db.First(&proy, id); result.Error != nil {
+		return c.JSON(http.StatusNotFound, map[string]string{"error": "Proyecto no encontrado"})
+	}
+
+	type UpdateRequest struct {
+		Titulo    string `json:"titulo"`
+		Categoria string `json:"categoria"`
+	}
+	var req UpdateRequest
+	if err := c.Bind(&req); err != nil {
+		return c.JSON(http.StatusBadRequest, map[string]string{"error": "Datos inválidos"})
+	}
+
+	if req.Titulo != "" {
+		proy.Titulo = req.Titulo
+	}
+	if req.Categoria != "" {
+		proy.Categoria = req.Categoria
+	}
+
+	db.Save(&proy)
+	return c.JSON(http.StatusOK, map[string]string{"mensaje": "Actualizado"})
+}
+
+// F. Eliminar Proyecto
+func eliminarProyectoBD(c echo.Context) error {
+	id := c.Param("id")
+	// Unscoped para borrado físico y liberar espacio
+	if result := db.Unscoped().Delete(&Proyecto{}, id); result.Error != nil {
+		return c.JSON(http.StatusInternalServerError, map[string]string{"error": "Error al eliminar"})
+	}
+	return c.JSON(http.StatusOK, map[string]string{"mensaje": "Eliminado"})
+}
+
+// ---------------------------------------------------------
+// UTILIDADES
+// ---------------------------------------------------------
+
 func validarCaptchaGoogle(token string) bool {
 	secret := os.Getenv("RECAPTCHA_SECRET")
 	if secret == "" {
-		return false // Falla segura
+		return false
 	}
 	resp, err := http.PostForm("https://www.google.com/recaptcha/api/siteverify", map[string][]string{
 		"secret":   {secret},
@@ -349,40 +408,13 @@ func validarCaptchaGoogle(token string) bool {
 	return result.Success
 }
 
-// C. Servir la Imagen Visual (Src del <img>)
-func servirImagenBD(c echo.Context) error {
-	id := c.Param("id")
-	var proy Proyecto
-
-	// Buscamos el registro completo
-	if result := db.First(&proy, id); result.Error != nil {
-		fmt.Println("❌ Error: Imagen no encontrada para ID:", id) // Log para ver en Railway
-		return c.Redirect(http.StatusFound, "https://placehold.co/600x400?text=No+Encontrado")
-	}
-
-	// Si el array de bytes está vacío, algo falló en la subida
-	if len(proy.Datos) == 0 {
-		fmt.Println("⚠️ Advertencia: El registro existe pero no tiene datos de imagen (ID:", id, ")")
-		return c.Redirect(http.StatusFound, "https://placehold.co/600x400?text=Imagen+Vacia")
-	}
-
-	// Escribimos los bytes
-	return c.Blob(http.StatusOK, proy.MimeType, proy.Datos)
-}
-
-// ---------------------------------------------------------
-// MANEJADOR DE ERRORES PERSONALIZADO (404)
-// ---------------------------------------------------------
 func customHTTPErrorHandler(err error, c echo.Context) {
 	code := http.StatusInternalServerError
 	if he, ok := err.(*echo.HTTPError); ok {
 		code = he.Code
 	}
-
-	// Si el error es "Página no encontrada" (404)
+	// Si es 404 y NO es api, servimos HTML
 	if code == http.StatusNotFound {
-		// Importante: Si la ruta NO empieza con /api/, servimos el HTML visual.
-		// Si es /api/, dejamos que Echo devuelva el JSON de error estándar.
 		if !strings.HasPrefix(c.Path(), "/api/") {
 			if err := c.File("public/404.html"); err != nil {
 				c.Logger().Error(err)
@@ -390,54 +422,5 @@ func customHTTPErrorHandler(err error, c echo.Context) {
 			return
 		}
 	}
-
-	// Para cualquier otro error, usar el default de Echo (JSON text)
 	c.Echo().DefaultHTTPErrorHandler(err, c)
-}
-
-// D. Actualizar Proyecto (Solo metadatos: Título y Categoría)
-func actualizarProyectoBD(c echo.Context) error {
-	id := c.Param("id")
-	var proy Proyecto
-
-	// 1. Buscar si existe
-	if result := db.First(&proy, id); result.Error != nil {
-		return c.JSON(http.StatusNotFound, map[string]string{"error": "Proyecto no encontrado"})
-	}
-
-	// 2. Leer datos del JSON enviado
-	type UpdateRequest struct {
-		Titulo    string `json:"titulo"`
-		Categoria string `json:"categoria"`
-	}
-	var req UpdateRequest
-	if err := c.Bind(&req); err != nil {
-		return c.JSON(http.StatusBadRequest, map[string]string{"error": "Datos inválidos"})
-	}
-
-	// 3. Actualizar campos
-	if req.Titulo != "" {
-		proy.Titulo = req.Titulo
-	}
-	if req.Categoria != "" {
-		proy.Categoria = req.Categoria
-	}
-
-	// 4. Guardar cambios en BD
-	db.Save(&proy)
-
-	return c.JSON(http.StatusOK, map[string]string{"mensaje": "Proyecto actualizado correctamente"})
-}
-
-// E. Eliminar Proyecto
-func eliminarProyectoBD(c echo.Context) error {
-	id := c.Param("id")
-
-	// 1. Buscar y eliminar (GORM soft delete si tienes DeletedAt, o hard delete si no)
-	// Usamos Unscoped() para borrado físico permanente de la imagen pesada
-	if result := db.Unscoped().Delete(&Proyecto{}, id); result.Error != nil {
-		return c.JSON(http.StatusInternalServerError, map[string]string{"error": "Error al eliminar"})
-	}
-
-	return c.JSON(http.StatusOK, map[string]string{"mensaje": "Proyecto eliminado"})
 }
