@@ -1521,60 +1521,94 @@
     // Cargar Galería al inicio
     document.addEventListener('DOMContentLoaded', cargarGaleria);
 
+// ======================================================
+// FUNCIÓN CARGAR TABLA ADMIN (Con botón refresh animado)
+// ======================================================
+async function cargarTablaAdmin() {
+    const tbody = document.getElementById('admin-table-body');
+    // Seleccionamos el icono dentro del botón para animarlo
+    const refreshIcon = document.querySelector('#tab-admin button i'); 
 
-//-----------------------------------------------------------------//
-// Función para cargar la tabla de administración
-    async function cargarTablaAdmin() {
-        const tbody = document.getElementById('admin-table-body');
-        if(!tbody) return;
+    if(!tbody) return;
 
-        try {
-            const response = await fetch(`${API_BASE_URL}/api/proyectos?t=${Date.now()}`);
-            if (!response.ok) throw new Error("Error cargando datos");
-            const proyectos = await response.json();
+    // 1. Feedback Visual: Animamos el icono y mostramos "Cargando" en la tabla
+    if(refreshIcon) refreshIcon.classList.add('fa-spin');
+    
+    tbody.innerHTML = `
+        <tr>
+            <td colspan="5" class="p-10 text-center text-slate-400">
+                <i class="fa-solid fa-circle-notch fa-spin text-2xl text-brand-primary mb-2"></i><br>
+                Actualizando lista...
+            </td>
+        </tr>`;
 
-            tbody.innerHTML = '';
-            
-            if(proyectos.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="5" class="p-4 text-center">No hay registros</td></tr>';
-                return;
-            }
+    try {
+        // 2. Petición al servidor (usamos timestamp para evitar caché del navegador)
+        const response = await fetch(`${API_BASE_URL}/api/proyectos?t=${Date.now()}`);
+        
+        if (!response.ok) throw new Error("Error cargando datos");
+        
+        const proyectos = await response.json();
 
-            proyectos.forEach(p => {
-                const tr = document.createElement('tr');
-                tr.className = "hover:bg-gray-50 transition-colors border-b last:border-0";
-                
-                // Miniatura de imagen
-                const imgUrl = `${API_BASE_URL}/api/imagen/${p.id}`;
-                
-                tr.innerHTML = `
-                    <td class="p-4 font-mono text-xs text-gray-500">#${p.id}</td>
-                    <td class="p-4">
-                        <div class="w-12 h-12 rounded-lg overflow-hidden bg-gray-100 border border-gray-200">
-                            <img src="${imgUrl}" alt="Img" class="w-full h-full object-cover">
-                        </div>
+        tbody.innerHTML = ''; // Limpiar loader
+
+        if(proyectos.length === 0) {
+            tbody.innerHTML = `
+                <tr>
+                    <td colspan="5" class="p-8 text-center text-slate-400 italic bg-gray-50 rounded-lg">
+                        No hay proyectos subidos todavía.
                     </td>
-                    <td class="p-4 font-bold text-gray-800">${p.titulo}</td>
-                    <td class="p-4"><span class="bg-brand-primary/10 text-brand-primary px-2 py-1 rounded text-xs font-bold uppercase">${p.categoria}</span></td>
-                    <td class="p-4 text-center">
-                        <div class="flex justify-center gap-2">
-                            <button onclick="openEditModal(${p.id}, '${p.titulo}', '${p.categoria}')" class="w-8 h-8 rounded bg-blue-50 text-blue-600 hover:bg-blue-100 transition flex items-center justify-center">
-                                <i class="fa-solid fa-pen text-xs"></i>
-                            </button>
-                            <button onclick="deleteItem(${p.id})" class="w-8 h-8 rounded bg-red-50 text-red-600 hover:bg-red-100 transition flex items-center justify-center">
-                                <i class="fa-solid fa-trash text-xs"></i>
-                            </button>
-                        </div>
-                    </td>
-                `;
-                tbody.appendChild(tr);
-            });
-
-        } catch (error) {
-            console.error(error);
+                </tr>`;
+            return;
         }
-    }
 
+        // 3. Renderizar filas
+        proyectos.forEach(p => {
+            const tr = document.createElement('tr');
+            tr.className = "hover:bg-slate-50 transition-colors border-b border-gray-100 last:border-0";
+            
+            const imgUrl = `${API_BASE_URL}/api/imagen/${p.id}`;
+            
+            tr.innerHTML = `
+                <td class="p-4 font-mono text-xs text-gray-400">#${p.id}</td>
+                <td class="p-4">
+                    <div class="w-16 h-12 rounded-lg overflow-hidden bg-gray-100 border border-gray-200 shadow-sm relative group">
+                        <img src="${imgUrl}" alt="Img" class="w-full h-full object-cover">
+                    </div>
+                </td>
+                <td class="p-4 font-bold text-gray-700">${p.titulo}</td>
+                <td class="p-4">
+                    <span class="inline-block bg-brand-primary/10 text-brand-primary border border-brand-primary/20 px-2.5 py-1 rounded-md text-xs font-bold uppercase tracking-wider">
+                        ${p.categoria}
+                    </span>
+                </td>
+                <td class="p-4 text-center">
+                    <div class="flex justify-center gap-2">
+                        <button onclick="openEditModal(${p.id}, '${p.titulo}', '${p.categoria}')" class="w-8 h-8 rounded-lg bg-white border border-gray-200 text-blue-500 hover:bg-blue-500 hover:text-white hover:border-blue-500 transition-all shadow-sm flex items-center justify-center" title="Editar">
+                            <i class="fa-solid fa-pen text-xs"></i>
+                        </button>
+                        <button onclick="deleteItem(${p.id})" class="w-8 h-8 rounded-lg bg-white border border-gray-200 text-red-500 hover:bg-red-500 hover:text-white hover:border-red-500 transition-all shadow-sm flex items-center justify-center" title="Eliminar">
+                            <i class="fa-solid fa-trash text-xs"></i>
+                        </button>
+                    </div>
+                </td>
+            `;
+            tbody.appendChild(tr);
+        });
+
+    } catch (error) {
+        console.error(error);
+        tbody.innerHTML = `
+            <tr>
+                <td colspan="5" class="p-4 text-center text-red-500 bg-red-50 rounded-lg">
+                    <i class="fa-solid fa-triangle-exclamation"></i> Error al conectar con el servidor.
+                </td>
+            </tr>`;
+    } finally {
+        // 4. Detener la animación del icono (siempre se ejecuta)
+        if(refreshIcon) refreshIcon.classList.remove('fa-spin');
+    }
+}
     // --- FUNCIONES DE ELIMINAR ---
     window.deleteItem = async (id) => {
         const result = await Swal.fire({
