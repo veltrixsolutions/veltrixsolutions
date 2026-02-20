@@ -280,7 +280,7 @@ func obtenerProyectosBD(c echo.Context) error {
 	var proyectos []Proyecto
 
 	// 2. Preparar consulta base (sin los bytes pesados)
-	query := db.Select("id", "titulo", "categoria", "created_at").Order("created_at desc").Limit(20)
+	query := db.Select("titulo", "categoria", "created_at").Order("created_at desc").Limit(20)
 
 	// 3. Aplicar filtro si existe búsqueda
 	if busqueda != "" {
