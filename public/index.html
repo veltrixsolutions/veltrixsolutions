@@ -187,7 +187,6 @@
             </span>
     </div>
 </div>
-
 <section id="dashboard" class="pt-36 pb-20 bg-slate-50 border-t border-gray-200 relative overflow-hidden">
     <div class="absolute top-0 left-0 w-full h-[500px] bg-brand-dark -z-10"></div>
     <div class="absolute top-20 right-0 w-96 h-96 bg-brand-primary/20 rounded-full blur-[100px] -z-10"></div>
@@ -205,28 +204,20 @@
                 <div class="p-6 border-b border-white/10">
                     <span class="text-xs font-bold uppercase tracking-widest text-brand-primary">Menú</span>
                 </div>
-                               <button onclick="switchTab('admin')" id="btn-admin" class="w-full flex items-center gap-4 px-4 py-3 rounded-xl transition-all duration-300 hover:bg-white/5 hover:text-white text-left group">
-                        <div class="w-8 h-8 rounded-lg bg-white/5 flex items-center justify-center text-red-400 group-hover:scale-110 transition-transform">
-                            <i class="fa-solid fa-user-shield"></i>
-                        </div>
-                        <span class="font-medium">Administración</span>
-                    </button>
-
-
                 
                 <nav class="flex-1 p-4 space-y-2">
-                    <button onclick="switchTab('search')" id="btn-search" class="w-full flex items-center gap-4 px-4 py-3 rounded-xl transition-all duration-300 hover:bg-white/5 hover:text-white text-left group active-tab">
-                        <div class="w-8 h-8 rounded-lg bg-white/5 flex items-center justify-center text-brand-primary group-hover:scale-110 transition-transform">
-                            <i class="fa-solid fa-magnifying-glass"></i>
-                        </div>
-                        <span class="font-medium">Explorador</span>
-                    </button>
-
-                    <button onclick="switchTab('gallery')" id="btn-gallery" class="w-full flex items-center gap-4 px-4 py-3 rounded-xl transition-all duration-300 hover:bg-white/5 hover:text-white text-left group">
+                    <button onclick="switchTab('gallery')" id="btn-gallery" class="w-full flex items-center gap-4 px-4 py-3 rounded-xl transition-all duration-300 hover:bg-white/5 hover:text-white text-left group active-tab">
                         <div class="w-8 h-8 rounded-lg bg-white/5 flex items-center justify-center text-brand-secondary group-hover:scale-110 transition-transform">
                             <i class="fa-solid fa-images"></i>
                         </div>
                         <span class="font-medium">Galería & Upload</span>
+                    </button>
+
+                    <button onclick="switchTab('admin')" id="btn-admin" class="w-full flex items-center gap-4 px-4 py-3 rounded-xl transition-all duration-300 hover:bg-white/5 hover:text-white text-left group">
+                        <div class="w-8 h-8 rounded-lg bg-white/5 flex items-center justify-center text-red-400 group-hover:scale-110 transition-transform">
+                            <i class="fa-solid fa-user-shield"></i>
+                        </div>
+                        <span class="font-medium">Administración</span>
                     </button>
                 </nav>
 
@@ -240,53 +231,29 @@
 
             <main class="flex-1 bg-gray-50 relative overflow-y-auto max-h-[800px] scroll-smooth p-6 lg:p-10">
                 
-                <div id="tab-search" class="tab-content transition-opacity duration-300">
-                    <div class="max-w-3xl mx-auto">
-                        <div class="text-center mb-8">
-                            <h4 class="text-2xl font-bold text-brand-dark">Buscador Inteligente</h4>
-                            <p class="text-gray-500 text-sm">Filtra proyectos por nombre o categoría en tiempo real.</p>
-                        </div>
-
-                        <div class="relative group mb-10">
-                            <div class="absolute -inset-1 bg-gradient-to-r from-brand-primary to-brand-secondary rounded-2xl blur opacity-25 group-hover:opacity-50 transition duration-1000"></div>
-                            <div class="relative bg-white shadow-lg rounded-2xl flex items-center p-2 border border-gray-100">
-                                <span class="pl-4 text-gray-400 text-xl"><i class="fa-solid fa-magnifying-glass"></i></span>
-                                <input type="text" id="inputBuscador" placeholder="Ej: ecommerce, web, app..." class="w-full bg-transparent border-none text-gray-800 placeholder-gray-400 focus:ring-0 text-lg py-3 px-4 outline-none" autocomplete="off">
-                                <div id="loadingSearch" class="hidden pr-4 text-brand-primary animate-spin"><i class="fa-solid fa-circle-notch"></i></div>
-                            </div>
-                        </div>
-
-                        <div id="resultadosBusqueda" class="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                            <div class="col-span-full text-center text-gray-400 py-10 italic border-2 border-dashed border-gray-200 rounded-2xl">
-                                Empieza a escribir para ver resultados...
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div id="tab-gallery" class="tab-content hidden transition-opacity duration-300">
+                <div id="tab-gallery" class="tab-content transition-opacity duration-300">
                     <div class="grid grid-cols-1 xl:grid-cols-12 gap-8">
                         <div class="xl:col-span-4">
-    <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-200">
-        <h4 class="text-lg font-bold text-brand-dark mb-4 flex items-center gap-2">
-            <i class="fa-solid fa-cloud-arrow-up text-brand-primary"></i> Compartir Proyecto
-        </h4>
-        <p class="text-xs text-gray-500 mb-4">Sube tu referencia para añadirla a la galería comunitaria.</p>
-        
-        <div class="relative group">
-            <label for="triggerFile" class="flex flex-col items-center justify-center w-full h-48 border-2 border-dashed border-gray-300 rounded-2xl cursor-pointer bg-gray-50 hover:bg-brand-primary/5 hover:border-brand-primary transition-all overflow-hidden relative">
-                <div class="flex flex-col items-center justify-center pt-5 pb-6 text-center px-4">
-                    <div class="w-12 h-12 bg-white shadow-sm text-brand-primary rounded-full flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
-                        <i class="fa-solid fa-image text-xl"></i>
-                    </div>
-                    <p class="text-sm font-bold text-gray-700">Toca para elegir imagen</p>
-                    <p class="text-xs text-gray-400 mt-1">JPG, PNG (Max 5MB)</p>
-                </div>
-                <input id="triggerFile" type="file" class="hidden" accept="image/png, image/jpeg, image/jpg" />
-            </label>
-        </div>
-    </div>
-</div>
+                            <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-200">
+                                <h4 class="text-lg font-bold text-brand-dark mb-4 flex items-center gap-2">
+                                    <i class="fa-solid fa-cloud-arrow-up text-brand-primary"></i> Compartir Proyecto
+                                </h4>
+                                <p class="text-xs text-gray-500 mb-4">Sube tu referencia para añadirla a la galería comunitaria.</p>
+                                
+                                <div class="relative group">
+                                    <label for="triggerFile" class="flex flex-col items-center justify-center w-full h-48 border-2 border-dashed border-gray-300 rounded-2xl cursor-pointer bg-gray-50 hover:bg-brand-primary/5 hover:border-brand-primary transition-all overflow-hidden relative">
+                                        <div class="flex flex-col items-center justify-center pt-5 pb-6 text-center px-4">
+                                            <div class="w-12 h-12 bg-white shadow-sm text-brand-primary rounded-full flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
+                                                <i class="fa-solid fa-image text-xl"></i>
+                                            </div>
+                                            <p class="text-sm font-bold text-gray-700">Toca para elegir imagen</p>
+                                            <p class="text-xs text-gray-400 mt-1">JPG, PNG (Max 5MB)</p>
+                                        </div>
+                                        <input id="triggerFile" type="file" class="hidden" accept="image/png, image/jpeg, image/jpg" />
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
 
                         <div class="xl:col-span-8">
                             <div class="flex justify-between items-center mb-4">
@@ -307,94 +274,50 @@
                 </div>
 
                 <div id="tab-admin" class="tab-content hidden transition-opacity duration-300">
-    
-    <div class="flex flex-col sm:flex-row justify-between items-center mb-6 gap-4">
-        <h4 class="text-2xl font-bold text-brand-dark">Panel Administrativo</h4>
-        <div class="flex gap-3">
-            <button onclick="cargarTablaAdmin()" class="px-4 py-2 text-sm font-medium text-brand-dark bg-white border border-gray-200 rounded-xl hover:bg-gray-50 transition-colors">
-                <i class="fa-solid fa-rotate-right mr-1"></i> Refrescar
-            </button>
-            <button onclick="openAddModal()" class="px-4 py-2 text-sm font-bold text-white bg-brand-primary rounded-xl shadow-lg hover:bg-brand-secondary hover:shadow-brand-primary/50 transition-all transform active:scale-95">
-                <i class="fa-solid fa-plus mr-1"></i> Nuevo Proyecto
-            </button>
-        </div>
-    </div>
-    
-<div class="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden flex flex-col">
-        <div class="overflow-x-auto min-h-[300px]"> <table class="w-full text-left border-collapse">
-                <thead>
-                    <tr class="bg-gray-50 text-gray-500 text-xs uppercase tracking-wider border-b border-gray-200">
-                        <th class="p-4 font-semibold text-center w-24">Vista Previa</th> 
-                        <th class="p-4 font-semibold text-left">Título del Proyecto</th>
-                        <th class="p-4 font-semibold text-center">Categoría</th>
-                        <th class="p-4 text-center font-semibold w-32">Acciones</th>
-                    </tr>
-                </thead>
-                <tbody id="admin-table-body" class="text-sm text-gray-600 divide-y divide-gray-100">
-                    </tbody>
-            </table>
-        </div>
-        <div id="admin-pagination" class="bg-gray-50 px-6 py-4 border-t border-gray-200 w-full mt-auto">
-        </div>
-    </div>
-</div>
+                    
+                    <div class="flex flex-col sm:flex-row justify-between items-center mb-6 gap-4">
+                        <h4 class="text-2xl font-bold text-brand-dark">Panel Administrativo</h4>
+                        <div class="flex gap-3">
+                            <button onclick="cargarTablaAdmin()" id="btn-refresh-admin" class="px-4 py-2 text-sm font-medium text-brand-dark bg-white border border-gray-200 rounded-xl hover:bg-gray-50 transition-colors flex items-center">
+                                <i class="fa-solid fa-rotate-right mr-2"></i> Refrescar
+                            </button>
+                            <button onclick="openAddModal()" class="px-4 py-2 text-sm font-bold text-white bg-brand-primary rounded-xl shadow-lg hover:bg-brand-secondary hover:shadow-brand-primary/50 transition-all transform active:scale-95 flex items-center">
+                                <i class="fa-solid fa-plus mr-2"></i> Nuevo Proyecto
+                            </button>
+                        </div>
+                    </div>
 
-<div id="addModal" class="fixed inset-0 z-[70] hidden" role="dialog" aria-modal="true">
-    <div class="fixed inset-0 bg-gray-900/70 backdrop-blur-sm transition-opacity" onclick="closeAddModal()"></div>
-
-    <div class="flex items-center justify-center min-h-screen p-4">
-        <div class="relative bg-white rounded-2xl shadow-2xl max-w-md w-full overflow-hidden transform transition-all scale-100">
-            
-            <div class="bg-brand-dark px-6 py-4 flex justify-between items-center">
-                <h3 class="text-lg font-bold text-white">Nuevo Proyecto</h3>
-                <button onclick="closeAddModal()" class="text-white/50 hover:text-white transition">
-                    <i class="fa-solid fa-xmark text-xl"></i>
-                </button>
-            </div>
-
-            <form id="formAddProject" class="p-6 space-y-4">
-                
-                <div>
-                    <label class="block text-xs font-bold text-gray-500 uppercase mb-2">Imagen del Proyecto</label>
-                    <div class="relative">
-                        <input type="file" id="add-imagen" accept="image/*" required 
-                               class="block w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-semibold file:bg-brand-primary/10 file:text-brand-primary hover:file:bg-brand-primary/20 transition-all"/>
+                    <div class="mb-6 relative">
+                        <div class="relative bg-white shadow-sm rounded-xl flex items-center p-1 border border-gray-200">
+                            <span class="pl-4 text-gray-400"><i class="fa-solid fa-magnifying-glass"></i></span>
+                            <input type="text" id="inputBuscadorAdmin" placeholder="Buscar por título o categoría..." class="w-full bg-transparent border-none text-gray-700 placeholder-gray-400 focus:ring-0 text-sm py-2 px-3 outline-none" autocomplete="off">
+                            <div id="loadingSearchAdmin" class="hidden pr-4 text-brand-primary animate-spin"><i class="fa-solid fa-circle-notch"></i></div>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden flex flex-col">
+                        <div class="overflow-x-auto min-h-[300px]"> 
+                            <table class="w-full text-left border-collapse">
+                                <thead>
+                                    <tr class="bg-gray-50 text-gray-500 text-xs uppercase tracking-wider border-b border-gray-200">
+                                        <th class="p-4 font-semibold text-center w-24">Vista Previa</th> 
+                                        <th class="p-4 font-semibold text-left">Título del Proyecto</th>
+                                        <th class="p-4 font-semibold text-center">Categoría</th>
+                                        <th class="p-4 text-center font-semibold w-32">Acciones</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="admin-table-body" class="text-sm text-gray-600 divide-y divide-gray-100">
+                                    </tbody>
+                            </table>
+                        </div>
+                        <div id="admin-pagination" class="bg-gray-50 px-6 py-4 border-t border-gray-200 w-full mt-auto">
+                            </div>
                     </div>
                 </div>
 
-                <div>
-                    <label class="block text-xs font-bold text-gray-500 uppercase mb-2">Título</label>
-                    <input type="text" id="add-titulo" required placeholder="Ej: E-Commerce Moda" 
-                           class="w-full border border-gray-300 rounded-lg px-3 py-2 text-gray-700 focus:outline-none focus:ring-2 focus:ring-brand-primary focus:border-transparent transition-all">
-                </div>
-
-                <div>
-                    <label class="block text-xs font-bold text-gray-500 uppercase mb-2">Categoría</label>
-                    <select id="add-categoria" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-gray-700 focus:outline-none focus:ring-2 focus:ring-brand-primary focus:border-transparent transition-all">
-                        <option value="Desarrollo Web">Desarrollo Web</option>
-                        <option value="E-Commerce">E-Commerce</option>
-                        <option value="App Movil">App Movil</option>
-                        <option value="Software a Medida">Software a Medida</option>
-                        <option value="Comunidad">Comunidad</option>
-                    </select>
-                </div>
-
-                <div class="pt-4 flex gap-3">
-                    <button type="button" onclick="closeAddModal()" class="flex-1 px-4 py-2 bg-gray-100 text-gray-700 rounded-xl font-medium hover:bg-gray-200 transition-colors">
-                        Cancelar
-                    </button>
-                    <button type="submit" id="btnAddSubmit" class="flex-1 px-4 py-2 bg-brand-primary text-white rounded-xl font-bold shadow-lg hover:bg-brand-secondary transition-all flex justify-center items-center gap-2">
-                        <span>Guardar</span>
-                        <i class="fa-solid fa-arrow-right"></i>
-                    </button>
-                </div>
-            </form>
+            </main>
         </div>
     </div>
-</div>      
-</main>
-</div>
-</div>
 </section>
 
     <div id="editModal" class="fixed inset-0 z-[60] hidden overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
@@ -570,11 +493,11 @@
     <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
 
-<script>
-    // ======================================================
+    <script>
+
+// ======================================================
     // 0. CONFIGURACIÓN GLOBAL
     // ======================================================
-    // Detecta si es local o producción para las peticiones a la API
     const API_BASE_URL = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' 
         ? 'http://localhost:8080' 
         : ''; 
@@ -582,13 +505,10 @@
     let gallerySwiper = null;
 
     // ======================================================
-    // 1. INTERFAZ DE USUARIO (NAVBAR, MENU, BREADCRUMBS)
+    // 1. INTERFAZ Y NAVEGACIÓN
     // ======================================================
-    
-    // Iniciar Animaciones AOS
     AOS.init({ duration: 800, once: true, offset: 100 });
 
-    // Efecto de sombra en Navbar al hacer scroll
     window.addEventListener('scroll', () => {
         const nav = document.getElementById('navbar');
         if (window.scrollY > 50) {
@@ -600,13 +520,12 @@
         }
     });
 
-    // Menú Móvil (Abrir/Cerrar)
-    const btn = document.getElementById('mobile-menu-btn');
+    const btnMenu = document.getElementById('mobile-menu-btn');
     const menu = document.getElementById('mobile-menu');
     const links = document.querySelectorAll('.mobile-link');
 
-    if(btn && menu) {
-        btn.addEventListener('click', () => {
+    if(btnMenu && menu) {
+        btnMenu.addEventListener('click', () => {
             menu.classList.toggle('hidden');
             menu.classList.toggle('flex');
         });
@@ -618,7 +537,6 @@
         });
     }
 
-    // Breadcrumbs (Barra superior de navegación)
     document.addEventListener('DOMContentLoaded', () => {
         const breadcrumbContainer = document.getElementById('breadcrumbs-container');
         const breadcrumbCurrent = document.getElementById('breadcrumb-current');
@@ -647,19 +565,60 @@
         sections.forEach(section => observer.observe(section));
     });
 
-    // ======================================================
-    // 2. LÓGICA DE GALERÍA (SWIPER + CARGA DE IMÁGENES)
-    // ======================================================
+    function navToModule(moduleName) {
+        if(menu && !menu.classList.contains('hidden')) {
+            menu.classList.add('hidden');
+            menu.classList.remove('flex');
+        }
+        const dashboardSection = document.getElementById('dashboard');
+        if(dashboardSection) {
+             const y = dashboardSection.getBoundingClientRect().top + window.scrollY - 100;
+             window.scrollTo({top: y, behavior: 'smooth'});
+        }
+        setTimeout(() => {
+            switchTab(moduleName);
+        }, 300);
+    }
 
+    function switchTab(tabName) {
+        document.querySelectorAll('.tab-content').forEach(el => {
+            el.classList.add('hidden');
+            el.classList.remove('animate-fade-in'); 
+        });
+
+        document.querySelectorAll('aside nav button').forEach(btn => {
+            btn.classList.remove('active-tab');
+        });
+
+        const target = document.getElementById(`tab-${tabName}`);
+        if(target) {
+            target.classList.remove('hidden');
+            setTimeout(() => target.classList.add('animate-fade-in'), 10);
+        }
+
+        const tabBtn = document.getElementById(`btn-${tabName}`);
+        if(tabBtn) {
+            tabBtn.classList.add('active-tab');
+        }
+
+        if(tabName === 'gallery' && gallerySwiper) {
+            gallerySwiper.update(); 
+        }
+        if(tabName === 'admin') {
+            cargarTablaAdmin(); 
+        }
+    }
+
+    // ======================================================
+    // 2. LÓGICA DE GALERÍA PÚBLICA
+    // ======================================================
     function initSwiper(cantidadImagenes) {
         if (gallerySwiper) gallerySwiper.destroy(true, true);
         
-        const enableLoop = cantidadImagenes > 2;
-
         gallerySwiper = new Swiper(".mySwiper", {
             slidesPerView: 1,
             spaceBetween: 20,
-            loop: enableLoop, 
+            loop: cantidadImagenes > 2, 
             autoplay: { delay: 4000, disableOnInteraction: false },
             pagination: { el: ".swiper-pagination", clickable: true },
             navigation: { nextEl: ".swiper-next-btn", prevEl: ".swiper-prev-btn" },
@@ -670,77 +629,26 @@
         });
     }
 
-    // ======================================================
-    // 7. LÓGICA DE PESTAÑAS (SIDEBAR DINÁMICO)
-    // ======================================================
-    function switchTab(tabName) {
-        // 1. Ocultar todos los contenidos
-        document.querySelectorAll('.tab-content').forEach(el => {
-            el.classList.add('hidden');
-            el.classList.remove('animate-fade-in'); // Reset animación
-        });
-
-        // 2. Desactivar todos los botones
-        document.querySelectorAll('aside nav button').forEach(btn => {
-            btn.classList.remove('active-tab');
-            // Restaurar colores de iconos por defecto si es necesario (opcional)
-        });
-
-        // 3. Mostrar el contenido seleccionado
-        const target = document.getElementById(`tab-${tabName}`);
-        if(target) {
-            target.classList.remove('hidden');
-            // Pequeña animación de entrada
-            setTimeout(() => target.classList.add('animate-fade-in'), 10);
-        }
-
-        // 4. Activar el botón seleccionado
-        const btn = document.getElementById(`btn-${tabName}`);
-        if(btn) {
-            btn.classList.add('active-tab');
-        }
-
-        // 5. Cargas perezosas (Lazy Load) según la pestaña
-        if(tabName === 'gallery') {
-            if(gallerySwiper) gallerySwiper.update(); // Actualizar Swiper si estaba oculto
-        }
-        if(tabName === 'admin') {
-            cargarTablaAdmin(); // Recargar datos frescos
-        }
-    }
-
     async function cargarGaleria() {
         const container = document.getElementById('galeria-container');
         if(!container) return;
 
         try {
-            // Timestamp para evitar caché
             const response = await fetch(`${API_BASE_URL}/api/proyectos?t=${Date.now()}`);
-            
             if (!response.ok) throw new Error("Error al cargar galería");
             
             const proyectos = await response.json();
-            container.innerHTML = ''; // Limpiar loader
+            container.innerHTML = ''; 
 
             if(proyectos && proyectos.length > 0) {
                 proyectos.forEach(proy => {
                     const slide = document.createElement('div');
                     slide.className = 'swiper-slide relative group overflow-hidden rounded-2xl h-full'; 
-                    
-                    // URL apuntando al endpoint de BD
                     const imgUrl = `${API_BASE_URL}/api/imagen/${proy.id}?t=${Date.now()}`;
-
-                    // --- SOLUCIÓN VISUALIZACIÓN DE ERROR ---
-                    // Si la imagen falla, carga un placeholder elegante
                     const fallbackUrl = 'https://placehold.co/600x400/151B2B/FFF?text=Imagen+No+Disponible';
 
                     slide.innerHTML = `
-                        <img src="${imgUrl}" 
-                             alt="${proy.titulo}" 
-                             loading="lazy"
-                             class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110 bg-brand-card"
-                             onerror="this.onerror=null; this.src='${fallbackUrl}';"> 
-                        
+                        <img src="${imgUrl}" alt="${proy.titulo}" loading="lazy" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110 bg-brand-card" onerror="this.onerror=null; this.src='${fallbackUrl}';"> 
                         <div class="absolute inset-0 bg-gradient-to-t from-black/90 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-end p-6">
                             <span class="text-brand-accent text-xs font-bold uppercase mb-1">${proy.categoria || 'Comunidad'}</span>
                             <h5 class="text-white font-bold text-lg">${proy.titulo}</h5>
@@ -758,182 +666,505 @@
         }
     }
 
-    // ======================================================
-    // 3. SUBIDA DE IMÁGENES (FORMULARIO UPLOAD)
-    // ======================================================
-    const uploadForm = document.getElementById('uploadForm');
-    const fileInput = document.getElementById('imagenInput');
-    const previewImg = document.getElementById('previewImg');
-    const uploadPlaceholder = document.getElementById('uploadPlaceholder');
-    const btnUpload = document.getElementById('btnUpload');
+    document.addEventListener('DOMContentLoaded', cargarGaleria);
 
-    // Previsualización
-    if (fileInput) {
-        fileInput.addEventListener('change', function() {
-            const file = this.files[0];
+    // ======================================================
+    // 3. LÓGICA DE SUBIDA PÚBLICA (CON MODAL)
+    // ======================================================
+    const triggerFile = document.getElementById('triggerFile');
+    const publicModal = document.getElementById('publicUploadModal');
+    const publicPreview = document.getElementById('public-preview');
+    let selectedFile = null; 
+
+    if (triggerFile) {
+        triggerFile.addEventListener('change', function(e) {
+            const file = e.target.files[0];
             if (file) {
-                // Validar tamaño (2MB)
-                if (file.size > 2 * 1024 * 1024) { 
-                    Swal.fire({ icon: 'error', title: 'Archivo muy pesado', text: 'El límite es de 2MB.', confirmButtonColor: '#0B0F19' });
-                    this.value = '';
+                if (file.size > 5 * 1024 * 1024) {
+                    Swal.fire({ icon: 'error', title: 'Muy pesado', text: 'Máximo 5MB.', confirmButtonColor: '#0B0F19' });
+                    this.value = ''; 
                     return;
                 }
+                selectedFile = file;
                 const reader = new FileReader();
-                reader.onload = function(e) {
-                    previewImg.src = e.target.result;
-                    previewImg.classList.remove('hidden');
-                    uploadPlaceholder.classList.add('opacity-0');
+                reader.onload = function(evt) {
+                    publicPreview.src = evt.target.result;
+                    publicModal.classList.remove('hidden');
                 }
                 reader.readAsDataURL(file);
             }
         });
     }
 
-    // Envío a BD
-    if (uploadForm) {
-        uploadForm.addEventListener('submit', async (e) => {
+    window.closePublicModal = function() {
+        publicModal.classList.add('hidden');
+        if(triggerFile) triggerFile.value = ''; 
+        const formPublicData = document.getElementById('formPublicData');
+        if(formPublicData) formPublicData.reset();
+        selectedFile = null;
+    }
+
+    const formPublic = document.getElementById('formPublicData');
+    if (formPublic) {
+        formPublic.addEventListener('submit', async (e) => {
             e.preventDefault();
-            const file = fileInput.files[0];
-            if (!file) {
-                Swal.fire({ icon: 'warning', title: 'Falta imagen', text: 'Selecciona una imagen para subir.', confirmButtonColor: '#0B0F19' });
-                return;
-            }
+            if (!selectedFile) return;
+
+            const titulo = document.getElementById('public-titulo').value;
+            const categoria = document.getElementById('public-categoria').value;
+            const btnPublic = document.getElementById('btnPublicSubmit');
+            const originalTextPublic = btnPublic.innerHTML;
+
+            btnPublic.disabled = true;
+            btnPublic.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Subiendo...';
 
             const formData = new FormData();
-            formData.append('imagen', file);
-            
-            const originalText = btnUpload.innerHTML;
-            btnUpload.disabled = true;
-            btnUpload.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Subiendo...';
+            formData.append('titulo', titulo);
+            formData.append('categoria', categoria);
+            formData.append('imagen', selectedFile);
 
             try {
                 const res = await fetch(`${API_BASE_URL}/api/upload`, { method: 'POST', body: formData });
-                if (!res.ok) throw new Error('Error en subida');
-                
-                Swal.fire({ icon: 'success', title: '¡Publicado!', text: 'Tu imagen ya está en la galería.', confirmButtonColor: '#6366f1' });
-                
-                // Resetear form y recargar galería
-                uploadForm.reset();
-                previewImg.classList.add('hidden');
-                uploadPlaceholder.classList.remove('opacity-0');
-                await cargarGaleria(); 
+                if (!res.ok) throw new Error('Error en el servidor');
 
-            } catch (err) {
-                Swal.fire({ icon: 'error', title: 'Error', text: 'Formato invalido, por favor intenta de nuevo (jpg,png)', confirmButtonColor: '#0B0F19' });
+                Swal.fire({ icon: 'success', title: '¡Publicado!', text: 'Tu proyecto está visible en la galería.', confirmButtonColor: '#6366f1' });
+                closePublicModal();
+                cargarGaleria(); 
+                if(document.getElementById('tab-admin').classList.contains('hidden') === false){
+                    cargarTablaAdmin();
+                }
+            } catch (error) {
+                console.error(error);
+                Swal.fire({ icon: 'error', title: 'Error', text: 'No se pudo subir la imagen.', confirmButtonColor: '#ef4444' });
             } finally {
-                btnUpload.disabled = false;
-                btnUpload.innerHTML = originalText;
+                btnPublic.disabled = false;
+                btnPublic.innerHTML = originalTextPublic;
             }
         });
     }
 
     // ======================================================
-    // 4. FORMULARIO DE CONTACTO (VALIDACIÓN VISUAL)
+    // 4. LÓGICA DEL PANEL ADMIN (TABLA + BUSCADOR + PAGINACIÓN)
+    // ======================================================
+    let adminProyectosAll = [];       // Todos los proyectos (Original)
+    let adminProyectosFiltered = [];  // Proyectos después de buscar
+    let adminCurrentPage = 1;    
+    const adminItemsPerPage = 5; 
+
+    // Función principal para cargar datos del servidor
+    async function cargarTablaAdmin(query = '') {
+        const tbody = document.getElementById('admin-table-body');
+        const refreshIcon = document.querySelector('#btn-refresh-admin i'); 
+        const loadingSearch = document.getElementById('loadingSearchAdmin');
+
+        if(!tbody) return;
+        
+        if(query === '') {
+            if(refreshIcon) refreshIcon.classList.add('fa-spin');
+            tbody.innerHTML = `<tr><td colspan="4" class="p-10 text-center text-slate-400"><i class="fa-solid fa-circle-notch fa-spin text-2xl text-brand-primary mb-2"></i><br>Actualizando lista...</td></tr>`;
+        } else {
+            if(loadingSearch) loadingSearch.classList.remove('hidden');
+        }
+
+        try {
+            // Hacemos el fetch al backend (si hay query, la enviamos)
+            const url = query ? `${API_BASE_URL}/api/proyectos?q=${encodeURIComponent(query)}&t=${Date.now()}` : `${API_BASE_URL}/api/proyectos?t=${Date.now()}`;
+            const response = await fetch(url);
+            if (!response.ok) throw new Error("Error cargando datos");
+            
+            // Guardamos los datos recibidos
+            adminProyectosFiltered = await response.json();
+            
+            // Si es una carga inicial (sin filtro), actualizamos también la lista original
+            if(query === '') {
+                adminProyectosAll = [...adminProyectosFiltered];
+            }
+
+            // Resetear a la página 1 si hacemos una nueva búsqueda
+            if(query !== '') {
+                adminCurrentPage = 1;
+            } else {
+                const totalPages = Math.ceil(adminProyectosFiltered.length / adminItemsPerPage);
+                if (adminCurrentPage > totalPages && totalPages > 0) adminCurrentPage = totalPages;
+                else if (totalPages === 0) adminCurrentPage = 1;
+            }
+            
+            mostrarPaginaAdmin(); 
+
+        } catch (error) {
+            console.error(error);
+            tbody.innerHTML = `<tr><td colspan="4" class="p-4 text-center text-red-500 bg-red-50 rounded-lg"><i class="fa-solid fa-triangle-exclamation"></i> Error al conectar con el servidor.</td></tr>`;
+        } finally {
+            if(refreshIcon) refreshIcon.classList.remove('fa-spin');
+            if(loadingSearch) loadingSearch.classList.add('hidden');
+        }
+    }
+
+    // Escuchador del Buscador Integrado
+    const inputBuscadorAdmin = document.getElementById('inputBuscadorAdmin');
+    let timeoutAdminSearch = null;
+
+    if (inputBuscadorAdmin) {
+        inputBuscadorAdmin.addEventListener('input', function(e) {
+            const termino = e.target.value.trim();
+            clearTimeout(timeoutAdminSearch);
+
+            // Si se borra el buscador, restauramos la lista original instantáneamente
+            if (termino.length === 0) {
+                adminProyectosFiltered = [...adminProyectosAll];
+                adminCurrentPage = 1;
+                mostrarPaginaAdmin();
+                return;
+            }
+
+            // Retraso para no saturar el servidor
+            timeoutAdminSearch = setTimeout(() => {
+                cargarTablaAdmin(termino);
+            }, 300);
+        });
+    }
+
+    // Dibuja la tabla según la página actual
+    function mostrarPaginaAdmin() {
+        const tbody = document.getElementById('admin-table-body');
+        const paginationContainer = document.getElementById('admin-pagination');
+        
+        tbody.innerHTML = ''; 
+
+        if(adminProyectosFiltered.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="4" class="p-10 text-center text-slate-400 italic bg-white"><i class="fa-regular fa-folder-open text-3xl mb-2 opacity-50"></i><br>No se encontraron resultados.</td></tr>`;
+            if(paginationContainer) paginationContainer.innerHTML = '';
+            return;
+        }
+
+        const totalPages = Math.ceil(adminProyectosFiltered.length / adminItemsPerPage);
+        const startIndex = (adminCurrentPage - 1) * adminItemsPerPage;
+        const endIndex = startIndex + adminItemsPerPage;
+        const proyectosPagina = adminProyectosFiltered.slice(startIndex, endIndex);
+
+        proyectosPagina.forEach(p => {
+            const tr = document.createElement('tr');
+            tr.className = "hover:bg-slate-50 transition-colors border-b border-gray-100 last:border-0 animate-fade-in";
+            const imgUrl = `${API_BASE_URL}/api/imagen/${p.id}`;
+            const fechaStr = p.fecha ? new Date(p.fecha).toLocaleDateString() : '';
+            
+            tr.innerHTML = `
+                <td class="p-4">
+                    <div class="w-16 h-12 rounded-lg overflow-hidden bg-gray-100 border border-gray-200 shadow-sm mx-auto relative group">
+                        <img src="${imgUrl}" alt="Img" class="w-full h-full object-cover">
+                    </div>
+                </td>
+                <td class="p-4 align-middle">
+                    <div class="font-bold text-gray-700">${p.titulo}</div>
+                    <div class="text-xs text-gray-400 mt-1">${fechaStr}</div>
+                </td>
+                <td class="p-4 text-center align-middle">
+                    <span class="inline-block bg-brand-primary/10 text-brand-primary border border-brand-primary/20 px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider">
+                        ${p.categoria}
+                    </span>
+                </td>
+                <td class="p-4 text-center align-middle">
+                    <div class="flex justify-center gap-2">
+                        <button onclick="openEditModal(${p.id}, '${p.titulo}', '${p.categoria}')" class="w-9 h-9 rounded-xl bg-white border border-gray-200 text-slate-500 hover:bg-brand-primary hover:text-white hover:border-brand-primary transition-all shadow-sm flex items-center justify-center group" title="Editar">
+                            <i class="fa-solid fa-pen-to-square text-sm group-hover:scale-110 transition-transform"></i>
+                        </button>
+                        <button onclick="deleteItem(${p.id})" class="w-9 h-9 rounded-xl bg-white border border-gray-200 text-slate-500 hover:bg-red-500 hover:text-white hover:border-red-500 transition-all shadow-sm flex items-center justify-center group" title="Eliminar">
+                            <i class="fa-solid fa-trash-can text-sm group-hover:scale-110 transition-transform"></i>
+                        </button>
+                    </div>
+                </td>
+            `;
+            tbody.appendChild(tr);
+        });
+
+        if(paginationContainer) renderizarControlesPaginacion(totalPages);
+    }
+
+    function renderizarControlesPaginacion(totalPages) {
+        const container = document.getElementById('admin-pagination');
+        if (totalPages <= 1) {
+            container.innerHTML = ''; 
+            return;
+        }
+
+        const startItem = ((adminCurrentPage - 1) * adminItemsPerPage) + 1;
+        const endItem = Math.min(adminCurrentPage * adminItemsPerPage, adminProyectosFiltered.length);
+
+        let html = `
+            <div class="flex flex-col sm:flex-row items-center justify-between gap-4 w-full">
+                <div class="text-sm text-gray-500">
+                    Mostrando <span class="font-bold text-gray-700">${startItem}</span> a <span class="font-bold text-gray-700">${endItem}</span> de <span class="font-bold text-gray-700">${adminProyectosFiltered.length}</span> resultados
+                </div>
+                <div class="flex gap-2">
+                    <button onclick="cambiarPaginaAdmin(${adminCurrentPage - 1})" 
+                            class="w-9 h-9 flex items-center justify-center rounded-xl border border-gray-200 bg-white text-gray-500 hover:bg-gray-50 hover:text-brand-primary transition-all disabled:opacity-40 disabled:cursor-not-allowed" 
+                            ${adminCurrentPage === 1 ? 'disabled' : ''}>
+                        <i class="fa-solid fa-chevron-left text-xs"></i>
+                    </button>
+        `;
+
+        for(let i = 1; i <= totalPages; i++) {
+            if (i === adminCurrentPage) {
+                html += `<button class="w-9 h-9 flex items-center justify-center rounded-xl bg-brand-primary text-white font-bold shadow-md">${i}</button>`;
+            } else {
+                html += `<button onclick="cambiarPaginaAdmin(${i})" class="w-9 h-9 flex items-center justify-center rounded-xl border border-gray-200 bg-white text-gray-600 hover:bg-gray-50 hover:border-brand-primary hover:text-brand-primary transition-all">${i}</button>`;
+            }
+        }
+
+        html += `
+                    <button onclick="cambiarPaginaAdmin(${adminCurrentPage + 1})" 
+                            class="w-9 h-9 flex items-center justify-center rounded-xl border border-gray-200 bg-white text-gray-500 hover:bg-gray-50 hover:text-brand-primary transition-all disabled:opacity-40 disabled:cursor-not-allowed" 
+                            ${adminCurrentPage === totalPages ? 'disabled' : ''}>
+                        <i class="fa-solid fa-chevron-right text-xs"></i>
+                    </button>
+                </div>
+            </div>`;
+        
+        container.innerHTML = html;
+    }
+
+    window.cambiarPaginaAdmin = (newPage) => {
+        const totalPages = Math.ceil(adminProyectosFiltered.length / adminItemsPerPage);
+        if(newPage >= 1 && newPage <= totalPages) {
+            adminCurrentPage = newPage;
+            mostrarPaginaAdmin();
+        }
+    };
+
+    // --- ACCIONES ADMIN (ELIMINAR / EDITAR / AGREGAR) ---
+    window.deleteItem = async (id) => {
+        const result = await Swal.fire({
+            title: '¿Estás seguro?',
+            text: "No podrás revertir esta acción.",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#ef4444',
+            cancelButtonColor: '#1f2937',
+            confirmButtonText: 'Sí, eliminar',
+            cancelButtonText: 'Cancelar'
+        });
+
+        if (result.isConfirmed) {
+            try {
+                const res = await fetch(`${API_BASE_URL}/api/proyectos/${id}`, { method: 'DELETE' });
+                if(res.ok) {
+                    Swal.fire('Eliminado', 'El proyecto ha sido eliminado.', 'success');
+                    cargarTablaAdmin(inputBuscadorAdmin ? inputBuscadorAdmin.value.trim() : ''); 
+                    cargarGaleria();    
+                } else {
+                    Swal.fire('Error', 'No se pudo eliminar.', 'error');
+                }
+            } catch (e) {
+                Swal.fire('Error', 'Error de conexión.', 'error');
+            }
+        }
+    };
+
+    window.openEditModal = (id, titulo, categoria) => {
+        document.getElementById('edit-id').value = id;
+        document.getElementById('edit-titulo').value = titulo;
+        document.getElementById('edit-categoria').value = categoria;
+        
+        const modal = document.getElementById('editModal');
+        modal.classList.remove('hidden');
+    };
+
+    window.closeModal = () => {
+        document.getElementById('editModal').classList.add('hidden');
+    };
+
+    window.saveEdit = async () => {
+        const id = document.getElementById('edit-id').value;
+        const titulo = document.getElementById('edit-titulo').value;
+        const categoria = document.getElementById('edit-categoria').value;
+
+        try {
+            const res = await fetch(`${API_BASE_URL}/api/proyectos/${id}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ titulo, categoria })
+            });
+
+            if(res.ok) {
+                Swal.fire({icon: 'success', title: 'Actualizado', toast: true, position: 'top-end', showConfirmButton: false, timer: 3000});
+                closeModal();
+                cargarTablaAdmin(inputBuscadorAdmin ? inputBuscadorAdmin.value.trim() : '');
+                cargarGaleria(); 
+            } else {
+                Swal.fire('Error', 'No se pudo actualizar.', 'error');
+            }
+        } catch (e) {
+            Swal.fire('Error', 'Error de conexión.', 'error');
+        }
+    };
+
+    window.openAddModal = function() {
+        const modal = document.getElementById('addModal');
+        modal.classList.remove('hidden');
+        const content = modal.querySelector('div.relative');
+        content.classList.remove('scale-95', 'opacity-0');
+        content.classList.add('scale-100', 'opacity-100');
+    }
+
+    window.closeAddModal = function() {
+        const modal = document.getElementById('addModal');
+        modal.classList.add('hidden');
+        document.getElementById('formAddProject').reset(); 
+    }
+
+    const formAddAdmin = document.getElementById('formAddProject');
+    if(formAddAdmin) {
+        formAddAdmin.addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const titulo = document.getElementById('add-titulo').value;
+            const categoria = document.getElementById('add-categoria').value;
+            const fileInput = document.getElementById('add-imagen');
+            const file = fileInput.files[0];
+
+            if(!file) return Swal.fire('Error', 'Debes seleccionar una imagen', 'warning');
+
+            const formData = new FormData();
+            formData.append('titulo', titulo);
+            formData.append('categoria', categoria);
+            formData.append('imagen', file);
+
+            const btnSubmit = document.getElementById('btnAddSubmit');
+            const originalText = btnSubmit.innerHTML;
+            btnSubmit.disabled = true;
+            btnSubmit.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Guardando...';
+
+            try {
+                const res = await fetch(`${API_BASE_URL}/api/upload`, {
+                    method: 'POST',
+                    body: formData
+                });
+
+                if(!res.ok) throw new Error('Error al subir');
+
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Proyecto Agregado',
+                    text: 'El proyecto se ha guardado correctamente.',
+                    timer: 2000,
+                    showConfirmButton: false
+                });
+
+                closeAddModal();
+                cargarTablaAdmin(); 
+                cargarGaleria();   
+
+            } catch (error) {
+                console.error(error);
+                Swal.fire('Error', 'No se pudo guardar el proyecto', 'error');
+            } finally {
+                btnSubmit.disabled = false;
+                btnSubmit.innerHTML = originalText;
+            }
+        });
+    }
+
+    // ======================================================
+    // 5. VALIDACIÓN Y ENVÍO DEL FORMULARIO DE CONTACTO INFERIOR
     // ======================================================
     document.addEventListener('DOMContentLoaded', () => {
         // --- NOMBRE ---
-        const inNombre = document.getElementById('nombre');
-        const barNombre = document.getElementById('bar-nombre');
-        const cntNombre = document.getElementById('count-nombre');
+        const inNombreForm = document.getElementById('nombre');
+        const barNombreForm = document.getElementById('bar-nombre');
+        const cntNombreForm = document.getElementById('count-nombre');
 
-        if(inNombre) {
-            inNombre.setAttribute('maxlength', '50');
-            inNombre.addEventListener('input', function() {
+        if(inNombreForm) {
+            inNombreForm.setAttribute('maxlength', '50');
+            inNombreForm.addEventListener('input', function() {
                 const len = this.value.length;
-                cntNombre.innerText = `${len}/50`;
-                barNombre.style.width = `${(len/50)*100}%`;
+                cntNombreForm.innerText = `${len}/50`;
+                barNombreForm.style.width = `${(len/50)*100}%`;
                 
                 if(len === 50) {
-                    cntNombre.classList.add('text-red-400', 'font-bold');
-                    barNombre.classList.replace('bg-brand-secondary', 'bg-red-500');
+                    cntNombreForm.classList.add('text-red-400', 'font-bold');
+                    barNombreForm.classList.replace('bg-brand-secondary', 'bg-red-500');
                 } else {
-                    cntNombre.classList.remove('text-red-400', 'font-bold');
-                    barNombre.classList.replace('bg-red-500', 'bg-brand-secondary');
+                    cntNombreForm.classList.remove('text-red-400', 'font-bold');
+                    barNombreForm.classList.replace('bg-red-500', 'bg-brand-secondary');
                 }
             });
         }
 
-        // --- TELÉFONO (Lógica 0/10 corregida) ---
-        const inTel = document.getElementById('telefono');
-        const cntTel = document.getElementById('count-telefono');
+        // --- TELÉFONO ---
+        const inTelForm = document.getElementById('telefono');
+        const cntTelForm = document.getElementById('count-telefono');
 
-        if(inTel) {
-            inTel.setAttribute('maxlength', '10');
-            inTel.addEventListener('input', function() {
-                this.value = this.value.replace(/[^0-9]/g, ''); // Solo números
+        if(inTelForm) {
+            inTelForm.setAttribute('maxlength', '10');
+            inTelForm.addEventListener('input', function() {
+                this.value = this.value.replace(/[^0-9]/g, ''); 
                 const len = this.value.length;
-                cntTel.innerText = `${len}/10`;
+                cntTelForm.innerText = `${len}/10`;
 
                 if (len === 10) {
-                    cntTel.className = "text-[10px] font-mono font-bold px-2 py-0.5 rounded bg-green-500/20 text-green-400 border border-green-500/30 transition-all";
+                    cntTelForm.className = "text-[10px] font-mono font-bold px-2 py-0.5 rounded bg-green-500/20 text-green-400 border border-green-500/30 transition-all";
                 } else if (len > 0) {
-                    cntTel.className = "text-[10px] font-mono font-bold px-2 py-0.5 rounded bg-yellow-500/10 text-yellow-500 border border-yellow-500/20 transition-all";
+                    cntTelForm.className = "text-[10px] font-mono font-bold px-2 py-0.5 rounded bg-yellow-500/10 text-yellow-500 border border-yellow-500/20 transition-all";
                 } else {
-                    cntTel.className = "text-[10px] font-mono px-2 py-0.5 rounded bg-white/5 text-slate-500 border border-transparent transition-all";
+                    cntTelForm.className = "text-[10px] font-mono px-2 py-0.5 rounded bg-white/5 text-slate-500 border border-transparent transition-all";
                 }
             });
         }
 
         // --- MENSAJE ---
-        const inMsg = document.getElementById('mensaje');
-        const barMsg = document.getElementById('bar-mensaje');
-        const numRestante = document.getElementById('num-restante');
-        const MAX_MSG = 300;
+        const inMsgForm = document.getElementById('mensaje');
+        const barMsgForm = document.getElementById('bar-mensaje');
+        const numRestanteForm = document.getElementById('num-restante');
+        const MAX_MSG_FORM = 300;
 
-        if(inMsg) {
-            inMsg.setAttribute('maxlength', MAX_MSG);
-            numRestante.innerText = MAX_MSG;
+        if(inMsgForm) {
+            inMsgForm.setAttribute('maxlength', MAX_MSG_FORM);
+            numRestanteForm.innerText = MAX_MSG_FORM;
 
-            inMsg.addEventListener('input', function() {
+            inMsgForm.addEventListener('input', function() {
                 const len = this.value.length;
-                const left = MAX_MSG - len;
-                numRestante.innerText = left;
-                barMsg.style.width = `${(len/MAX_MSG)*100}%`;
+                const left = MAX_MSG_FORM - len;
+                numRestanteForm.innerText = left;
+                barMsgForm.style.width = `${(len/MAX_MSG_FORM)*100}%`;
                 
-                barMsg.className = "h-full w-0 transition-all duration-300"; // Reset base
+                barMsgForm.className = "h-full w-0 transition-all duration-300"; 
                 if(left < 20) {
-                    barMsg.classList.add('bg-red-500');
-                    numRestante.classList.add('text-red-500', 'font-bold');
+                    barMsgForm.classList.add('bg-red-500');
+                    numRestanteForm.classList.add('text-red-500', 'font-bold');
                 } else {
-                    barMsg.classList.add('bg-brand-primary');
-                    numRestante.classList.remove('text-red-500', 'font-bold');
-                    numRestante.classList.add('text-white');
+                    barMsgForm.classList.add('bg-brand-primary');
+                    numRestanteForm.classList.remove('text-red-500', 'font-bold');
+                    numRestanteForm.classList.add('text-white');
                 }
             });
         }
     });
 
-    // ======================================================
-    // 5. ENVÍO CONTACTO
-    // ======================================================
-    const contactForm = document.getElementById('contactForm');
-    const submitBtn = document.getElementById('submitBtn');
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    const contactFormBottom = document.getElementById('contactForm');
+    const submitBtnBottom = document.getElementById('submitBtn');
+    const emailRegexBottom = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-    if (contactForm) {
-        contactForm.addEventListener('submit', async function(e) {
+    if (contactFormBottom) {
+        contactFormBottom.addEventListener('submit', async function(e) {
             e.preventDefault();
             
-            // Recolección
             const nombre = document.getElementById('nombre').value.trim();
             const email = document.getElementById('email').value.trim();
             const telefono = document.getElementById('telefono').value.trim();
             const servicio = document.getElementById('servicio').value;
             const mensaje = document.getElementById('mensaje').value.trim();
 
-            // Validaciones Frontend
             if (nombre.length < 3) return Swal.fire({icon:'warning', title:'Nombre corto', text:'Mínimo 3 letras.', confirmButtonColor: '#0B0F19'});
-            if (!emailRegex.test(email)) return Swal.fire({icon:'warning', title:'Email inválido', text:'Revisa el formato.', confirmButtonColor: '#0B0F19'});
+            if (!emailRegexBottom.test(email)) return Swal.fire({icon:'warning', title:'Email inválido', text:'Revisa el formato.', confirmButtonColor: '#0B0F19'});
             if (telefono.length !== 10) return Swal.fire({icon:'warning', title:'Teléfono incompleto', text:'Deben ser 10 dígitos.', confirmButtonColor: '#0B0F19'});
             if (mensaje.length < 10) return Swal.fire({icon:'warning', title:'Mensaje corto', text:'Danos más detalles.', confirmButtonColor: '#0B0F19'});
 
             const recaptchaToken = grecaptcha.getResponse();
             if (!recaptchaToken) return Swal.fire({icon:'warning', title:'Captcha', text:'Confirma que no eres un robot.', confirmButtonColor: '#0B0F19'});
 
-            // UI Loading
-            const originalText = submitBtn.innerHTML;
-            submitBtn.disabled = true;
-            submitBtn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Enviando...';
+            const originalText = submitBtnBottom.innerHTML;
+            submitBtnBottom.disabled = true;
+            submitBtnBottom.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Enviando...';
 
             try {
                 const response = await fetch(`${API_BASE_URL}/api/contacto`, {
@@ -948,8 +1179,7 @@
 
                 Swal.fire({ icon: 'success', title: '¡Recibido!', text: 'Nos pondremos en contacto contigo pronto.', background: '#0B0F19', color: '#fff', confirmButtonColor: '#6366f1' });
                 
-                // Limpieza total
-                contactForm.reset();
+                contactFormBottom.reset();
                 grecaptcha.reset();
                 document.getElementById('bar-nombre').style.width = '0%';
                 document.getElementById('count-nombre').innerText = '0/50';
@@ -961,453 +1191,10 @@
             } catch (error) {
                 Swal.fire({ icon: 'error', title: 'Atención', text: error.message, background: '#0B0F19', color: '#fff', confirmButtonColor: '#ef4444' });
             } finally {
-                submitBtn.disabled = false;
-                submitBtn.innerHTML = originalText;
+                submitBtnBottom.disabled = false;
+                submitBtnBottom.innerHTML = originalText;
             }
         });
     }
 
-    // Cargar Galería al inicio
-    document.addEventListener('DOMContentLoaded', cargarGaleria);
-
-
-  // ======================================================
-// VARIABLES GLOBALES PARA PAGINACIÓN
-// ======================================================
-let adminProyectos = [];     // Guarda todos los proyectos
-let adminCurrentPage = 1;    // Página actual
-const adminItemsPerPage = 5; // Número de filas por página
-
-// ======================================================
-// FUNCIÓN CARGAR TABLA ADMIN (FETCH)
-// ======================================================
-async function cargarTablaAdmin() {
-    const tbody = document.getElementById('admin-table-body');
-    const refreshIcon = document.querySelector('#tab-admin button i'); 
-
-    if(!tbody) return;
-    if(refreshIcon) refreshIcon.classList.add('fa-spin');
-    
-    // IMPORTANTE: colspan="4" porque solo hay 4 encabezados ahora
-    tbody.innerHTML = `<tr><td colspan="4" class="p-10 text-center text-slate-400"><i class="fa-solid fa-circle-notch fa-spin text-2xl text-brand-primary mb-2"></i><br>Actualizando lista...</td></tr>`;
-
-    try {
-        const response = await fetch(`${API_BASE_URL}/api/proyectos?t=${Date.now()}`);
-        if (!response.ok) throw new Error("Error cargando datos");
-        
-        adminProyectos = await response.json();
-        
-        // Si borramos el último ítem de una página, retroceder a la anterior
-        const totalPages = Math.ceil(adminProyectos.length / adminItemsPerPage);
-        if (adminCurrentPage > totalPages && totalPages > 0) {
-            adminCurrentPage = totalPages;
-        } else if (totalPages === 0) {
-            adminCurrentPage = 1;
-        }
-        
-        mostrarPaginaAdmin(); // Llama a dibujar la tabla
-    } catch (error) {
-        console.error(error);
-        tbody.innerHTML = `<tr><td colspan="4" class="p-4 text-center text-red-500 bg-red-50 rounded-lg"><i class="fa-solid fa-triangle-exclamation"></i> Error al conectar con el servidor.</td></tr>`;
-    } finally {
-        if(refreshIcon) refreshIcon.classList.remove('fa-spin');
-    }
-}
-
-// ======================================================
-// FUNCIÓN RENDERIZAR FILAS POR PÁGINA
-// ======================================================
-function mostrarPaginaAdmin() {
-    const tbody = document.getElementById('admin-table-body');
-    const paginationContainer = document.getElementById('admin-pagination');
-    
-    tbody.innerHTML = ''; 
-
-    if(adminProyectos.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="4" class="p-10 text-center text-slate-400 italic bg-white"><i class="fa-regular fa-folder-open text-3xl mb-2 opacity-50"></i><br>No hay proyectos subidos todavía.</td></tr>`;
-        if(paginationContainer) paginationContainer.innerHTML = '';
-        return;
-    }
-
-    // Cálculos de paginación
-    const totalPages = Math.ceil(adminProyectos.length / adminItemsPerPage);
-    const startIndex = (adminCurrentPage - 1) * adminItemsPerPage;
-    const endIndex = startIndex + adminItemsPerPage;
-    const proyectosPagina = adminProyectos.slice(startIndex, endIndex);
-
-    // Renderizar filas de la página actual
-    proyectosPagina.forEach(p => {
-        const tr = document.createElement('tr');
-        tr.className = "hover:bg-slate-50 transition-colors border-b border-gray-100 last:border-0 animate-fade-in";
-        
-        const imgUrl = `${API_BASE_URL}/api/imagen/${p.id}`;
-        
-        tr.innerHTML = `
-            <td class="p-4">
-                <div class="w-16 h-12 rounded-lg overflow-hidden bg-gray-100 border border-gray-200 shadow-sm mx-auto relative group">
-                    <img src="${imgUrl}" alt="Img" class="w-full h-full object-cover">
-                </div>
-            </td>
-            <td class="p-4 font-bold text-gray-700 align-middle">${p.titulo}</td>
-            <td class="p-4 text-center align-middle">
-                <span class="inline-block bg-brand-primary/10 text-brand-primary border border-brand-primary/20 px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider">
-                    ${p.categoria}
-                </span>
-            </td>
-            <td class="p-4 text-center align-middle">
-                <div class="flex justify-center gap-2">
-                    <button onclick="openEditModal(${p.id}, '${p.titulo}', '${p.categoria}')" class="w-9 h-9 rounded-xl bg-white border border-gray-200 text-slate-500 hover:bg-brand-primary hover:text-white hover:border-brand-primary transition-all shadow-sm flex items-center justify-center group" title="Editar">
-                        <i class="fa-solid fa-pen-to-square text-sm group-hover:scale-110 transition-transform"></i>
-                    </button>
-                    <button onclick="deleteItem(${p.id})" class="w-9 h-9 rounded-xl bg-white border border-gray-200 text-slate-500 hover:bg-red-500 hover:text-white hover:border-red-500 transition-all shadow-sm flex items-center justify-center group" title="Eliminar">
-                        <i class="fa-solid fa-trash-can text-sm group-hover:scale-110 transition-transform"></i>
-                    </button>
-                </div>
-            </td>
-        `;
-        tbody.appendChild(tr);
-    });
-
-    // Renderizar controles de paginación
-    if(paginationContainer) {
-        renderizarControlesPaginacion(totalPages);
-    }
-}
-
-// ======================================================
-// FUNCIÓN RENDERIZAR BOTONES DE PAGINACIÓN
-// ======================================================
-function renderizarControlesPaginacion(totalPages) {
-    const container = document.getElementById('admin-pagination');
-    if (totalPages <= 1) {
-        container.innerHTML = ''; // Ocultar si solo hay 1 página
-        return;
-    }
-
-    const startItem = ((adminCurrentPage - 1) * adminItemsPerPage) + 1;
-    const endItem = Math.min(adminCurrentPage * adminItemsPerPage, adminProyectos.length);
-
-    let html = `
-        <div class="flex flex-col sm:flex-row items-center justify-between gap-4 w-full">
-            <div class="text-sm text-gray-500">
-                Mostrando <span class="font-bold text-gray-700">${startItem}</span> a <span class="font-bold text-gray-700">${endItem}</span> de <span class="font-bold text-gray-700">${adminProyectos.length}</span> resultados
-            </div>
-            <div class="flex gap-2">
-                <button onclick="cambiarPaginaAdmin(${adminCurrentPage - 1})" 
-                        class="w-9 h-9 flex items-center justify-center rounded-xl border border-gray-200 bg-white text-gray-500 hover:bg-gray-50 hover:text-brand-primary transition-all disabled:opacity-40 disabled:cursor-not-allowed" 
-                        ${adminCurrentPage === 1 ? 'disabled' : ''}>
-                    <i class="fa-solid fa-chevron-left text-xs"></i>
-                </button>
-    `;
-
-    // Números de página
-    for(let i = 1; i <= totalPages; i++) {
-        if (i === adminCurrentPage) {
-            html += `<button class="w-9 h-9 flex items-center justify-center rounded-xl bg-brand-primary text-white font-bold shadow-md">${i}</button>`;
-        } else {
-            html += `<button onclick="cambiarPaginaAdmin(${i})" class="w-9 h-9 flex items-center justify-center rounded-xl border border-gray-200 bg-white text-gray-600 hover:bg-gray-50 hover:border-brand-primary hover:text-brand-primary transition-all">${i}</button>`;
-        }
-    }
-
-    // Siguiente
-    html += `
-                <button onclick="cambiarPaginaAdmin(${adminCurrentPage + 1})" 
-                        class="w-9 h-9 flex items-center justify-center rounded-xl border border-gray-200 bg-white text-gray-500 hover:bg-gray-50 hover:text-brand-primary transition-all disabled:opacity-40 disabled:cursor-not-allowed" 
-                        ${adminCurrentPage === totalPages ? 'disabled' : ''}>
-                    <i class="fa-solid fa-chevron-right text-xs"></i>
-                </button>
-            </div>
-        </div>`;
-    
-    container.innerHTML = html;
-}
-
-// Acción al hacer clic en un número o flecha
-window.cambiarPaginaAdmin = (newPage) => {
-    const totalPages = Math.ceil(adminProyectos.length / adminItemsPerPage);
-    if(newPage >= 1 && newPage <= totalPages) {
-        adminCurrentPage = newPage;
-        mostrarPaginaAdmin();
-    }
-};
-// ======================================================
-    // 6. LÓGICA DEL BUSCADOR EN VIVO
-    // ======================================================
-    const inputBuscador = document.getElementById('inputBuscador');
-    const resultadosContainer = document.getElementById('resultadosBusqueda');
-    const loadingIcon = document.getElementById('loadingSearch');
-    let timeoutBusqueda = null; // Para el "debounce" (esperar a que deje de escribir)
-
-    if (inputBuscador) {
-        inputBuscador.addEventListener('input', function(e) {
-            const termino = e.target.value.trim();
-
-            // Limpiamos el timeout anterior si el usuario sigue escribiendo rápido
-            clearTimeout(timeoutBusqueda);
-
-            // Si el campo está vacío, reseteamos la vista
-            if (termino.length === 0) {
-                resultadosContainer.innerHTML = `
-                    <div class="col-span-full text-center text-slate-500 py-10 italic">
-                        Empieza a escribir para ver resultados...
-                    </div>`;
-                loadingIcon.classList.add('hidden');
-                return;
-            }
-
-            // Mostramos icono de carga
-            loadingIcon.classList.remove('hidden');
-
-            // Esperamos 300ms después de la última tecla para no saturar el servidor
-            timeoutBusqueda = setTimeout(async () => {
-                try {
-                    // Petición al backend con el parámetro ?q=
-                    const res = await fetch(`${API_BASE_URL}/api/proyectos?q=${encodeURIComponent(termino)}`);
-                    if (!res.ok) throw new Error('Error en búsqueda');
-                    
-                    const proyectos = await res.json();
-                    renderizarResultados(proyectos);
-                    
-                } catch (error) {
-                    console.error(error);
-                    resultadosContainer.innerHTML = `
-                        <div class="col-span-full text-center text-red-400 py-4">
-                            Ocurrió un error al buscar. Intenta de nuevo.
-                        </div>`;
-                } finally {
-                    loadingIcon.classList.add('hidden');
-                }
-            }, 300);
-        });
-    }
-
-    function renderizarResultados(proyectos) {
-        if (proyectos.length === 0) {
-            resultadosContainer.innerHTML = `
-                <div class="col-span-full text-center text-slate-500 py-8">
-                    <i class="fa-regular fa-face-frown text-3xl mb-2 opacity-50"></i><br>
-                    No se encontraron coincidencias.
-                </div>`;
-            return;
-        }
-
-        // Generamos el HTML de las tarjetas
-        resultadosContainer.innerHTML = proyectos.map(p => {
-            // URL de la imagen
-            const imgUrl = `${API_BASE_URL}/api/imagen/${p.id}`;
-            
-            return `
-            <div class="bg-brand-card border border-white/5 rounded-xl overflow-hidden hover:border-brand-primary/50 transition-all group animate-fade-in-up">
-                <div class="h-40 overflow-hidden relative">
-                    <img src="${imgUrl}" alt="${p.titulo}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
-                    <div class="absolute top-2 right-2 bg-brand-dark/80 backdrop-blur text-xs font-bold text-white px-2 py-1 rounded">
-                        ${p.categoria}
-                    </div>
-                </div>
-                <div class="p-4">
-                    <h4 class="text-white font-bold text-lg truncate">${p.titulo}</h4>
-<p class="text-slate-500 text-xs mt-1">${new Date(p.fecha).toLocaleDateString()}</p>
-                </div>
-            </div>
-            `;
-        }).join('');
-    }
-
-    // ======================================================
-    // 8. LÓGICA MODAL "AGREGAR PROYECTO" (ADMIN)
-    // ======================================================
-    
-    // Abrir Modal
-    function openAddModal() {
-        const modal = document.getElementById('addModal');
-        modal.classList.remove('hidden');
-        // Pequeña animación de entrada
-        const content = modal.querySelector('div.relative');
-        content.classList.remove('scale-95', 'opacity-0');
-        content.classList.add('scale-100', 'opacity-100');
-    }
-
-    // Cerrar Modal
-    function closeAddModal() {
-        const modal = document.getElementById('addModal');
-        modal.classList.add('hidden');
-        document.getElementById('formAddProject').reset(); // Limpiar campos
-    }
-
-    // Manejar el Envío del Formulario
-    const formAdd = document.getElementById('formAddProject');
-    if(formAdd) {
-        formAdd.addEventListener('submit', async (e) => {
-            e.preventDefault();
-
-            // 1. Obtener datos
-            const titulo = document.getElementById('add-titulo').value;
-            const categoria = document.getElementById('add-categoria').value;
-            const fileInput = document.getElementById('add-imagen');
-            const file = fileInput.files[0];
-
-            if(!file) return Swal.fire('Error', 'Debes seleccionar una imagen', 'warning');
-
-            // 2. Crear FormData
-            const formData = new FormData();
-            formData.append('titulo', titulo);
-            formData.append('categoria', categoria);
-            formData.append('imagen', file);
-
-            // 3. UI Loading
-            const btn = document.getElementById('btnAddSubmit');
-            const originalText = btn.innerHTML;
-            btn.disabled = true;
-            btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Guardando...';
-
-            try {
-                // 4. Enviar al Backend (usamos la misma ruta /api/upload pero ahora procesa titulo/cat)
-                const res = await fetch(`${API_BASE_URL}/api/upload`, {
-                    method: 'POST',
-                    body: formData
-                });
-
-                if(!res.ok) throw new Error('Error al subir');
-
-                // 5. Éxito
-                Swal.fire({
-                    icon: 'success',
-                    title: 'Proyecto Agregado',
-                    text: 'El proyecto se ha guardado correctamente.',
-                    timer: 2000,
-                    showConfirmButton: false
-                });
-
-                closeAddModal();
-                cargarTablaAdmin(); // Refrescar la tabla automáticamente
-                cargarGaleria();    // Actualizar también el swiper principal
-
-            } catch (error) {
-                console.error(error);
-                Swal.fire('Error', 'No se pudo guardar el proyecto', 'error');
-            } finally {
-                btn.disabled = false;
-                btn.innerHTML = originalText;
-            }
-        });
-    }
-
-// ======================================================
-    // 9. NAVEGACIÓN INTELIGENTE (NAVBAR -> DASHBOARD)
-    // ======================================================
-    function navToModule(moduleName) {
-        // 1. Cerrar menú móvil si está abierto
-        const menu = document.getElementById('mobile-menu');
-        if(menu && !menu.classList.contains('hidden')) {
-            menu.classList.add('hidden');
-            menu.classList.remove('flex');
-        }
-
-        // 2. Scroll suave hacia la sección Dashboard
-        const dashboardSection = document.getElementById('dashboard');
-        if(dashboardSection) {
-            dashboardSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        }
-
-        // 3. Pequeño delay para permitir que el scroll inicie antes de cambiar la tab visualmente
-        setTimeout(() => {
-            switchTab(moduleName);
-        }, 300);
-    }
-
-    // ======================================================
-    // 10. LÓGICA DE SUBIDA PÚBLICA (CON MODAL)
-    // ======================================================
-    
-    const triggerFile = document.getElementById('triggerFile');
-    const publicModal = document.getElementById('publicUploadModal');
-    const publicPreview = document.getElementById('public-preview');
-    let selectedFile = null; // Variable temporal para guardar el archivo
-
-    // 1. Detectar selección de archivo
-    if (triggerFile) {
-        triggerFile.addEventListener('change', function(e) {
-            const file = e.target.files[0];
-            if (file) {
-                // Validar tamaño (5MB)
-                if (file.size > 5 * 1024 * 1024) {
-                    Swal.fire({ icon: 'error', title: 'Muy pesado', text: 'Máximo 5MB.', confirmButtonColor: '#0B0F19' });
-                    this.value = ''; // Reset
-                    return;
-                }
-
-                // Guardamos el archivo en variable global
-                selectedFile = file;
-
-                // Mostrar Preview
-                const reader = new FileReader();
-                reader.onload = function(evt) {
-                    publicPreview.src = evt.target.result;
-                    // Abrir Modal
-                    publicModal.classList.remove('hidden');
-                }
-                reader.readAsDataURL(file);
-            }
-        });
-    }
-
-    // 2. Cerrar Modal
-    function closePublicModal() {
-        publicModal.classList.add('hidden');
-        triggerFile.value = ''; // Resetear input file para permitir seleccionar el mismo de nuevo
-        document.getElementById('formPublicData').reset();
-        selectedFile = null;
-    }
-
-    // 3. Enviar Datos al Servidor
-    const formPublic = document.getElementById('formPublicData');
-    if (formPublic) {
-        formPublic.addEventListener('submit', async (e) => {
-            e.preventDefault();
-
-            if (!selectedFile) return;
-
-            const titulo = document.getElementById('public-titulo').value;
-            const categoria = document.getElementById('public-categoria').value;
-            const btn = document.getElementById('btnPublicSubmit');
-            const originalText = btn.innerHTML;
-
-            // UI Loading
-            btn.disabled = true;
-            btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Subiendo...';
-
-            const formData = new FormData();
-            formData.append('titulo', titulo);
-            formData.append('categoria', categoria);
-            formData.append('imagen', selectedFile);
-
-            try {
-                const res = await fetch(`${API_BASE_URL}/api/upload`, {
-                    method: 'POST',
-                    body: formData
-                });
-
-                if (!res.ok) throw new Error('Error en el servidor');
-
-                // Éxito
-                Swal.fire({
-                    icon: 'success',
-                    title: '¡Publicado!',
-                    text: 'Tu proyecto está visible en la galería.',
-                    confirmButtonColor: '#6366f1'
-                });
-
-                closePublicModal();
-                cargarGaleria(); // Actualizar galería visual
-                cargarTablaAdmin(); // Actualizar admin si está logueado
-
-            } catch (error) {
-                console.error(error);
-                Swal.fire({ icon: 'error', title: 'Error', text: 'No se pudo subir la imagen.', confirmButtonColor: '#ef4444' });
-            } finally {
-                btn.disabled = false;
-                btn.innerHTML = originalText;
-            }
-        });
-    }
-</script>
+    </script>
