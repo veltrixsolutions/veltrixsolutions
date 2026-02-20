@@ -721,6 +721,14 @@
                 <div class="p-6 border-b border-white/10">
                     <span class="text-xs font-bold uppercase tracking-widest text-brand-primary">Menú</span>
                 </div>
+                               <button onclick="switchTab('admin')" id="btn-admin" class="w-full flex items-center gap-4 px-4 py-3 rounded-xl transition-all duration-300 hover:bg-white/5 hover:text-white text-left group">
+                        <div class="w-8 h-8 rounded-lg bg-white/5 flex items-center justify-center text-red-400 group-hover:scale-110 transition-transform">
+                            <i class="fa-solid fa-user-shield"></i>
+                        </div>
+                        <span class="font-medium">Administración</span>
+                    </button>
+
+
                 
                 <nav class="flex-1 p-4 space-y-2">
                     <button onclick="switchTab('search')" id="btn-search" class="w-full flex items-center gap-4 px-4 py-3 rounded-xl transition-all duration-300 hover:bg-white/5 hover:text-white text-left group active-tab">
@@ -735,13 +743,6 @@
                             <i class="fa-solid fa-images"></i>
                         </div>
                         <span class="font-medium">Galería & Upload</span>
-                    </button>
-
-                    <button onclick="switchTab('admin')" id="btn-admin" class="w-full flex items-center gap-4 px-4 py-3 rounded-xl transition-all duration-300 hover:bg-white/5 hover:text-white text-left group">
-                        <div class="w-8 h-8 rounded-lg bg-white/5 flex items-center justify-center text-red-400 group-hover:scale-110 transition-transform">
-                            <i class="fa-solid fa-user-shield"></i>
-                        </div>
-                        <span class="font-medium">Administración</span>
                     </button>
                 </nav>
 
