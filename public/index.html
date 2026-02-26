@@ -392,17 +392,23 @@
                     </select>
                 </div>
 
-                <div>
-                    <label class="block text-gray-700 text-sm font-bold mb-2">Imagen de Referencia</label>
-                    <label for="add-imagen" class="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed border-gray-300 rounded-lg cursor-pointer bg-gray-50 hover:bg-brand-primary/5 hover:border-brand-primary transition-colors">
-                        <div class="flex flex-col items-center justify-center pt-5 pb-6 text-center">
-                            <i class="fa-solid fa-cloud-arrow-up text-2xl text-gray-400 mb-2"></i>
-                            <p class="text-sm font-medium text-gray-600">Haz clic para buscar archivo</p>
-                            <p class="text-xs text-gray-400 mt-1">JPG o PNG (Max 5MB)</p>
-                        </div>
-                        <input id="add-imagen" type="file" class="hidden" accept="image/png, image/jpeg, image/jpg" required />
-                    </label>
-                </div>
+            <div>
+    <label class="block text-gray-700 text-sm font-bold mb-2">Imagen de Referencia</label>
+    <label for="add-imagen" class="flex flex-col items-center justify-center w-full h-40 border-2 border-dashed border-gray-300 rounded-lg cursor-pointer bg-gray-50 hover:bg-brand-primary/5 hover:border-brand-primary transition-all relative overflow-hidden group">
+        
+        <div id="add-image-placeholder" class="flex flex-col items-center justify-center pt-5 pb-6 text-center z-10">
+            <div class="w-10 h-10 bg-white shadow-sm text-gray-400 rounded-full flex items-center justify-center mb-2 group-hover:text-brand-primary transition-colors">
+                <i class="fa-solid fa-cloud-arrow-up text-lg"></i>
+            </div>
+            <p class="text-sm font-medium text-gray-600">Haz clic para buscar archivo</p>
+            <p class="text-xs text-gray-400 mt-1">JPG o PNG (Max 5MB)</p>
+        </div>
+
+        <img id="add-preview" class="hidden absolute inset-0 w-full h-full object-cover z-20" />
+        
+        <input id="add-imagen" type="file" class="hidden" accept="image/png, image/jpeg, image/jpg" required />
+    </label>
+</div>
 
                 <div class="pt-4 flex flex-col sm:flex-row-reverse gap-3">
                     <button type="submit" id="btnAddSubmit" class="w-full inline-flex justify-center items-center gap-2 rounded-xl border border-transparent shadow-md px-4 py-2.5 bg-brand-primary text-base font-bold text-white hover:bg-brand-secondary focus:outline-none sm:w-auto sm:text-sm transition-colors">
@@ -552,9 +558,9 @@
     <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
 
-    <script>
+<script>
 
-// ======================================================
+    // ======================================================
     // 0. CONFIGURACIÓN GLOBAL
     // ======================================================
     const API_BASE_URL = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' 
@@ -1061,14 +1067,54 @@
         const modal = document.getElementById('addModal');
         modal.classList.remove('hidden');
         const content = modal.querySelector('div.relative');
-        content.classList.remove('scale-95', 'opacity-0');
-        content.classList.add('scale-100', 'opacity-100');
+        if(content) {
+            content.classList.remove('scale-95', 'opacity-0');
+            content.classList.add('scale-100', 'opacity-100');
+        }
+    }
+
+    // Lógica para previsualizar la imagen en el modal de Administrador
+    const addImagenInput = document.getElementById('add-imagen');
+    const addPreviewImg = document.getElementById('add-preview');
+    const addImagePlaceholder = document.getElementById('add-image-placeholder');
+
+    if (addImagenInput) {
+        addImagenInput.addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                // Validar peso (Max 5MB)
+                if (file.size > 5 * 1024 * 1024) {
+                    Swal.fire({ icon: 'error', title: 'Muy pesado', text: 'Máximo 5MB.', confirmButtonColor: '#0B0F19' });
+                    this.value = ''; 
+                    return;
+                }
+                
+                // Leer y mostrar la imagen
+                const reader = new FileReader();
+                reader.onload = function(evt) {
+                    if (addPreviewImg && addImagePlaceholder) {
+                        addPreviewImg.src = evt.target.result;
+                        addPreviewImg.classList.remove('hidden');
+                        addImagePlaceholder.classList.add('hidden'); // Ocultar los textos
+                    }
+                }
+                reader.readAsDataURL(file);
+            }
+        });
     }
 
     window.closeAddModal = function() {
         const modal = document.getElementById('addModal');
         modal.classList.add('hidden');
-        document.getElementById('formAddProject').reset(); 
+        const form = document.getElementById('formAddProject');
+        if (form) form.reset(); 
+        
+        // Limpiar la previsualización de la imagen
+        if (addPreviewImg && addImagePlaceholder) {
+            addPreviewImg.src = '';
+            addPreviewImg.classList.add('hidden');
+            addImagePlaceholder.classList.remove('hidden');
+        }
     }
 
     const formAddAdmin = document.getElementById('formAddProject');
@@ -1256,4 +1302,4 @@
         });
     }
 
-    </script>
+</script>
